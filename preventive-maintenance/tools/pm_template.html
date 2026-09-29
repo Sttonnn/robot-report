@@ -43,7 +43,7 @@
   .seg button span { font-size: 12px; opacity: .8; }
   .seg button.on { background: #fff; color: var(--ink); box-shadow: 0 8px 20px rgba(0,0,0,.25); }
 
-  .stats { display: grid; grid-template-columns: 1.3fr repeat(4, minmax(0,1fr)); gap: 14px; margin-top: 18px; }
+  .stats { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 14px; margin-top: 18px; }
   .card { border-radius: 22px; padding: 16px 18px; color: #fff; min-width: 0; position: relative; }
   .card .lbl { font-size: 13.5px; font-weight: 600; opacity: .92; }
   .card .val { font-family: Archivo, sans-serif; font-size: 40px; font-weight: 900; line-height: 1.1; margin-top: 10px; }
@@ -219,12 +219,17 @@
     tbody tr { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 4px 10px; padding: 12px 4px; border-bottom: 1px solid #eef1f6; }
     tbody td { padding: 0; border: 0; }
     tbody td:nth-child(1) { grid-column: 1; font-size: 12.5px; }
-    tbody td:nth-child(6) { grid-column: 2; grid-row: 1; justify-self: end; }
-    tbody td:nth-child(2) { grid-column: 1 / -1; }
-    tbody td:nth-child(3) { display: none; }
-    tbody td:nth-child(4) { grid-column: 1 / -1; }
-    tbody td:nth-child(5) { grid-column: 1; font-size: 12.5px; color: #5a6784; }
-    tbody td:nth-child(7) { grid-column: 2; justify-self: end; }
+    #tbody td:nth-child(5) { grid-column: 2; grid-row: 1; justify-self: end; }
+    #tbody td:nth-child(2) { grid-column: 1 / -1; }
+    #tbody td:nth-child(3) { display: none; }
+    #tbody td:nth-child(4) { grid-column: 1; font-size: 12.5px; color: #5a6784; }
+    #tbody td:nth-child(6) { grid-column: 2; justify-self: end; }
+    #fBody td:nth-child(6) { grid-column: 2; grid-row: 1; justify-self: end; }
+    #fBody td:nth-child(2) { grid-column: 1 / -1; }
+    #fBody td:nth-child(3) { display: none; }
+    #fBody td:nth-child(4) { grid-column: 1 / -1; }
+    #fBody td:nth-child(5) { grid-column: 1; font-size: 12.5px; color: #5a6784; }
+    #fBody td:nth-child(7) { grid-column: 2; justify-self: end; }
     tr.bad td { background: none; }
     tr.bad { background: #fff6f3; box-shadow: inset 4px 0 0 var(--fail); padding-left: 12px; }
     tr.bad td:first-child { box-shadow: none; }
@@ -252,7 +257,7 @@
         <button type="button" id="histBtn" class="login" style="cursor:pointer;border:0;background:none;padding:0;text-decoration:underline">ประวัติการอัปโหลด</button>
       </div>
     </div>
-    <div class="seg" id="seg"></div>
+    <div id="seg" style="margin-top:18px;display:flex;align-items:baseline;gap:8px"></div>
     <div class="stats" id="stats"></div>
   </div>
 </header>
@@ -261,7 +266,7 @@
   <div class="tabs" id="tabs"></div>
   <div class="filters">
     <div class="pills" id="months"></div>
-    <label class="sel">สาขา / อาคาร <select id="branch"></select></label>
+    <label class="sel" style="display:none">สาขา / อาคาร <select id="branch"></select></label>
     <label class="sel">ประเภท <select id="type"></select></label>
     <label class="chk"><input type="checkbox" id="showPlan"> แสดงแผนงาน (ยังไม่ออกใบงาน)</label>
     <label class="chk"><input type="checkbox" id="showCancel"> แสดงงานที่ยกเลิก</label>
@@ -289,7 +294,7 @@
       <div class="pills" id="stFilter"></div>
       <label class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a6784" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-4.3-4.3 M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14z"/></svg><input id="q" placeholder="ค้นหา เลขใบงาน / อุปกรณ์ / แผน"></label>
     </div>
-    <div class="tbl-wrap"><table><thead><tr><th>ใบงาน</th><th>อุปกรณ์</th><th>ประเภท</th><th>คลัง / สาขา</th><th>กำหนดการ</th><th>① สถานะงาน</th><th>② ผลตรวจ</th></tr></thead><tbody id="tbody"></tbody></table></div>
+    <div class="tbl-wrap"><table><thead><tr><th>ใบงาน</th><th>อุปกรณ์</th><th>ประเภท</th><th>กำหนดการ</th><th>① สถานะงาน</th><th>② ผลตรวจ</th></tr></thead><tbody id="tbody"></tbody></table></div>
     <button class="more" id="more" type="button">แสดงเพิ่ม</button>
   </section>
   </div>
@@ -400,7 +405,7 @@ const nextPass = r => DATA.filter(x => x.p === r.p && x.e === r.e && x.n === r.n
 const daysPill = r => { const d = downDays(r), st = repSt(r);
   return st === "fixed" ? `<span class="pill" style="background:#e3f6ee;color:#0a6b4d">ใช้เวลาแก้ <span class="days">${d}</span> วัน</span>`
     : `<span class="pill" style="background:${d > 7 ? "#c9301a" : "#ffe3dc"};color:${d > 7 ? "#fff" : "#a8250f"}">เสียมาแล้ว <span class="days">${d}</span> วัน</span>`; };
-const S = { view: "overview", fst: "all", wh: "all", month: "all", branch: "all", type: "all", cancel: false, plan: false, per: "week", anchor: null, st: "all", q: "", limit: 25 };
+const S = { view: "overview", fst: "all", wh: "all", month: "all", branch: "all", type: "all", cancel: false, plan: false, per: "all", anchor: null, st: "all", q: "", limit: 25 };
 
 function rows(ignore = {}) {
   return DATA.filter(r =>
@@ -420,22 +425,16 @@ const overdue = r => grp(r) === "prog" && !r.r && r.due && r.due < ASOF;
 
 function renderHero() {
   const last = LOG[LOG.length - 1];
-  $("asof").textContent = "ข้อมูล ณ " + fmtD(ASOF) + " · " + DATA.length.toLocaleString() + " รายการในระบบ" + (last ? " · อัปโหลดล่าสุด " + fmtD(last.at.slice(0, 10)) + " " + last.at.slice(11, 16) + " น." : "");
-  const cnt = k => DATA.filter(r => (k === "all" || r.p === k) && GROUP[r.s] !== "cancel" && GROUP[r.s] !== "wait").length;
-  $("seg").innerHTML = ["all", "WHA05", "RDC01"].map(k =>
-    `<button type="button" class="${S.wh === k ? "on" : ""}" data-wh="${k}"><b>${WH[k]}</b><span>${k === "all" ? "รวมทุกคลัง" : WH_SUB[k]} · ${cnt(k).toLocaleString()} ใบงาน</span></button>`).join("");
-  const R = rows(), n = R.length, g = k => R.filter(r => grp(r) === k).length;
-  const pass = R.filter(r => r.r === "pass").length, fail = R.filter(isFail).length, tested = pass + fail;
-  const pct = tested ? pass / tested : 0, C = 2 * Math.PI * 44, od = R.filter(overdue).length;
-  const plans = rows({ plan: true }).filter(r => grp(r) === "wait").length;
-  const ring = fail ? "#ffb13d" : "#39d99a";
-  $("stats").innerHTML = `
-    <div class="card gauge"><svg width="108" height="108" viewBox="0 0 108 108"><circle cx="54" cy="54" r="44" fill="none" stroke="rgba(255,255,255,.14)" stroke-width="11"/><circle cx="54" cy="54" r="44" fill="none" stroke="${ring}" stroke-width="11" stroke-linecap="round" stroke-dasharray="${(C * pct).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 54 54)"/><text x="54" y="61" text-anchor="middle" fill="#fff" font-family="Archivo" font-weight="900" font-size="22">${tested ? Math.round(pct * 100) + "%" : "–"}</text></svg>
-      <div><div class="lbl">PM ผ่านเกณฑ์</div><div class="val" style="margin-top:4px">${pass.toLocaleString()}<small>/ ${tested.toLocaleString()}</small></div><div class="sub">ไม่ผ่าน ${fail} ใบงาน</div></div></div>
-    <div class="card" style="background:linear-gradient(150deg,#1a5fe4,#0f3fa4);box-shadow:0 12px 26px rgba(15,63,164,.4)"><div class="lbl">ใบงานทั้งหมด</div><div class="val">${n.toLocaleString()}<small>ใบ</small></div><div class="sub">${[S.plan ? "รวมแผนงาน" : "ไม่รวมแผนงาน", S.cancel ? "รวมยกเลิก" : "ไม่รวมยกเลิก"].join(" · ")}</div></div>
-    <div class="card" style="background:linear-gradient(150deg,#13a878,#0a7353);box-shadow:0 12px 26px rgba(10,115,83,.4)"><div class="lbl">ดำเนินการแล้วเสร็จ</div><div class="val">${g("done").toLocaleString()}<small>ใบ</small></div><div class="sub">${n ? Math.round(g("done") / n * 100) : 0}% ของใบงาน</div></div>
-    <div class="card" style="background:linear-gradient(150deg,#2f7cf6,#1a4fc4);box-shadow:0 12px 26px rgba(26,79,196,.4)"><div class="lbl">กำลังดำเนินการ</div><div class="val">${g("prog").toLocaleString()}<small>ใบ</small></div><div class="sub">มอบหมาย / กำลังทำ / รอประเมิน</div></div>
-    <div class="card" style="background:${od ? "linear-gradient(150deg,#f0553a,#b8260f)" : "linear-gradient(150deg,#4a5877,#333f5a)"};box-shadow:0 12px 26px rgba(22,33,58,.3)"><div class="lbl">เลยกำหนด · ยังไม่เสร็จ</div><div class="val">${od.toLocaleString()}<small>ใบ</small></div><div class="sub">แผนงานที่ยังไม่ออกใบงาน ${plans.toLocaleString()} รายการ (ไม่นับ)</div></div>`;
+  $("asof").textContent = "ข้อมูล ณ " + fmtD(ASOF) + (last ? " · อัปโหลดล่าสุด " + fmtD(last.at.slice(0, 10)) + " " + last.at.slice(11, 16) + " น." : "");
+  /* ตัวเลขบนสุด = 4 ตัวเดียวกับการ์ดด้านล่าง แยกตาม 2 คำถาม ใช้สีชุดเดียวกัน */
+  const s = stat(rows()), scope = S.wh === "all" ? "ทุกคลัง" : S.branch !== "all" ? S.branch : WH[S.wh];
+  const card = (bg, sh, q, lbl, val, unit, sub) => `<div class="card" style="background:${bg};box-shadow:${sh}"><div class="lbl"><span style="opacity:.8">${q}</span> ${lbl}</div><div class="val">${val}<small>${unit}</small></div><div class="sub">${sub}</div></div>`;
+  $("seg").innerHTML = `<span style="font-size:13px;font-weight:700;color:rgba(255,255,255,.8)">กำลังดู:</span> <b style="font-size:16px">${scope}</b>`;
+  $("stats").innerHTML =
+    card("linear-gradient(150deg,#1a5fe4,#0f3fa4)", "0 12px 26px rgba(15,63,164,.4)", "①", "งานเสร็จแล้ว", s.pct + "%", "", `เสร็จ ${s.done.toLocaleString()} จาก ${s.n.toLocaleString()} ใบงาน`) +
+    card(s.late ? "linear-gradient(150deg,#ff8a3d,#d9570f)" : "linear-gradient(150deg,#4a5877,#333f5a)", "0 12px 26px rgba(217,87,15,.35)", "①", "เลยกำหนด ยังไม่ได้ตรวจ", s.late.toLocaleString(), "ใบ", s.late ? "ต้องตามให้ทำ" : "ไม่มีงานค้าง") +
+    card("linear-gradient(150deg,#13a878,#0a7353)", "0 12px 26px rgba(10,115,83,.4)", "②", "ตรวจแล้วผ่าน", s.tested ? Math.round(s.pass / s.tested * 100) + "%" : "–", "", `ผ่าน ${s.pass.toLocaleString()} จาก ${s.tested.toLocaleString()} ใบที่ตรวจแล้ว`) +
+    card(s.open ? "linear-gradient(150deg,#f0553a,#b8260f)" : "linear-gradient(150deg,#4a5877,#333f5a)", "0 12px 26px rgba(184,38,15,.35)", "②", "ไม่ผ่าน ยังไม่ได้แก้", s.open.toLocaleString(), "ใบ", s.open ? "ต้องตามให้ซ่อม" : "แก้ครบแล้ว");
 }
 
 function renderFilters() {
@@ -512,7 +511,7 @@ function renderFail() {
   // top อุปกรณ์
   const by = {}; F.forEach(r => { const k = r.e + " · " + r.b, v = by[k] = by[k] || { n: 0, d: 0, o: 0 }; v.n++; v.d += downDays(r); if (repSt(r) !== "fixed") v.o++; });
   const top = Object.entries(by).sort((a, b) => b[1].n - a[1].n || b[1].d - a[1].d).slice(0, 10), tm = Math.max(1, ...top.map(x => x[1].n));
-  $("fTop").innerHTML = top.map(([k, v]) => `<div class="brow" style="grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) 92px"><span class="nm" title="${k}">${k}</span>
+  $("fTop").innerHTML = top.map(([k, v]) => `<div class="brow" style="grid-template-columns:minmax(0,1.8fr) minmax(0,1fr) 92px"><span class="nm" title="${k}">${k}</span>
     <div class="bar" style="width:${(v.n / tm * 100).toFixed(0)}%">${v.n - v.o ? `<span style="flex:${v.n - v.o};background:#13a878" data-tip="${k}<br>แก้ไขแล้ว ${v.n - v.o} ครั้ง"></span>` : ""}${v.o ? `<span style="flex:${v.o};background:#f0553a" data-tip="${k}<br>ยังไม่แก้ไข ${v.o} ครั้ง"></span>` : ""}</div>
     <span class="tot" style="white-space:nowrap">${v.n} ครั้ง · ${v.d} วัน</span></div>`).join("") || `<p class="note">ไม่มีข้อมูล</p>`;
   // รายสาขา
@@ -582,17 +581,18 @@ function renderTable() {
   if (!keys.some(([k]) => k === S.st)) S.st = "all";
   $("stFilter").innerHTML = keys.map(([k, l]) => `<button type="button" class="${S.st === k ? "on" : ""}" data-st="${k}" style="${S.st === k && (k === "fail" || k === "late") ? "background:#c9301a" : ""}">${l} ${cnt(k)}</button>`).join("");
   const R = base.filter(r => hit(r, S.st) &&
-    (!q || (r.w + " " + r.e + " " + r.n).toLowerCase().includes(q))).sort((a, b) => b.due.localeCompare(a.due));
+    (!q || (r.w + " " + r.e + " " + r.n).toLowerCase().includes(q)))
+    /* เรื่องที่ต้องตามขึ้นก่อน: ไม่ผ่านยังไม่แก้ → เลยกำหนด → ที่เหลือ (ใหม่สุดก่อน) */
+    .sort((a, b) => ((isFail(b) && repSt(b) !== "fixed") - (isFail(a) && repSt(a) !== "fixed")) || (overdue(b) - overdue(a)) || b.due.localeCompare(a.due));
   $("rowTag").textContent = R.length.toLocaleString() + " ใบงาน";
   $("tbody").innerHTML = R.slice(0, S.limit).map(r => {
     const g = ST[grp(r)], od = overdue(r);
     const res = r.r === "pass" ? `<span class="pill" style="background:#e3f6ee;color:#0a6b4d">✓ ผ่าน</span>` : isFail(r) ? `<span class="pill" style="background:#ffe3dc;color:#a8250f">✕ ไม่ผ่าน ${r.r.split(":")[1]}</span><div style="margin-top:6px;display:flex;gap:6px;align-items:center;flex-wrap:wrap"><span class="pill" style="padding:3px 9px;font-size:11.5px;background:${REP[repSt(r)].bg};color:${REP[repSt(r)].fg}">${REP[repSt(r)].label}</span><button type="button" class="btn ${repSt(r) === "fixed" ? "ghost" : "fix"}" data-edit="${fkey(r)}" style="padding:4px 10px;font-size:11.5px">อัปเดตการซ่อม</button></div>` : `<span style="color:#9aa6bd">ยังไม่ตรวจ</span>`;
     return `<tr class="${isFail(r) ? "bad" : ""}"><td class="num" style="font-weight:700;white-space:nowrap">${r.w === "-" ? "<span style='color:#9aa6bd'>ยังไม่มีเลข</span>" : r.w}</td>
       <td><div style="font-weight:700">${r.e}</div><div style="font-size:12px;color:#5a6784">${r.n}</div></td><td>${r.t === "-" ? "ไม่ระบุ" : r.t}</td>
-      <td style="white-space:nowrap"><button type="button" data-pick="${r.p}|${r.b}" title="กรองเฉพาะ ${r.b}" style="cursor:pointer;border:0;text-align:left;padding:4px 10px;border-radius:10px;background:${S.branch === r.b ? "#16213a" : "#eef2f8"};color:${S.branch === r.b ? "#fff" : "#16213a"};font-size:13px;font-weight:700">${r.p === "WHA05" ? "คลังในประเทศ" : "RDC ต่างจังหวัด"}<div style="font-size:12px;font-weight:600;opacity:.75">${r.b}</div></button></td>
       <td style="white-space:nowrap">${fmtD(r.due)}${od ? `<div style="font-size:12px;color:#a8250f;font-weight:700">เลยกำหนด</div>` : ""}</td>
       <td><span class="pill" style="background:${g.bg};color:${g.fg}">${r.s}</span></td><td>${res}</td></tr>`;
-  }).join("") || `<tr><td colspan="7" style="text-align:center;color:#5a6784;padding:22px">ไม่พบใบงาน</td></tr>`;
+  }).join("") || `<tr><td colspan="6" style="text-align:center;color:#5a6784;padding:22px">ไม่พบใบงาน</td></tr>`;
   $("more").style.display = R.length > S.limit ? "" : "none";
   $("more").textContent = "แสดงเพิ่ม (" + (R.length - S.limit).toLocaleString() + " ใบ)";
 }
