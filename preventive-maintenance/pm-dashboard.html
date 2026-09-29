@@ -144,6 +144,9 @@
   .seg2 { display: flex; gap: 6px; flex-wrap: wrap; }
   .seg2 button { flex: 1; cursor: pointer; border: 1px solid #d6deeb; background: #fff; border-radius: 12px; padding: 10px; font-weight: 700; font-size: 13.5px; color: var(--ink3); }
   .seg2 button.on { border-color: transparent; color: #fff; }
+  .pernav { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 16px; background: #f5f7fb; }
+  .navb { cursor: pointer; border: 0; width: 38px; height: 38px; border-radius: 12px; background: #fff; color: #16213a; font-weight: 800; box-shadow: var(--shadow-s); flex: none; }
+  .navb:hover { background: #eaf1ff; }
   .sumgrid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 8px; }
   .sumgrid div { border-radius: 14px; padding: 10px 12px; background: #f5f7fb; }
   .sumgrid b { display: block; font-family: Archivo, sans-serif; font-size: 24px; font-weight: 900; }
@@ -163,6 +166,9 @@
     main { padding: 18px 12px 40px; }
     .brow { grid-template-columns: 92px minmax(0,1fr) 36px; }
     .upl { width: 100%; justify-content: center; }
+    .pernav { flex-wrap: wrap; }
+    .pernav > div { order: -1; flex-basis: 100% !important; }
+    .pernav #perToday { margin-left: auto; }
     .tbl-wrap { margin: 0; padding: 0; overflow: visible; }
     table { min-width: 0; }
     thead { display: none; }
@@ -242,10 +248,18 @@
   <section class="panel" style="display:grid;gap:12px">
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:space-between">
       <h2>รายการใบงาน <span class="tag" id="rowTag"></span></h2>
-      <div class="pills" id="stFilter"></div>
+      <div class="pills" id="perTabs"></div>
     </div>
-    <label class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a6784" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-4.3-4.3 M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14z"/></svg><input id="q" placeholder="ค้นหา เลขใบงาน / อุปกรณ์ / แผน"></label>
-    <div id="whChips" style="display:grid;gap:8px"></div>
+    <div class="pernav">
+      <button type="button" class="navb" id="perPrev" aria-label="ช่วงก่อนหน้า">◀</button>
+      <div style="display:grid;min-width:0;flex:1"><b id="perLabel" style="font-size:17px"></b><span id="perSum" style="font-size:13px;color:#5a6784"></span></div>
+      <button type="button" class="navb" id="perToday" style="width:auto;padding:0 14px;font-size:13px">วันนี้</button>
+      <button type="button" class="navb" id="perNext" aria-label="ช่วงถัดไป">▶</button>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <div class="pills" id="stFilter"></div>
+      <label class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a6784" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-4.3-4.3 M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14z"/></svg><input id="q" placeholder="ค้นหา เลขใบงาน / อุปกรณ์ / แผน"></label>
+    </div>
     <div class="tbl-wrap"><table><thead><tr><th>ใบงาน</th><th>อุปกรณ์</th><th>ประเภท</th><th>คลัง / สาขา</th><th>กำหนดการ</th><th>สถานะ</th><th>ผล PM</th></tr></thead><tbody id="tbody"></tbody></table></div>
     <button class="more" id="more" type="button">แสดงเพิ่ม</button>
   </section>
@@ -357,7 +371,7 @@ const nextPass = r => DATA.filter(x => x.p === r.p && x.e === r.e && x.n === r.n
 const daysPill = r => { const d = downDays(r), st = repSt(r);
   return st === "fixed" ? `<span class="pill" style="background:#e3f6ee;color:#0a6b4d">ใช้เวลาแก้ <span class="days">${d}</span> วัน</span>`
     : `<span class="pill" style="background:${d > 7 ? "#c9301a" : "#ffe3dc"};color:${d > 7 ? "#fff" : "#a8250f"}">เสียมาแล้ว <span class="days">${d}</span> วัน</span>`; };
-const S = { view: "overview", fst: "all", wh: "all", month: "all", branch: "all", type: "all", cancel: false, plan: false, st: "all", q: "", limit: 25 };
+const S = { view: "overview", fst: "all", wh: "all", month: "all", branch: "all", type: "all", cancel: false, plan: false, per: "week", anchor: null, st: "all", q: "", limit: 25 };
 
 function rows(ignore = {}) {
   return DATA.filter(r =>
@@ -501,8 +515,33 @@ function renderTypes() {
   }).join("");
 }
 
+/* ช่วงเวลาของรายการใบงาน: Daily / Weekly (จันทร์–อาทิตย์) / Monthly */
+const addD = (iso, n) => { const d = new Date(iso + "T00:00:00"); d.setDate(d.getDate() + n); return d.toLocaleDateString("sv-SE"); };
+function perRange() {
+  const a = S.anchor || ASOF, d = new Date(a + "T00:00:00");
+  if (S.per === "day") return [a, a];
+  if (S.per === "week") { const s = addD(a, -((d.getDay() + 6) % 7)); return [s, addD(s, 6)]; }
+  const s = a.slice(0, 8) + "01", e = new Date(d.getFullYear(), d.getMonth() + 1, 0).toLocaleDateString("sv-SE"); return [s, e];
+}
+function perLabel([s, e]) {
+  const TH_D = ["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัสบดี","ศุกร์","เสาร์"];
+  if (S.per === "day") return TH_D[new Date(s + "T00:00:00").getDay()] + " " + fmtD(s);
+  if (S.per === "week") return "สัปดาห์ " + (+s.slice(8)) + (s.slice(5, 7) === e.slice(5, 7) ? "" : " " + TH_M[+s.slice(5, 7) - 1]) + " – " + fmtD(e);
+  const FULL = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+  return "เดือน" + FULL[+s.slice(5, 7) - 1] + " " + (+s.slice(0, 4) + 543);
+}
+function shiftPer(n) { const a = S.anchor || ASOF;
+  if (S.per === "day") S.anchor = addD(a, n); else if (S.per === "week") S.anchor = addD(a, 7 * n);
+  else { const d = new Date(a + "T00:00:00"); S.anchor = new Date(d.getFullYear(), d.getMonth() + n, 1).toLocaleDateString("sv-SE"); }
+  S.limit = 25; render(); }
+
 function renderTable() {
-  const base = rows(), q = S.q.trim().toLowerCase();
+  const [ps, pe] = perRange(), q = S.q.trim().toLowerCase();
+  const base = rows({ month: true }).filter(r => r.due >= ps && r.due <= pe);
+  $("perTabs").innerHTML = [["day", "Daily"], ["week", "Weekly"], ["month", "Monthly"]].map(([k, l]) => `<button type="button" class="${S.per === k ? "on" : ""}" data-per="${k}">${l}</button>`).join("");
+  $("perLabel").textContent = perLabel([ps, pe]);
+  const nOf = f => base.filter(f).length;
+  $("perSum").innerHTML = base.length ? `กำหนดทำ <b>${base.length}</b> ใบ · เสร็จ <b style="color:#0a6b4d">${nOf(r => grp(r) === "done")}</b> · กำลังทำ <b style="color:#0f3fa4">${nOf(r => grp(r) === "prog")}</b> · เลยกำหนด <b style="color:#a8250f">${nOf(overdue)}</b> · ไม่ผ่าน <b style="color:#a8250f">${nOf(isFail)}</b>` : "ไม่มีใบงานที่กำหนดทำในช่วงนี้";
   const hit = (r, k) => k === "all" || (k === "fail" ? isFail(r) : k === "late" ? overdue(r) : grp(r) === k);
   const cnt = k => base.filter(r => hit(r, k)).length;
   const keys = [["all", "ทั้งหมด"], ["done", "เสร็จ"], ["prog", "กำลังทำ"], ["late", "เลยกำหนด"], ["fail", "ไม่ผ่าน"]].concat(S.plan ? [["wait", "แผนงาน"]] : []);
@@ -511,17 +550,6 @@ function renderTable() {
   const R = base.filter(r => hit(r, S.st) &&
     (!q || (r.w + " " + r.e + " " + r.n).toLowerCase().includes(q))).sort((a, b) => b.due.localeCompare(a.due));
   $("rowTag").textContent = R.length.toLocaleString() + " ใบงาน";
-  /* ปุ่มกรองคลัง / สาขา (นับตามสถานะและคำค้นที่เลือกอยู่) */
-  const pool = DATA.filter(r => (S.month === "all" || r.due.slice(0, 7) === S.month) && (S.type === "all" || r.t === S.type) &&
-    (S.cancel || grp(r) !== "cancel") && (S.plan || grp(r) !== "wait") && hit(r, S.st) && (!q || (r.w + " " + r.e + " " + r.n).toLowerCase().includes(q)));
-  const chip = (on, pick, label, n, sub) => `<button type="button" data-pick="${pick}" style="cursor:pointer;border:0;border-radius:999px;padding:7px 13px;font-size:13px;font-weight:700;white-space:nowrap;background:${on ? "#16213a" : "#fff"};color:${on ? "#fff" : "#2a3b5f"};box-shadow:${on ? "none" : "0 0 0 1px #dde3ee inset"}">${label}${sub ? ` <span style="font-weight:600;opacity:.7">${sub}</span>` : ""} <span class="num" style="opacity:.75">${n}</span></button>`;
-  const whs = [["all", "ทุกคลัง"], ["WHA05", "คลังกระจายสินค้าภายในประเทศ"], ["RDC01", "คลัง RDC ต่างจังหวัด"]];
-  const brOf = p => { const c = {}; pool.filter(r => p === "all" || r.p === p).forEach(r => c[r.b] = (c[r.b] || 0) + 1);
-    return Object.entries(c).sort((a, b) => (a[0] === "ไม่ระบุ") - (b[0] === "ไม่ระบุ") || b[1] - a[1]); };
-  $("whChips").innerHTML = `<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><span style="font-size:12.5px;font-weight:700;color:#5a6784;margin-right:4px">คลังสินค้า</span>${whs.map(([k, l]) =>
-      chip(S.wh === k && S.branch === "all", k + "|all", l, pool.filter(r => k === "all" || r.p === k).length, k === "all" ? "" : k)).join("")}</div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><span style="font-size:12.5px;font-weight:700;color:#5a6784;margin-right:4px">สาขา / อาคาร</span>${
-      (S.wh === "all" ? ["WHA05", "RDC01"] : [S.wh]).map(p => brOf(p).map(([b, n]) => chip(S.branch === b, p + "|" + b, b, n)).join("")).join('<span style="width:1px;height:22px;background:#dde3ee;margin:0 4px"></span>')}</div>`;
   $("tbody").innerHTML = R.slice(0, S.limit).map(r => {
     const g = ST[grp(r)], od = overdue(r);
     const res = r.r === "pass" ? `<span class="pill" style="background:#e3f6ee;color:#0a6b4d">✓ ผ่าน</span>` : isFail(r) ? `<span class="pill" style="background:#ffe3dc;color:#a8250f">✕ ไม่ผ่าน ${r.r.split(":")[1]}</span>` : `<span style="color:#9aa6bd">–</span>`;
@@ -552,8 +580,9 @@ document.addEventListener("click", e => {
   const pk = e.target.closest("[data-pick]");
   if (pk) { const [p, b] = pk.dataset.pick.split("|"); const same = S.wh === p && S.branch === b && b !== "all";
     S.wh = p; S.branch = same ? "all" : b; S.limit = 25; render(); return; }
-  const t = e.target.closest("[data-wh],[data-month],[data-branch],[data-type],[data-st],[data-view],[data-fst]");
+  const t = e.target.closest("[data-wh],[data-month],[data-branch],[data-type],[data-st],[data-view],[data-fst],[data-per]");
   if (!t) return;
+  if (t.dataset.per) S.per = t.dataset.per;
   if (t.dataset.view) S.view = t.dataset.view;
   if (t.dataset.fst) S.fst = t.dataset.fst;
   if (t.dataset.wh) { S.wh = t.dataset.wh; S.branch = "all"; }
@@ -569,6 +598,9 @@ $("showCancel").onchange = e => { S.cancel = e.target.checked; render(); };
 $("showPlan").onchange = e => { S.plan = e.target.checked; render(); };
 $("q").oninput = e => { S.q = e.target.value; S.limit = 25; renderTable(); };
 $("more").onclick = () => { S.limit += 50; renderTable(); };
+$("perPrev").onclick = () => shiftPer(-1);
+$("perNext").onclick = () => shiftPer(1);
+$("perToday").onclick = () => { S.anchor = null; S.limit = 25; render(); };
 
 const tip = $("tip");
 document.addEventListener("mousemove", e => {
