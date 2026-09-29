@@ -156,7 +156,16 @@
   .fcard .todo { font-size: 12.5px; font-weight: 600; opacity: .85; }
   .fcard .go { justify-self: start; margin-top: 4px; cursor: pointer; border: 0; border-radius: 999px; padding: 8px 14px; font-size: 13px; font-weight: 700; color: #fff; }
   @media (max-width: 1100px) { .fcards { grid-template-columns: minmax(0,1fr); } }
-  .crumb { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 15px; font-weight: 700; }
+  .crumb { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 15px; font-weight: 700; position: sticky; top: 0; z-index: 20; padding: 10px 12px; margin: -10px -12px; border-radius: 0 0 18px 18px; background: rgba(238,242,248,.94); backdrop-filter: blur(8px); }
+  .crumb .backb { background: #16213a; color: #fff; box-shadow: 0 6px 14px rgba(22,33,58,.25); }
+  .crumb .backb:hover { background: #2a3b5f; }
+  .rgnav { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+  .rgchip { text-decoration: none; padding: 8px 14px; border-radius: 999px; background: #fff; box-shadow: var(--shadow-s); font-size: 13.5px; font-weight: 700; color: #0b6f7a; }
+  .rgchip span { color: #5a6784; font-weight: 600; margin-left: 4px; }
+  .rgsec { display: grid; gap: 12px; margin-top: 18px; scroll-margin-top: 70px; }
+  .rghd { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding-bottom: 8px; border-bottom: 2px solid #d3e6e6; }
+  .rghd > b { font-size: 19px; color: #0b6f7a; }
+  .rgsum { font-size: 13px; color: #5a6784; margin-left: auto; }
   .crumb button { cursor: pointer; border: 0; background: #fff; box-shadow: var(--shadow-s); border-radius: 999px; padding: 8px 14px; font-weight: 700; color: #1a5fe4; }
   .crumb .cur { padding: 8px 4px; color: var(--ink); font-size: 18px; }
   .howto { display: flex; gap: 10px 24px; flex-wrap: wrap; font-size: 13px; color: var(--ink2); padding: 10px 14px; border-radius: 14px; background: #fff; box-shadow: var(--shadow-s); }
@@ -681,14 +690,24 @@ function q2(s, compact) {
     <div style="font-size:12.5px;color:#5a6784">ตรวจแล้ว <b>${s.tested}</b> ใบ${s.chk ? ` (เสร็จ ${s.tested - s.chk} + รอปิดงาน ${s.chk})` : ""} · ผ่าน ${Math.round(s.pass / s.tested * 100)}% · ${s.open ? `<b style="color:#a8250f">ยังไม่ได้แก้ ${s.open}</b>` : s.fail ? "แก้ครบแล้ว" : "ไม่มีเครื่องเสีย"}</div>`
     : `<div style="font-size:13px;color:#5a6784">ยังไม่มีผลตรวจในช่วงนี้</div>`}</div>`;
 }
+/* ภาคของ RDC ตามทีม "คลังสินค้าภาค…" ที่รับมอบหมายในระบบ PM */
+const REGIONS = [
+  ["กรุงเทพฯ", ["สายไหม", "หนองแขม", "ลาดพร้าว", "ปากเกร็ด"]],
+  ["ภาคกลาง", ["ศรีราชา", "ราชบุรี"]],
+  ["ภาคเหนือ", ["เชียงใหม่", "เชียงราย", "พิษณุโลก"]],
+  ["ภาคอีสาน", ["โคราช", "ขอนแก่น", "อุบลราชธานี"]],
+  ["ภาคใต้", ["สุราษฎร์ธานี", "หาดใหญ่"]]
+];
+const regionOf = b => (REGIONS.find(([, bs]) => bs.includes(b)) || ["อื่นๆ"])[0];
 const WHC = { WHA05: ["#1a5fe4", "#0f3fa4", "WH05 / WH32"], RDC01: ["#15a6a0", "#0b6f7a", "14 สาขาต่างจังหวัด"] };
 function renderDrill() {
   const lvl = S.wh === "all" ? 1 : S.branch === "all" ? 2 : 3;
   const cr = [];
+  if (lvl > 1) cr.push(`<button type="button" class="backb" data-pick="${lvl === 3 ? S.wh + "|all" : "all|all"}">← ย้อนกลับ</button>`);
   cr.push(lvl === 1 ? `<span class="cur">ภาพรวมทุกคลัง</span>` : `<button type="button" data-pick="all|all">ทุกคลัง</button>`);
   if (lvl >= 2) cr.push(lvl === 2 ? `<span class="cur">${WH[S.wh]}</span>` : `<button type="button" data-pick="${S.wh}|all">${WH[S.wh]}</button>`);
-  if (lvl === 3) cr.push(`<span class="cur">${S.branch}</span>`);
-  $("crumb").innerHTML = cr.join(`<span style="color:#9aa6bd">›</span>`) + `<span style="margin-left:auto;font-size:12.5px;font-weight:600;color:#5a6784">${lvl === 1 ? "กดที่คลังเพื่อดูรายสาขา" : lvl === 2 ? "กดที่สาขาเพื่อดูใบงาน" : ""}</span>`;
+  if (lvl === 3) cr.push(`<span class="cur">${S.wh === "RDC01" ? `<span style="font-size:13px;color:#5a6784;font-weight:700">${regionOf(S.branch)} · </span>` : ""}${S.branch}</span>`);
+  $("crumb").innerHTML = (lvl > 1 ? cr[0] + `<span style="width:8px"></span>` + cr.slice(1).join(`<span style="color:#9aa6bd">›</span>`) : cr.join("")) + `<span style="margin-left:auto;font-size:12.5px;font-weight:600;color:#5a6784">${lvl === 1 ? "กดที่คลังเพื่อดูรายสาขา" : lvl === 2 ? "กดที่สาขาเพื่อดูใบงาน" : ""}</span>`;
   $("tblSec").style.display = lvl === 3 ? "grid" : "none";
   if (lvl === 1) {
     const R = rows({ wh: true, branch: true });
@@ -705,15 +724,33 @@ function renderDrill() {
     R.forEach(r => (by[r.b] = by[r.b] || []).push(r));
     const list = Object.entries(by).map(([b, L]) => [b, stat(L)]).sort((a, b) => b[1].lv - a[1].lv || b[1].late - a[1].late || b[1].open - a[1].open);
     const C = WHC[S.wh];
-    $("drill").innerHTML = `<div class="brcards">${list.map(([b, s]) => `<button type="button" class="whc" data-pick="${S.wh}|${b}">
+    const cards = L => `<div class="brcards">${L.map(([b, s]) => `<button type="button" class="whc" data-pick="${S.wh}|${b}">
         <div class="hd" style="background:linear-gradient(150deg,${C[0]},${C[1]});padding:12px 16px"><b style="font-size:17px;flex:1">${b}</b><span style="font-size:12.5px;font-weight:700;opacity:.9">${s.n} ใบงาน</span></div>
         <div class="bd" style="padding:14px 16px;gap:14px">${q1(s)}${q2(s)}<div style="font-size:13px;font-weight:800;color:#1a5fe4">ดูใบงาน →</div></div></button>`).join("")}</div>`;
+    if (S.wh !== "RDC01") { $("drill").innerHTML = cards(list); return; }
+    /* RDC: แบ่งตามภาค (ตามทีมคลังสินค้าภาคที่รับผิดชอบในระบบ) */
+    const groups = REGIONS.map(([rg, bs]) => [rg, list.filter(([b]) => bs.includes(b))]).concat([["อื่นๆ", list.filter(([b]) => !REGIONS.some(([, bs]) => bs.includes(b)))]]).filter(([, L]) => L.length);
+    $("drill").innerHTML = `<div class="rgnav">${groups.map(([rg, L]) => `<button type="button" class="rgchip" data-jump="rg-${rg}" style="border:0;cursor:pointer">${rg} <span>${L.length} สาขา</span></button>`).join("")}</div>` +
+      groups.map(([rg, L]) => { const s = stat(R.filter(r => L.some(([b]) => b === r.b)));
+        return `<section class="rgsec" id="rg-${rg}"><div class="rghd"><b>${rg}</b><span class="tag">${L.length} สาขา</span>
+          <span class="rgsum"><span class="q1">① เสร็จ ${s.pct}%</span>${s.late ? ` · <b style="color:#c2410c">เลยกำหนด ${s.late}</b>` : ""} · <span class="q2">② ผ่าน ${s.tested ? Math.round(s.pass / s.tested * 100) + "%" : "–"}</span>${s.open ? ` · <b style="color:#a8250f">ไม่ผ่านยังไม่แก้ ${s.open}</b>` : ""}</span></div>${cards(L)}</section>`; }).join("");
     return;
   }
   const s = stat(rows());
   $("drill").innerHTML = `<div class="whc" style="cursor:default"><div class="hd" style="background:linear-gradient(150deg,${WHC[S.wh][0]},${WHC[S.wh][1]})"><div style="display:grid;flex:1"><span style="font-size:12px;font-weight:600;opacity:.85">${WH[S.wh]}</span><b style="font-size:19px">${S.branch}</b></div>${verdict(s, true)}</div>
     <div class="bd" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">${q1(s)}${q2(s)}</div></div>`;
 }
+
+/* เปลี่ยนระดับ + จำไว้ในประวัติเบราว์เซอร์ ให้ปุ่ม Back ของเบราว์เซอร์/มือถือ ย้อนกลับได้ */
+function goLevel(p, b, fromHistory) {
+  if (S.wh === p && S.branch === b) return;
+  S.wh = p; S.branch = b; S.limit = 25; S.st = "all"; S.view = "overview";
+  if (!fromHistory) try { history.pushState({ wh: p, b }, ""); } catch (e) {}
+  render();
+  const c = $("crumb"); if (c && c.getBoundingClientRect().top < 0) c.scrollIntoView({ behavior: "smooth" });
+}
+window.addEventListener("popstate", e => { const st = e.state || { wh: "all", b: "all" }; goLevel(st.wh, st.b, true); });
+try { history.replaceState({ wh: "all", b: "all" }, ""); } catch (e) {}
 
 function render() { renderFilters(); renderHero(); renderTabs(); if (S.view === "overview") { renderDrill(); if (S.wh !== "all" && S.branch !== "all") renderTable(); } else renderFail(); }
 
@@ -728,8 +765,9 @@ document.addEventListener("click", e => {
     S.view = "overview"; S.per = k === "today" ? "day" : "all"; S.st = k === "late" ? "late" : "all";
     render(); $("rowTag").closest("section").scrollIntoView({ behavior: "smooth" }); return; }
   const pk = e.target.closest("[data-pick]");
-  if (pk) { const [p, b] = pk.dataset.pick.split("|"); const same = S.wh === p && S.branch === b && b !== "all";
-    S.wh = p; S.branch = same ? "all" : b; S.limit = 25; render(); return; }
+  if (pk) { const [p, b] = pk.dataset.pick.split("|"); goLevel(p, b); return; }
+  const jp = e.target.closest("[data-jump]");
+  if (jp) { const el = document.getElementById(jp.dataset.jump); if (el) el.scrollIntoView({ behavior: "smooth" }); return; }
   const t = e.target.closest("[data-wh],[data-month],[data-branch],[data-type],[data-st],[data-view],[data-fst],[data-per]");
   if (!t) return;
   if (t.dataset.per) S.per = t.dataset.per;
