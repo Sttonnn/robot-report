@@ -270,9 +270,7 @@
   <nav class="crumb" id="crumb"></nav>
   <div class="howto">
     <span><b class="q1">① งานทำครบไหม?</b> <i class="sw" style="background:#1a5fe4"></i>เสร็จแล้ว <i class="sw" style="background:#9cc0ff"></i>กำลังทำ <i class="sw" style="background:#ff8a3d"></i>เลยกำหนด</span>
-    <span><b class="q2">② เครื่องปกติไหม?</b> <span style="color:#0a6b4d;font-weight:700">✓ ผ่าน</span> · <span style="color:#a8250f;font-weight:700">✕ ไม่ผ่าน</span> (นับเฉพาะงานที่ตรวจแล้ว)</span>
-    <span><b style="color:#2a3b5f">ป้าย:</b> <span class="vb" style="background:#e3f6ee;color:#0a6b4d;padding:2px 9px;font-size:12px">✓ ปกติ</span> ไม่มีค้าง · <span class="vb" style="background:#fff1d6;color:#8a5200;padding:2px 9px;font-size:12px">! ต้องดู</span> มีงาน/เครื่องค้าง ไม่เกิน 7 วัน · <span class="vb" style="background:#c9301a;color:#fff;padding:2px 9px;font-size:12px">!! ต้องแก้</span> ค้างเกิน 7 วัน ต้องรีบตาม</span>
-  </div>
+    <span><b class="q2">② เครื่องปกติไหม?</b> <span style="color:#0a6b4d;font-weight:700">✓ ผ่าน</span> · <span style="color:#a8250f;font-weight:700">✕ ไม่ผ่าน</span> (นับเฉพาะงานที่ตรวจแล้ว)</span>  </div>
   <div id="drill"></div>
 
   <section class="panel" id="tblSec" style="display:grid;gap:12px">
@@ -662,7 +660,9 @@ function why(s) {
   if (s.lv === 1) return [s.late ? `งานเลยกำหนด ${s.late} ใบ` : "", s.open ? `เครื่องรอซ่อม ${s.open} ใบ` : ""].filter(Boolean).join(" · ") + " (ยังไม่เกิน 7 วัน)";
   return "ไม่มีงานค้าง ไม่มีเครื่องรอซ่อม";
 }
-const verdict = (s, light) => `<span style="display:grid;gap:4px;justify-items:${light ? "end" : "start"}"><span class="vb" style="background:${VERD[s.lv][1]};color:${VERD[s.lv][2]}">${VERD[s.lv][0]}</span><span style="font-size:12px;font-weight:600;line-height:1.4;${light ? "color:rgba(255,255,255,.92);text-align:right" : "color:" + ["#0a6b4d", "#8a5200", "#a8250f"][s.lv]}">${why(s)}</span></span>`;
+/* ผู้ใช้สั่งไม่แสดงป้าย ปกติ/ต้องดู/ต้องแก้ (29 ก.ย.) · ยังใช้ lv เรียงสาขาแย่สุดก่อน */
+const verdict = () => "";
+const verdictOld = (s, light) => `<span style="display:grid;gap:4px;justify-items:${light ? "end" : "start"}"><span class="vb" style="background:${VERD[s.lv][1]};color:${VERD[s.lv][2]}">${VERD[s.lv][0]}</span><span style="font-size:12px;font-weight:600;line-height:1.4;${light ? "color:rgba(255,255,255,.92);text-align:right" : "color:" + ["#0a6b4d", "#8a5200", "#a8250f"][s.lv]}">${why(s)}</span></span>`;
 function q1(s, compact) {
   const w = x => (s.n ? x / s.n * 100 : 0).toFixed(1) + "%";
   return `<div class="qbox">${compact ? "" : `<div class="qt q1">① งานทำครบไหม?</div>`}
