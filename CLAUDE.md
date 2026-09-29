@@ -50,6 +50,7 @@ repo `sttonnn/robot-report` คือที่รวมทุก Dashboard (ต�
 - วิธีอัปเดต: **ทาง A** อัปโหลด Excel บนหน้าเว็บ (login) → เว็บอ่านไฟล์ → บันทึก Supabase (ผู้ใช้เลือก 29 ก.ย.)
 - Mock up: `preventive-maintenance/pm-dashboard.html` (ข้อมูลจริงตัดชื่อแล้ว, อัปโหลดยังไม่บันทึก Supabase)
   - สร้างใหม่: `python3 preventive-maintenance/tools/pm_extract.py <xlsx> > data.json` แล้วแทน `/*__PM_DATA__*/[]` ใน `tools/pm_template.html`
+  - แล้วรัน `node preventive-maintenance/tools/prerender.js` เพื่อฝังตารางลงใน HTML (iPad เปิดไฟล์ผ่าน Files/Quick Look ไม่รัน JavaScript → ถ้าไม่ฝังจะเห็นแค่หัว)
 - ใบงานไม่ผ่าน: ผู้ใช้อัปเดตสถานะซ่อมเองได้ (ยังไม่แก้ไข / กำลังซ่อม / แก้ไขแล้ว + วันที่ + หมายเหตุ) นับ "เสียมาแล้ว N วัน" จากวันที่พบ (วันที่เสร็จสิ้นของใบงาน PM) ถึงวันที่แก้หรือวันนี้
   - เก็บแยกจาก Excel (อัปโหลดใหม่ไม่หาย) · mock up ใช้ localStorage `pcg-pm-fix` · ของจริง: ตาราง Supabase `pm_fail_followup` (key = รหัสโรงงาน|เลขใบงาน)
   - แนะนำอัตโนมัติ: ถ้ารอบถัดไปของแผนเดียวกันผ่านแล้ว แสดงลิงก์ "ปิดเป็นแก้ไขแล้ว" (ไม่ปิดเอง)

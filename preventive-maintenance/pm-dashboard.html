@@ -1,11 +1,10 @@
 <!DOCTYPE html>
-<html lang="th">
-<head>
+<html lang="th"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Preventive Maintenance</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&amp;family=IBM+Plex+Sans+Thai:wght@400;500;600;700&amp;display=swap">
 <style>
   :root {
     --bg: #eef2f8; --ink: #16213a; --ink2: #5a6784; --ink3: #2a3b5f; --chip: #dde6f5; --line: #e6ebf3;
@@ -308,43 +307,143 @@
   <div class="glow" style="top:-50%;right:-12%;width:50vw;height:50vw;background:radial-gradient(circle,rgba(26,200,196,.4),rgba(26,200,196,0) 66%)"></div>
   <div class="wrap">
     <div class="top">
-      <a class="back" href="index.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>หน้าหลัก</a>
-      <span class="logo"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span>
+      <a class="back" href="index.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>หน้าหลัก</a>
+      <span class="logo"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg></span>
       <div class="ttl">
         <span class="kicker">PCG · วิศวกรรม · งานบำรุงรักษา</span>
         <h1>Preventive Maintenance</h1>
-        <span class="asof" id="asof"></span>
+        <span class="asof" id="asof">ข้อมูล ณ 29 ก.ย. 69 · อัปโหลดล่าสุด 29 ก.ย. 69 11:27 น.</span>
       </div>
       <div style="display:grid;gap:6px;justify-items:end;flex:none;max-width:100%">
-        <button class="upl" id="uplBtn" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M17 8l-5-5-5 5 M12 3v12"/></svg>อัปโหลด Excel ประจำวัน</button>
-        <span class="login"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11h14v10H5z M8 11V7a4 4 0 0 1 8 0v4"/></svg>ต้อง login ก่อนอัปโหลด · ไฟล์ TrackingReport_PM_*.xlsx</span>
-        <input type="file" id="file" accept=".xlsx,.xls" hidden>
+        <button class="upl" id="uplBtn" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M17 8l-5-5-5 5 M12 3v12"></path></svg>อัปโหลด Excel ประจำวัน</button>
+        <span class="login"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11h14v10H5z M8 11V7a4 4 0 0 1 8 0v4"></path></svg>ต้อง login ก่อนอัปโหลด · ไฟล์ TrackingReport_PM_*.xlsx</span>
+        <input type="file" id="file" accept=".xlsx,.xls" hidden="">
         <button type="button" id="histBtn" class="login" style="cursor:pointer;border:0;background:none;padding:0;text-decoration:underline">ประวัติการอัปโหลด</button>
       </div>
     </div>
-    <div id="seg" style="margin-top:18px;display:flex;align-items:baseline;gap:8px"></div>
-    <div class="stats" id="stats"></div>
+    <div id="seg" style="margin-top:18px;display:flex;align-items:baseline;gap:8px"><span style="font-size:13px;font-weight:700;color:rgba(255,255,255,.8)">กำลังดู:</span> <b style="font-size:16px">ทุกคลัง</b></div>
+    <div class="stats" id="stats"><div class="card" style="background:linear-gradient(150deg,#1a5fe4,#0f3fa4);box-shadow:0 12px 26px rgba(15,63,164,.4)"><div class="lbl"><span style="opacity:.8">①</span> งานเสร็จแล้ว</div><div class="val">78%<small></small></div><div class="sub">เสร็จ 498 จาก 639 ใบงาน</div></div><div class="card" style="background:linear-gradient(150deg,#ff8a3d,#d9570f);box-shadow:0 12px 26px rgba(217,87,15,.35)"><div class="lbl"><span style="opacity:.8">①</span> เลยกำหนด ยังไม่ได้ตรวจ</div><div class="val">96<small>ใบ</small></div><div class="sub">ต้องตามให้ทำ</div></div><div class="card" style="background:linear-gradient(150deg,#13a878,#0a7353);box-shadow:0 12px 26px rgba(10,115,83,.4)"><div class="lbl"><span style="opacity:.8">②</span> ตรวจแล้วผ่าน</div><div class="val">93%<small></small></div><div class="sub">ผ่าน 473 จาก 510 ใบที่ตรวจแล้ว</div></div><div class="card" style="background:linear-gradient(150deg,#f0553a,#b8260f);box-shadow:0 12px 26px rgba(184,38,15,.35)"><div class="lbl"><span style="opacity:.8">②</span> ไม่ผ่าน ยังไม่ได้แก้</div><div class="val">37<small>ใบ</small></div><div class="sub">ต้องตามให้ซ่อม</div></div></div>
   </div>
 </header>
 
 <main>
-  <div class="tabs" id="tabs"></div>
+  <div class="tabs" id="tabs"><button type="button" class="on" data-view="overview"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v16a2 2 0 0 0 2 2h16 M7 16h8 M7 11h12 M7 6h3"></path></svg>ภาพรวม PM</button><button type="button" class="" data-view="fail"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4 M12 17h.01 M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path></svg>สถิติการเสีย <span class="cnt">ค้าง 37</span></button></div>
   <div class="filters">
-    <div class="pills" id="months"></div>
-    <label class="sel" style="display:none">สาขา / อาคาร <select id="branch"></select></label>
-    <label class="sel">ประเภท <select id="type"></select></label>
+    <div class="pills" id="months"><button type="button" class="on" data-month="all">ทุกเดือน</button><button type="button" class="" data-month="2026-07">ก.ค. 69</button><button type="button" class="" data-month="2026-08">ส.ค. 69</button><button type="button" class="" data-month="2026-09">ก.ย. 69</button></div>
+    <label class="sel" style="display:none">สาขา / อาคาร <select id="branch"><option value="all">ทั้งหมด</option><option>ขอนแก่น</option><option>โคราช</option><option>เชียงราย</option><option>เชียงใหม่</option><option>ปากเกร็ด</option><option>พิษณุโลก</option><option>ราชบุรี</option><option>ลาดพร้าว</option><option>ศรีราชา</option><option>สายไหม</option><option>สุราษฎร์ธานี</option><option>หนองแขม</option><option>หาดใหญ่</option><option>อุบลราชธานี</option><option>WH05</option><option>WH32</option><option>ไม่ระบุ</option></select></label>
+    <label class="sel">ประเภท <select id="type"><option value="all">ทั้งหมด</option><option>เครื่องจักร</option><option>Lead-Acid</option><option>Lithium</option><option>Gas</option><option>MHE</option></select></label>
     <label class="chk"><input type="checkbox" id="showPlan"> แสดงแผนงาน (ยังไม่ออกใบงาน)</label>
     <label class="chk"><input type="checkbox" id="showCancel"> แสดงงานที่ยกเลิก</label>
   </div>
 
   <div id="vOverview" style="display:grid;gap:22px">
-  <nav class="crumb" id="crumb"></nav>
-  <div class="howto">
+  <nav class="crumb" id="crumb"><span class="cur">ตารางรวมทุกสาขา</span><span class="chint" style="margin-left:auto;font-size:12.5px;font-weight:600;color:#5a6784">กดที่แถวเพื่อดูใบงานของสาขานั้น</span></nav>
+  <div class="howto" style="display: none;">
     <span><b class="q1">① งานทำครบไหม?</b> <i class="sw" style="background:#1a5fe4"></i>เสร็จแล้ว <i class="sw" style="background:#7b61ff"></i>ตรวจแล้ว รอปิดงาน <i class="sw" style="background:#9cc0ff"></i>กำลังทำ <i class="sw" style="background:#ff8a3d"></i>เลยกำหนด</span>
     <span><b class="q2">② เครื่องปกติไหม?</b> <span style="color:#0a6b4d;font-weight:700">✓ ผ่าน</span> · <span style="color:#a8250f;font-weight:700">✕ ไม่ผ่าน</span> (นับเฉพาะงานที่ตรวจแล้ว)</span>  </div>
-  <div id="drill"></div>
+  <div id="drill"><div class="board"><div class="bwrap"><table class="btab">
+    <thead><tr><th class="bn">สาขา / อาคาร</th><th class="c">ใบงาน</th><th class="q1h">① งานเสร็จ</th><th class="c q1h">① เลยกำหนด<br><small>ยังไม่ได้ตรวจ</small></th><th class="c q2h">② ตรวจผ่าน</th><th class="c q2h">② ไม่ผ่าน<br><small>ยังไม่ได้แก้</small></th><th></th></tr></thead>
+    <tbody><tr class="gh wh"><td class="bn"><b>คลังกระจายสินค้าภายในประเทศ</b><span>WHA05</span></td><td class="num c">286</td>
+      <td><div class="sbar"><div class="sfill" style="width:81%"></div></div><span class="num spct">81%</span></td>
+      <td class="c"><span class="hot late num">50</span></td>
+      <td class="c num"><span style="color:#0a6b4d;font-weight:800">97%</span></td>
+      <td class="c"><span class="hot bad num">7</span></td><td></td></tr><tr class="brow2" data-pick="WHA05|WH05|" tabindex="0"><td class="bn">WH05</td><td class="num c">187</td>
+      <td><div class="sbar"><div class="sfill" style="width:78%"></div></div><span class="num spct">78%</span></td>
+      <td class="c"><span class="hot late num">36</span></td>
+      <td class="c num"><span style="color:#0a6b4d;font-weight:800">95%</span></td>
+      <td class="c"><span class="hot bad num">7</span></td><td class="go">›</td></tr><tr class="brow2" data-pick="WHA05|WH32|" tabindex="0"><td class="bn">WH32</td><td class="num c">99</td>
+      <td><div class="sbar"><div class="sfill" style="width:86%"></div></div><span class="num spct">86%</span></td>
+      <td class="c"><span class="hot late num">14</span></td>
+      <td class="c num"><span style="color:#0a6b4d;font-weight:800">100%</span></td>
+      <td class="c"><span class="nil">–</span></td><td class="go">›</td></tr><tr class="gh wh"><td class="bn"><b>คลัง RDC ต่างจังหวัด</b><span>RDC01 · 14 สาขา</span></td><td class="num c">353</td>
+      <td><div class="sbar"><div class="sfill" style="width:76%"></div></div><span class="num spct">76%</span></td>
+      <td class="c"><span class="hot late num">46</span></td>
+      <td class="c num"><span style="color:#a8250f;font-weight:800">89%</span></td>
+      <td class="c"><span class="hot bad num">30</span></td><td></td></tr><tr class="gh rg"><td class="bn"><b>กรุงเทพฯ</b><span>4 สาขา</span></td><td class="num c">97</td>
+      <td><div class="sbar"><div class="sfill" style="width:92%"></div></div><span class="num spct">92%</span></td>
+      <td class="c"><span class="hot late num">2</span></td>
+      <td class="c num"><span style="color:#0a6b4d;font-weight:800">98%</span></td>
+      <td class="c"><span class="hot bad num">2</span></td><td></td></tr><tr class="brow2" data-pick="RDC01|สายไหม|" tabindex="0"><td class="bn">สายไหม</td><td class="num c">34</td>
+      <td><div class="sbar"><div class="sfill" style="width:88%"></div></div><span class="num spct">88%</span></td>
+      <td class="c"><span class="hot late num">2</span></td>
+      <td class="c num"><span style="color:#0a6b4d;font-weight:800">100%</span></td>
+      <td class="c"><span class="nil">–</span></td><td class="go">›</td></tr><tr class="brow2" data-pick="RDC01|หนองแขม|" tabindex="0"><td class="bn">หนองแขม</td><td class="num c">33</td>
+      <td><div class="sbar"><div class="sfill" style="width:88%"></div></div><span class="num spct">88%</span></td>
+      <td class="c"><span class="nil">–</span></td>
+      <td class="c num"><span style="color:#0a6b4d;font-weight:800">97%</span></td>
+      <td class="c"><span class="hot bad num">1</span></td><td class="go">›</td></tr><tr class="brow2" data-pick="RDC01|ลาดพร้าว|" tabindex="0"><td class="bn">ลาดพร้าว</td><td class="num c">15</td>
+      <td><div class="sbar"><div class="sfill" style="width:100%"></div></div><span class="num spct">100%</span></td>
+      <td class="c"><span class="nil">–</span></td>
+      <td class="c num"><span style="color:#0a6b4d;font-weight:800">93%</span></td>
+      <td class="c"><span class="hot bad num">1</span></td><td class="go">›</td></tr><tr class="brow2" data-pick="RDC01|ปากเกร็ด|" tabindex="0"><td class="bn">ปากเกร็ด</td><td class="num c">15</td>
+      <td><div class="sbar"><div class="sfill" style="width:100%"></div></div><span class="num spct">100%</span></td>
+      <td class="c"><span class="nil">–</span></td>
+      <td class="c num"><span style="color:#0a6b4d;font-weight:800">100%</span></td>
+      <td class="c"><span class="nil">–</span></td><td class="go">›</td></tr><tr class="gh rg"><td class="bn"><b>ภาคกลาง</b><span>2 สาขา</span></td><td class="num c">58</td>
+      <td><div class="sbar"><div class="sfill" style="width:17%"></div></div><span class="num spct">17%</span></td>
+      <td class="c"><span class="hot late num">32</span></td>
+      <td class="c num"><span style="color:#0a6b4d;font-weight:800">92%</span></td>
+      <td class="c"><span class="hot bad num">1</span></td><td></td></tr><tr class="brow2" data-pick="RDC01|ศรีราชา|" tabindex="0"><td class="bn">ศรีราชา</td><td class="num c">35</td>
+      <td><div class="sbar"><div class="sfill" style="width:14%"></div></div><span class="num spct">14%</span></td>
+      <td class="c"><span class="hot late num">20</span></td>
+      <td class="c num"><span style="color:#a8250f;font-weight:800">80%</span></td>
+      <td class="c"><span class="hot bad num">1</span></td><td class="go">›</td></tr><tr class="brow2" data-pick="RDC01|ราชบุรี|" tabindex="0"><td class="bn">ราชบุรี</td><td class="num c">23</td>
+      <td><div class="sbar"><div class="sfill" style="width:22%"></div></div><span class="num spct">22%</span></td>
+      <td class="c"><span class="hot late num">12</span></td>
+      <td class="c num"><span style="color:#0a6b4d;font-weight:800">100%</span></td>
+      <td class="c"><span class="nil">–</span></td><td class="go">›</td></tr><tr class="gh rg"><td class="bn"><b>ภาคเหนือ</b><span>3 สาขา</span></td><td class="num c">68</td>
+      <td><div class="sbar"><div class="sfill" style="width:78%"></div></div><span class="num spct">78%</span></td>
+      <td class="c"><span class="hot late num">7</span></td>
+      <td class="c num"><span style="color:#a8250f;font-weight:800">75%</span></td>
+      <td class="c"><span class="hot bad num">14</span></td><td></td></tr><tr class="brow2" data-pick="RDC01|เชียงใหม่|" tabindex="0"><td class="bn">เชียงใหม่</td><td class="num c">19</td>
+      <td><div class="sbar"><div class="sfill" style="width:63%"></div></div><span class="num spct">63%</span></td>
+      <td class="c"><span class="hot late num">4</span></td>
+      <td class="c num"><span style="color:#0a6b4d;font-weight:800">100%</span></td>
+      <td class="c"><span class="nil">–</span></td><td class="go">›</td></tr><tr class="brow2" data-pick="RDC01|เชียงราย|" tabindex="0"><td class="bn">เชียงราย</td><td class="num c">19</td>
+      <td><div class="sbar"><div class="sfill" style="width:89%"></div></div><span class="num spct">89%</span></td>
+      <td class="c"><span class="nil">–</span></td>
+      <td class="c num"><span style="color:#a8250f;font-weight:800">47%</span></td>
+      <td class="c"><span class="hot bad num">10</span></td><td class="go">›</td></tr><tr class="brow2" data-pick="RDC01|พิษณุโลก|" tabindex="0"><td class="bn">พิษณุโลก</td><td class="num c">30</td>
+      <td><div class="sbar"><div class="sfill" style="width:80%"></div></div><span class="num spct">80%</span></td>
+      <td class="c"><span class="hot late num">3</span></td>
+      <td class="c num"><span style="color:#a8250f;font-weight:800">83%</span></td>
+      <td class="c"><span class="hot bad num">4</span></td><td class="go">›</td></tr><tr class="gh rg"><td class="bn"><b>ภาคอีสาน</b><span>3 สาขา</span></td><td class="num c">56</td>
+      <td><div class="sbar"><div class="sfill" style="width:82%"></div></div><span class="num spct">82%</span></td>
+      <td class="c"><span class="hot late num">4</span></td>
+      <td class="c num"><span style="color:#a8250f;font-weight:800">87%</span></td>
+      <td class="c"><span class="hot bad num">6</span></td><td></td></tr><tr class="brow2" data-pick="RDC01|โคราช|" tabindex="0"><td class="bn">โคราช</td><td class="num c">19</td>
+      <td><div class="sbar"><div class="sfill" style="width:79%"></div></div><span class="num spct">79%</span></td>
+      <td class="c"><span class="hot late num">2</span></td>
+      <td class="c num"><span style="color:#a8250f;font-weight:800">67%</span></td>
+      <td class="c"><span class="hot bad num">5</span></td><td class="go">›</td></tr><tr class="brow2" data-pick="RDC01|ขอนแก่น|" tabindex="0"><td class="bn">ขอนแก่น</td><td class="num c">19</td>
+      <td><div class="sbar"><div class="sfill" style="width:79%"></div></div><span class="num spct">79%</span></td>
+      <td class="c"><span class="hot late num">2</span></td>
+      <td class="c num"><span style="color:#0a6b4d;font-weight:800">93%</span></td>
+      <td class="c"><span class="hot bad num">1</span></td><td class="go">›</td></tr><tr class="brow2" data-pick="RDC01|อุบลราชธานี|" tabindex="0"><td class="bn">อุบลราชธานี</td><td class="num c">18</td>
+      <td><div class="sbar"><div class="sfill" style="width:89%"></div></div><span class="num spct">89%</span></td>
+      <td class="c"><span class="nil">–</span></td>
+      <td class="c num"><span style="color:#0a6b4d;font-weight:800">100%</span></td>
+      <td class="c"><span class="nil">–</span></td><td class="go">›</td></tr><tr class="gh rg"><td class="bn"><b>ภาคใต้</b><span>2 สาขา</span></td><td class="num c">74</td>
+      <td><div class="sbar"><div class="sfill" style="width:93%"></div></div><span class="num spct">93%</span></td>
+      <td class="c"><span class="hot late num">1</span></td>
+      <td class="c num"><span style="color:#0a6b4d;font-weight:800">90%</span></td>
+      <td class="c"><span class="hot bad num">7</span></td><td></td></tr><tr class="brow2" data-pick="RDC01|สุราษฎร์ธานี|" tabindex="0"><td class="bn">สุราษฎร์ธานี</td><td class="num c">42</td>
+      <td><div class="sbar"><div class="sfill" style="width:98%"></div></div><span class="num spct">98%</span></td>
+      <td class="c"><span class="hot late num">1</span></td>
+      <td class="c num"><span style="color:#a8250f;font-weight:800">85%</span></td>
+      <td class="c"><span class="hot bad num">6</span></td><td class="go">›</td></tr><tr class="brow2" data-pick="RDC01|หาดใหญ่|" tabindex="0"><td class="bn">หาดใหญ่</td><td class="num c">32</td>
+      <td><div class="sbar"><div class="sfill" style="width:88%"></div></div><span class="num spct">88%</span></td>
+      <td class="c"><span class="nil">–</span></td>
+      <td class="c num"><span style="color:#0a6b4d;font-weight:800">97%</span></td>
+      <td class="c"><span class="hot bad num">1</span></td><td class="go">›</td></tr></tbody>
+    <tfoot><tr class="gh tot"><td class="bn"><b>รวมทุกคลัง</b></td><td class="num c">639</td>
+      <td><div class="sbar"><div class="sfill" style="width:78%"></div></div><span class="num spct">78%</span></td>
+      <td class="c"><span class="hot late num">96</span></td>
+      <td class="c num"><span style="color:#0a6b4d;font-weight:800">93%</span></td>
+      <td class="c"><span class="hot bad num">37</span></td><td></td></tr></tfoot></table></div>
+    <div class="bnote"><span class="hot late">ส้ม</span> = มีงานเลยกำหนดต้องตามให้ทำ · <span class="hot bad">แดง</span> = มีเครื่องไม่ผ่านที่ยังไม่ได้ซ่อม · ผ่านต่ำกว่า 90% ตัวเลขเป็นสีแดง</div></div></div>
 
-  <section class="panel" id="tblSec" style="display:grid;gap:12px">
+  <section class="panel" id="tblSec" style="display: none; gap: 12px;">
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:space-between">
       <h2>รายการใบงาน <span class="tag" id="rowTag"></span></h2>
       <div class="pills" id="perTabs"></div>
@@ -357,7 +456,7 @@
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
       <div class="pills" id="stFilter"></div>
-      <label class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a6784" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-4.3-4.3 M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14z"/></svg><input id="q" placeholder="ค้นหา เลขใบงาน / อุปกรณ์ / แผน"></label>
+      <label class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a6784" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-4.3-4.3 M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14z"></path></svg><input id="q" placeholder="ค้นหา เลขใบงาน / อุปกรณ์ / แผน"></label>
     </div>
     <div class="tbl-wrap"><table><thead><tr><th>ใบงาน</th><th>อุปกรณ์</th><th>ประเภท</th><th>กำหนดการ</th><th>① สถานะงาน</th><th>② ผลตรวจ</th></tr></thead><tbody id="tbody"></tbody></table></div>
     <button class="more" id="more" type="button">แสดงเพิ่ม</button>
@@ -964,5 +1063,6 @@ $("file").onchange = async e => {
 
 render();
 </script>
-</body>
-</html>
+
+
+</body></html>
