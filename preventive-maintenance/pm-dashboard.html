@@ -172,8 +172,11 @@
   .qbox .qt { font-size: 13px; font-weight: 800; }
   .qbox .qline { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
   .qbox .qbig { font-family: Archivo, sans-serif; font-size: 30px; font-weight: 900; line-height: 1; }
-  .pbar { display: flex; height: 14px; border-radius: 999px; overflow: hidden; background: #eef1f6; gap: 2px; }
-  .pbar span { height: 100%; }
+  .pbar { display: flex; height: 22px; border-radius: 999px; overflow: hidden; background: #eef1f6; gap: 2px; }
+  .pbar span { height: 100%; display: flex; align-items: center; justify-content: center; font-family: Archivo, sans-serif; font-size: 12px; font-weight: 800; }
+  .plegend { display: flex; gap: 6px 14px; flex-wrap: wrap; font-size: 12.5px; color: #5a6784; }
+  .plegend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+  .plegend b { color: inherit; font-size: 13px; }
   .pf { display: flex; gap: 8px; flex-wrap: wrap; }
   .pf span { display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 999px; font-size: 14px; font-weight: 800; }
   .brlist { background: #fff; border-radius: 22px; box-shadow: var(--shadow); overflow: hidden; }
@@ -268,6 +271,7 @@
   <div class="howto">
     <span><b class="q1">① งานทำครบไหม?</b> <i class="sw" style="background:#1a5fe4"></i>เสร็จแล้ว <i class="sw" style="background:#9cc0ff"></i>กำลังทำ <i class="sw" style="background:#ff8a3d"></i>เลยกำหนด</span>
     <span><b class="q2">② เครื่องปกติไหม?</b> <span style="color:#0a6b4d;font-weight:700">✓ ผ่าน</span> · <span style="color:#a8250f;font-weight:700">✕ ไม่ผ่าน</span> (นับเฉพาะงานที่ตรวจแล้ว)</span>
+    <span><b style="color:#2a3b5f">ป้าย:</b> <span class="vb" style="background:#e3f6ee;color:#0a6b4d;padding:2px 9px;font-size:12px">✓ ปกติ</span> ไม่มีค้าง · <span class="vb" style="background:#fff1d6;color:#8a5200;padding:2px 9px;font-size:12px">! ต้องดู</span> มีงาน/เครื่องค้าง ไม่เกิน 7 วัน · <span class="vb" style="background:#c9301a;color:#fff;padding:2px 9px;font-size:12px">!! ต้องแก้</span> ค้างเกิน 7 วัน ต้องรีบตาม</span>
   </div>
   <div id="drill"></div>
 
@@ -646,18 +650,26 @@ function stat(L) {
   const n = L.length, done = L.filter(r => grp(r) === "done").length, prog = L.filter(r => grp(r) === "prog").length;
   const late = L.filter(overdue), pass = L.filter(r => r.r === "pass").length, fail = L.filter(isFail);
   const open = fail.filter(r => repSt(r) !== "fixed");
-  const bad = late.some(r => dayDiff(r.due, ASOF) > 7) || open.some(r => downDays(r) > 7);
+  const lateOld = late.filter(r => dayDiff(r.due, ASOF) > 7).length, openOld = open.filter(r => downDays(r) > 7).length;
+  const bad = lateOld || openOld;
   return { n, done, prog, late: late.length, pass, fail: fail.length, open: open.length, tested: pass + fail.length,
-    pct: n ? Math.round(done / n * 100) : 0, lv: bad ? 2 : late.length || open.length ? 1 : 0 };
+    pct: n ? Math.round(done / n * 100) : 0, lv: bad ? 2 : late.length || open.length ? 1 : 0, lateOld, openOld };
 }
 const VERD = [["✓ ปกติ", "#e3f6ee", "#0a6b4d"], ["! ต้องดู", "#fff1d6", "#8a5200"], ["!! ต้องแก้", "#c9301a", "#fff"]];
-const verdict = s => `<span class="vb" style="background:${VERD[s.lv][1]};color:${VERD[s.lv][2]}">${VERD[s.lv][0]}</span>`;
+/* เหตุผลของป้าย เขียนเป็นภาษาคน */
+function why(s) {
+  if (s.lv === 2) return [s.lateOld ? `งานเลยกำหนดเกิน 7 วัน ${s.lateOld} ใบ` : "", s.openOld ? `เครื่องไม่ผ่านค้างซ่อมเกิน 7 วัน ${s.openOld} ใบ` : ""].filter(Boolean).join(" · ");
+  if (s.lv === 1) return [s.late ? `งานเลยกำหนด ${s.late} ใบ` : "", s.open ? `เครื่องรอซ่อม ${s.open} ใบ` : ""].filter(Boolean).join(" · ") + " (ยังไม่เกิน 7 วัน)";
+  return "ไม่มีงานค้าง ไม่มีเครื่องรอซ่อม";
+}
+const verdict = (s, light) => `<span style="display:grid;gap:4px;justify-items:${light ? "end" : "start"}"><span class="vb" style="background:${VERD[s.lv][1]};color:${VERD[s.lv][2]}">${VERD[s.lv][0]}</span><span style="font-size:12px;font-weight:600;line-height:1.4;${light ? "color:rgba(255,255,255,.92);text-align:right" : "color:" + ["#0a6b4d", "#8a5200", "#a8250f"][s.lv]}">${why(s)}</span></span>`;
 function q1(s, compact) {
   const w = x => (s.n ? x / s.n * 100 : 0).toFixed(1) + "%";
   return `<div class="qbox">${compact ? "" : `<div class="qt q1">① งานทำครบไหม?</div>`}
     <div class="qline"><span class="qbig" style="color:#0f3fa4;${compact ? "font-size:22px" : ""}">${s.pct}%</span><span style="font-size:13.5px;color:#2a3b5f">เสร็จ <b>${s.done}</b> จาก ${s.n} ใบ</span></div>
-    <div class="pbar"><span style="width:${w(s.done)};background:#1a5fe4" data-tip="เสร็จแล้ว ${s.done} ใบ"></span><span style="width:${w(s.prog - s.late)};background:#9cc0ff" data-tip="กำลังทำ (ยังไม่เลยกำหนด) ${s.prog - s.late} ใบ"></span><span style="width:${w(s.late)};background:#ff8a3d" data-tip="เลยกำหนด ${s.late} ใบ"></span></div>
-    <div style="font-size:12.5px;color:#5a6784">กำลังทำ ${s.prog - s.late} · ${s.late ? `<b style="color:#c2410c">เลยกำหนด ${s.late}</b>` : "ไม่มีเลยกำหนด"}</div></div>`;
+    <div class="pbar">${[[s.done, "#1a5fe4", "#fff", "เสร็จแล้ว"], [s.prog - s.late, "#9cc0ff", "#0f3fa4", "กำลังทำ (ยังไม่เลยกำหนด)"], [s.late, "#ff8a3d", "#fff", "เลยกำหนด"]]
+      .filter(([n]) => n > 0).map(([n, bg, fg, l]) => `<span style="width:${w(n)};background:${bg};color:${fg}" data-tip="${l} ${n} ใบ">${n / s.n >= .07 ? n : ""}</span>`).join("")}</div>
+    <div class="plegend"><span><i style="background:#1a5fe4"></i>เสร็จ <b>${s.done}</b></span><span><i style="background:#9cc0ff"></i>กำลังทำ <b>${s.prog - s.late}</b></span><span style="${s.late ? "color:#c2410c" : ""}"><i style="background:#ff8a3d"></i>เลยกำหนด <b>${s.late}</b></span></div></div>`;
 }
 function q2(s, compact) {
   return `<div class="qbox">${compact ? "" : `<div class="qt q2">② เครื่องปกติไหม?</div>`}
@@ -679,7 +691,7 @@ function renderDrill() {
     $("drill").innerHTML = `<div class="whcards">${["WHA05", "RDC01"].map(p => {
       const L = R.filter(r => r.p === p), s = stat(L), nb = new Set(L.map(r => r.b)).size, C = WHC[p];
       return `<button type="button" class="whc" data-pick="${p}|all"><div class="hd" style="background:linear-gradient(150deg,${C[0]},${C[1]})">
-          <div style="display:grid;flex:1;min-width:0"><span style="font-size:12px;font-weight:600;opacity:.85">${p} · ${C[2]}</span><b style="font-size:19px">${WH[p]}</b></div>${verdict(s)}</div>
+          <div style="display:grid;flex:1;min-width:0"><span style="font-size:12px;font-weight:600;opacity:.85">${p} · ${C[2]}</span><b style="font-size:19px">${WH[p]}</b></div>${verdict(s, true)}</div>
         <div class="bd">${q1(s)}${q2(s)}<div style="font-size:13.5px;font-weight:800;color:#1a5fe4">ดู ${nb} สาขา/อาคาร →</div></div></button>`;
     }).join("")}</div>`;
     return;
@@ -693,7 +705,7 @@ function renderDrill() {
     return;
   }
   const s = stat(rows());
-  $("drill").innerHTML = `<div class="whc" style="cursor:default"><div class="hd" style="background:linear-gradient(150deg,${WHC[S.wh][0]},${WHC[S.wh][1]})"><div style="display:grid;flex:1"><span style="font-size:12px;font-weight:600;opacity:.85">${WH[S.wh]}</span><b style="font-size:19px">${S.branch}</b></div>${verdict(s)}</div>
+  $("drill").innerHTML = `<div class="whc" style="cursor:default"><div class="hd" style="background:linear-gradient(150deg,${WHC[S.wh][0]},${WHC[S.wh][1]})"><div style="display:grid;flex:1"><span style="font-size:12px;font-weight:600;opacity:.85">${WH[S.wh]}</span><b style="font-size:19px">${S.branch}</b></div>${verdict(s, true)}</div>
     <div class="bd" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">${q1(s)}${q2(s)}</div></div>`;
 }
 
