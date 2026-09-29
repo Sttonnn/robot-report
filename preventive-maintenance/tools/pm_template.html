@@ -179,6 +179,7 @@
   .plegend b { color: inherit; font-size: 13px; }
   .pf { display: flex; gap: 8px; flex-wrap: wrap; }
   .pf span { display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 999px; font-size: 14px; font-weight: 800; }
+  .brcards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(330px,100%), 1fr)); gap: 16px; }
   .brlist { background: #fff; border-radius: 22px; box-shadow: var(--shadow); overflow: hidden; }
   .brh, .brr { display: grid; grid-template-columns: minmax(150px,1.1fr) minmax(0,1.6fr) minmax(0,1.2fr) 28px; gap: 16px; align-items: center; padding: 12px 18px; }
   .brh { background: #f5f7fb; font-size: 12.5px; font-weight: 800; color: var(--ink2); }
@@ -269,7 +270,7 @@
   <div id="vOverview" style="display:grid;gap:22px">
   <nav class="crumb" id="crumb"></nav>
   <div class="howto">
-    <span><b class="q1">① งานทำครบไหม?</b> <i class="sw" style="background:#1a5fe4"></i>เสร็จแล้ว <i class="sw" style="background:#9cc0ff"></i>กำลังทำ <i class="sw" style="background:#ff8a3d"></i>เลยกำหนด</span>
+    <span><b class="q1">① งานทำครบไหม?</b> <i class="sw" style="background:#1a5fe4"></i>เสร็จแล้ว <i class="sw" style="background:#7b61ff"></i>ตรวจแล้ว รอปิดงาน <i class="sw" style="background:#9cc0ff"></i>กำลังทำ <i class="sw" style="background:#ff8a3d"></i>เลยกำหนด</span>
     <span><b class="q2">② เครื่องปกติไหม?</b> <span style="color:#0a6b4d;font-weight:700">✓ ผ่าน</span> · <span style="color:#a8250f;font-weight:700">✕ ไม่ผ่าน</span> (นับเฉพาะงานที่ตรวจแล้ว)</span>  </div>
   <div id="drill"></div>
 
@@ -413,7 +414,9 @@ function rows(ignore = {}) {
 const grp = r => GROUP[r.s] || "prog";
 const isFail = r => r.r.startsWith("fail");
 /* "รอสร้างใบงาน" = แผนงาน ยังไม่เกิดงานจริง → ไม่นับเป็นงานค้าง/เลยกำหนด */
-const overdue = r => grp(r) === "prog" && r.due && r.due < ASOF;
+/* ตรวจแล้ว (มีผล ผ่าน/ไม่ผ่าน) แต่ใบงานยังไม่ปิดในระบบ = "รอปิดงาน" ไม่นับเป็นเลยกำหนด */
+const checkedOpen = r => grp(r) === "prog" && !!r.r;
+const overdue = r => grp(r) === "prog" && !r.r && r.due && r.due < ASOF;
 
 function renderHero() {
   const last = LOG[LOG.length - 1];
@@ -650,7 +653,8 @@ function stat(L) {
   const open = fail.filter(r => repSt(r) !== "fixed");
   const lateOld = late.filter(r => dayDiff(r.due, ASOF) > 7).length, openOld = open.filter(r => downDays(r) > 7).length;
   const bad = lateOld || openOld;
-  return { n, done, prog, late: late.length, pass, fail: fail.length, open: open.length, tested: pass + fail.length,
+  const chk = L.filter(checkedOpen).length;
+  return { n, done, prog, chk, work: prog - chk - late.length, late: late.length, pass, fail: fail.length, open: open.length, tested: pass + fail.length,
     pct: n ? Math.round(done / n * 100) : 0, lv: bad ? 2 : late.length || open.length ? 1 : 0, lateOld, openOld };
 }
 const VERD = [["✓ ปกติ", "#e3f6ee", "#0a6b4d"], ["! ต้องดู", "#fff1d6", "#8a5200"], ["!! ต้องแก้", "#c9301a", "#fff"]];
@@ -667,14 +671,14 @@ function q1(s, compact) {
   const w = x => (s.n ? x / s.n * 100 : 0).toFixed(1) + "%";
   return `<div class="qbox">${compact ? "" : `<div class="qt q1">① งานทำครบไหม?</div>`}
     <div class="qline"><span class="qbig" style="color:#0f3fa4;${compact ? "font-size:22px" : ""}">${s.pct}%</span><span style="font-size:13.5px;color:#2a3b5f">เสร็จ <b>${s.done}</b> จาก ${s.n} ใบ</span></div>
-    <div class="pbar">${[[s.done, "#1a5fe4", "#fff", "เสร็จแล้ว"], [s.prog - s.late, "#9cc0ff", "#0f3fa4", "กำลังทำ (ยังไม่เลยกำหนด)"], [s.late, "#ff8a3d", "#fff", "เลยกำหนด"]]
+    <div class="pbar">${[[s.done, "#1a5fe4", "#fff", "เสร็จ (ปิดงานแล้ว)"], [s.chk, "#7b61ff", "#fff", "ตรวจแล้ว รอปิดงานในระบบ"], [s.work, "#9cc0ff", "#0f3fa4", "กำลังทำ (ยังไม่เลยกำหนด)"], [s.late, "#ff8a3d", "#fff", "เลยกำหนด ยังไม่ได้ตรวจ"]]
       .filter(([n]) => n > 0).map(([n, bg, fg, l]) => `<span style="width:${w(n)};background:${bg};color:${fg}" data-tip="${l} ${n} ใบ">${n / s.n >= .07 ? n : ""}</span>`).join("")}</div>
-    <div class="plegend"><span><i style="background:#1a5fe4"></i>เสร็จ <b>${s.done}</b></span><span><i style="background:#9cc0ff"></i>กำลังทำ <b>${s.prog - s.late}</b></span><span style="${s.late ? "color:#c2410c" : ""}"><i style="background:#ff8a3d"></i>เลยกำหนด <b>${s.late}</b></span></div></div>`;
+    <div class="plegend"><span><i style="background:#1a5fe4"></i>เสร็จ <b>${s.done}</b></span>${s.chk ? `<span><i style="background:#7b61ff"></i>ตรวจแล้ว รอปิดงาน <b>${s.chk}</b></span>` : ""}<span><i style="background:#9cc0ff"></i>กำลังทำ <b>${s.work}</b></span><span style="${s.late ? "color:#c2410c" : ""}"><i style="background:#ff8a3d"></i>เลยกำหนด <b>${s.late}</b></span></div></div>`;
 }
 function q2(s, compact) {
   return `<div class="qbox">${compact ? "" : `<div class="qt q2">② เครื่องปกติไหม?</div>`}
     ${s.tested ? `<div class="pf"><span style="background:#e3f6ee;color:#0a6b4d">✓ ผ่าน ${s.pass}</span><span style="background:${s.fail ? "#ffe3dc" : "#f1f3f7"};color:${s.fail ? "#a8250f" : "#7a849a"}">✕ ไม่ผ่าน ${s.fail}</span></div>
-    <div style="font-size:12.5px;color:#5a6784">ผ่าน ${Math.round(s.pass / s.tested * 100)}% ของที่ตรวจแล้ว · ${s.open ? `<b style="color:#a8250f">ยังไม่ได้แก้ ${s.open}</b>` : s.fail ? "แก้ครบแล้ว" : "ไม่มีเครื่องเสีย"}</div>`
+    <div style="font-size:12.5px;color:#5a6784">ตรวจแล้ว <b>${s.tested}</b> ใบ${s.chk ? ` (เสร็จ ${s.tested - s.chk} + รอปิดงาน ${s.chk})` : ""} · ผ่าน ${Math.round(s.pass / s.tested * 100)}% · ${s.open ? `<b style="color:#a8250f">ยังไม่ได้แก้ ${s.open}</b>` : s.fail ? "แก้ครบแล้ว" : "ไม่มีเครื่องเสีย"}</div>`
     : `<div style="font-size:13px;color:#5a6784">ยังไม่มีผลตรวจในช่วงนี้</div>`}</div>`;
 }
 const WHC = { WHA05: ["#1a5fe4", "#0f3fa4", "WH05 / WH32"], RDC01: ["#15a6a0", "#0b6f7a", "14 สาขาต่างจังหวัด"] };
@@ -700,8 +704,10 @@ function renderDrill() {
     const R = rows({ branch: true }), by = {};
     R.forEach(r => (by[r.b] = by[r.b] || []).push(r));
     const list = Object.entries(by).map(([b, L]) => [b, stat(L)]).sort((a, b) => b[1].lv - a[1].lv || b[1].late - a[1].late || b[1].open - a[1].open);
-    $("drill").innerHTML = `<div class="brlist"><div class="brh"><span>สาขา / อาคาร</span><span class="q1">① งานทำครบไหม?</span><span class="q2">② เครื่องปกติไหม?</span><span></span></div>
-      ${list.map(([b, s]) => `<button type="button" class="brr" data-pick="${S.wh}|${b}"><div><div class="nm2">${b}</div><div style="margin-top:6px">${verdict(s)}</div></div>${q1(s, true)}${q2(s, true)}<span style="font-size:20px;color:#9aa6bd">›</span></button>`).join("")}</div>`;
+    const C = WHC[S.wh];
+    $("drill").innerHTML = `<div class="brcards">${list.map(([b, s]) => `<button type="button" class="whc" data-pick="${S.wh}|${b}">
+        <div class="hd" style="background:linear-gradient(150deg,${C[0]},${C[1]});padding:12px 16px"><b style="font-size:17px;flex:1">${b}</b><span style="font-size:12.5px;font-weight:700;opacity:.9">${s.n} ใบงาน</span></div>
+        <div class="bd" style="padding:14px 16px;gap:14px">${q1(s)}${q2(s)}<div style="font-size:13px;font-weight:800;color:#1a5fe4">ดูใบงาน →</div></div></button>`).join("")}</div>`;
     return;
   }
   const s = stat(rows());
