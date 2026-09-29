@@ -190,8 +190,10 @@
   .howto .sw { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin: 0 4px 0 8px; vertical-align: -1px; }
   .q1 { color: #0f3fa4; } .q2 { color: #0a6b4d; }
   .whcards { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 18px; }
+  .whcards.three { grid-template-columns: repeat(auto-fill, minmax(min(320px,100%), 1fr)); }
   .whc { cursor: pointer; text-align: left; border: 0; background: #fff; border-radius: 22px; box-shadow: var(--shadow); padding: 0; overflow: hidden; display: grid; transition: transform .2s; animation: rise .45s ease both; }
   .whc:hover { transform: translateY(-4px); }
+  .whc { align-content: start; }
   .whc .hd { padding: 16px 18px; color: #fff; display: flex; align-items: center; gap: 12px; }
   .whc .bd { padding: 16px 18px; display: grid; gap: 16px; }
   .vb { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 999px; font-size: 13px; font-weight: 800; white-space: nowrap; }
@@ -435,11 +437,12 @@ const nextPass = r => DATA.filter(x => x.p === r.p && x.e === r.e && x.n === r.n
 const daysPill = r => { const d = downDays(r), st = repSt(r);
   return st === "fixed" ? `<span class="pill" style="background:#e3f6ee;color:#0a6b4d">ใช้เวลาแก้ <span class="days">${d}</span> วัน</span>`
     : `<span class="pill" style="background:${d > 7 ? "#c9301a" : "#ffe3dc"};color:${d > 7 ? "#fff" : "#a8250f"}">เสียมาแล้ว <span class="days">${d}</span> วัน</span>`; };
-const S = { view: "overview", fst: "all", wh: "all", month: "all", branch: "all", type: "all", cancel: false, plan: false, per: "all", anchor: null, st: "all", q: "", limit: 25 };
+const S = { view: "overview", fst: "all", wh: "all", month: "all", branch: "all", type: "all", cancel: false, plan: false, per: "all", anchor: null, rg: null, st: "all", q: "", limit: 25 };
 
 function rows(ignore = {}) {
   return DATA.filter(r =>
     (ignore.wh || S.wh === "all" || r.p === S.wh) &&
+    (ignore.rg || !S.rg || r.p !== "RDC01" || regionOf(r.b) === S.rg) &&
     (ignore.month || S.month === "all" || r.due.slice(0, 7) === S.month) &&
     (ignore.branch || S.branch === "all" || r.b === S.branch) &&
     (ignore.type || S.type === "all" || r.t === S.type) &&
@@ -457,7 +460,7 @@ function renderHero() {
   const last = LOG[LOG.length - 1];
   $("asof").textContent = "ข้อมูล ณ " + fmtD(ASOF) + (last ? " · อัปโหลดล่าสุด " + fmtD(last.at.slice(0, 10)) + " " + last.at.slice(11, 16) + " น." : "");
   /* ตัวเลขบนสุด = 4 ตัวเดียวกับการ์ดด้านล่าง แยกตาม 2 คำถาม ใช้สีชุดเดียวกัน */
-  const s = stat(rows()), scope = S.wh === "all" ? "ทุกคลัง" : S.branch !== "all" ? S.branch : WH[S.wh];
+  const s = stat(rows()), scope = S.wh === "all" ? "ทุกคลัง" : S.branch !== "all" ? S.branch : S.rg ? WH[S.wh] + " · " + S.rg : WH[S.wh];
   const card = (bg, sh, q, lbl, val, unit, sub) => `<div class="card" style="background:${bg};box-shadow:${sh}"><div class="lbl"><span style="opacity:.8">${q}</span> ${lbl}</div><div class="val">${val}<small>${unit}</small></div><div class="sub">${sub}</div></div>`;
   $("seg").innerHTML = `<span style="font-size:13px;font-weight:700;color:rgba(255,255,255,.8)">กำลังดู:</span> <b style="font-size:16px">${scope}</b>`;
   $("stats").innerHTML =
@@ -722,64 +725,60 @@ const REGIONS = [
 const regionOf = b => (REGIONS.find(([, bs]) => bs.includes(b)) || ["อื่นๆ"])[0];
 const WHC = { WHA05: ["#1a5fe4", "#0f3fa4", "WH05 / WH32"], RDC01: ["#15a6a0", "#0b6f7a", "14 สาขาต่างจังหวัด"] };
 function renderDrill() {
-  const lvl = S.wh === "all" ? 1 : S.branch === "all" ? 2 : 3;
-  const cr = [];
-  if (lvl > 1) cr.push(`<button type="button" class="backb" data-pick="${lvl === 3 ? S.wh + "|all" : "all|all"}">← ย้อนกลับ</button>`);
-  cr.push(lvl === 1 ? `<span class="cur">ภาพรวมทุกคลัง</span>` : `<button type="button" data-pick="all|all">ทุกคลัง</button>`);
-  if (lvl >= 2) cr.push(lvl === 2 ? `<span class="cur">${WH[S.wh]}</span>` : `<button type="button" data-pick="${S.wh}|all">${WH[S.wh]}</button>`);
-  if (lvl === 3) cr.push(`<span class="cur">${S.wh === "RDC01" ? `<span style="font-size:13px;color:#5a6784;font-weight:700">${regionOf(S.branch)} · </span>` : ""}${S.branch}</span>`);
-  $("crumb").innerHTML = (lvl > 1 ? cr[0] + `<span style="width:8px"></span>` + cr.slice(1).join(`<span style="color:#9aa6bd">›</span>`) : cr.join("")) + `<span class="chint" style="margin-left:auto;font-size:12.5px;font-weight:600;color:#5a6784">${lvl === 1 ? "กดที่คลังเพื่อดูรายสาขา" : lvl === 2 ? "กดที่สาขาเพื่อดูใบงาน" : ""}</span>`;
-  $("tblSec").style.display = lvl === 3 ? "grid" : "none";
-  if (lvl === 1) {
-    const R = rows({ wh: true, branch: true });
-    $("drill").innerHTML = `<div class="whcards">${["WHA05", "RDC01"].map(p => {
-      const L = R.filter(r => r.p === p), s = stat(L), nb = new Set(L.map(r => r.b)).size, C = WHC[p];
-      return `<button type="button" class="whc" data-pick="${p}|all"><div class="hd" style="background:linear-gradient(150deg,${C[0]},${C[1]})">
-          <div style="display:grid;flex:1;min-width:0"><span style="font-size:12px;font-weight:600;opacity:.85">${p} · ${C[2]}</span><b style="font-size:19px">${WH[p]}</b></div>${verdict(s, true)}</div>
-        <div class="bd">${q1(s)}${q2(s)}<div style="font-size:13.5px;font-weight:800;color:#1a5fe4">ดู ${nb} สาขา/อาคาร →</div></div></button>`;
-    }).join("")}</div>`;
+  /* 4 ระดับ ใหญ่ → เล็ก: คลัง → ภาค (เฉพาะ RDC) → สาขา/อาคาร → ใบงาน */
+  const isR = S.wh === "RDC01";
+  const lvl = S.wh === "all" ? "wh" : S.branch !== "all" ? "wo" : isR && !S.rg ? "rg" : "br";
+  const back = { rg: "all|all|", br: isR ? "RDC01|all|" : "all|all|", wo: `${S.wh}|all|${S.rg || ""}` }[lvl];
+  const parts = [];
+  parts.push(lvl === "wh" ? `<span class="cur">ภาพรวมทุกคลัง</span>` : `<button type="button" data-pick="all|all|">ทุกคลัง</button>`);
+  if (lvl !== "wh") parts.push((lvl === "rg" || (lvl === "br" && !isR)) ? `<span class="cur">${WH[S.wh]}</span>` : `<button type="button" data-pick="${S.wh}|all|">${WH[S.wh]}</button>`);
+  if (isR && S.rg) parts.push(lvl === "br" ? `<span class="cur">${S.rg}</span>` : `<button type="button" data-pick="RDC01|all|${S.rg}">${S.rg}</button>`);
+  if (lvl === "wo") parts.push(`<span class="cur">${S.branch}</span>`);
+  const hint = { wh: "กดที่คลังเพื่อดูต่อ", rg: "กดที่ภาคเพื่อดูสาขา", br: isR ? "กดที่สาขาเพื่อดูใบงาน" : "กดที่อาคารเพื่อดูใบงาน", wo: "" }[lvl];
+  $("crumb").innerHTML = (back ? `<button type="button" class="backb" data-pick="${back}">← ย้อนกลับ</button><span style="width:8px"></span>` : "") +
+    parts.join(`<span style="color:#9aa6bd">›</span>`) + `<span class="chint" style="margin-left:auto;font-size:12.5px;font-weight:600;color:#5a6784">${hint}</span>`;
+  $("tblSec").style.display = lvl === "wo" ? "grid" : "none";
+  const bigCard = (pick, c1, c2, kicker, title, s, foot) => `<button type="button" class="whc" data-pick="${pick}"><div class="hd" style="background:linear-gradient(150deg,${c1},${c2})">
+      <div style="display:grid;flex:1;min-width:0"><span style="font-size:12px;font-weight:600;opacity:.88">${kicker}</span><b style="font-size:19px">${title}</b></div><span style="font-size:12.5px;font-weight:700;opacity:.9;white-space:nowrap">${s.n} ใบงาน</span></div>
+    <div class="bd">${q1(s)}${q2(s)}<div style="font-size:13.5px;font-weight:800;color:#1a5fe4">${foot} →</div></div></button>`;
+  if (lvl === "wh") {
+    const R = rows({ wh: true, branch: true, rg: true });
+    $("drill").innerHTML = `<div class="whcards">${["WHA05", "RDC01"].map(p => { const L = R.filter(r => r.p === p), C = WHC[p];
+      return bigCard(`${p}|all|`, C[0], C[1], `${p} · ${C[2]}`, WH[p], stat(L), p === "RDC01" ? "ดู 5 ภาค" : `ดู ${new Set(L.map(r => r.b)).size} อาคาร`); }).join("")}</div>`;
     return;
   }
-  if (lvl === 2) {
+  if (lvl === "rg") {
+    const R = rows({ branch: true, rg: true });
+    const groups = REGIONS.map(([rg, bs]) => [rg, bs, R.filter(r => bs.includes(r.b))]).filter(g => g[2].length);
+    $("drill").innerHTML = `<div class="whcards three">${groups.map(([rg, bs, L]) =>
+      bigCard(`RDC01|all|${rg}`, "#15a6a0", "#0b6f7a", bs.join(" · "), rg, stat(L), `ดู ${bs.length} สาขา`)).join("")}</div>`;
+    return;
+  }
+  if (lvl === "br") {
     const R = rows({ branch: true }), by = {};
     R.forEach(r => (by[r.b] = by[r.b] || []).push(r));
     const list = Object.entries(by).map(([b, L]) => [b, stat(L)]).sort((a, b) => b[1].lv - a[1].lv || b[1].late - a[1].late || b[1].open - a[1].open);
     const C = WHC[S.wh];
-    const cards = L => `<div class="brcards">${L.map(([b, s]) => `<button type="button" class="whc" data-pick="${S.wh}|${b}">
-        <div class="hd" style="background:linear-gradient(150deg,${C[0]},${C[1]});padding:12px 16px"><b style="font-size:17px;flex:1">${b}</b><span style="font-size:12.5px;font-weight:700;opacity:.9">${s.n} ใบงาน</span></div>
-        <div class="bd" style="padding:14px 16px;gap:14px">${q1(s)}${q2(s)}<div style="font-size:13px;font-weight:800;color:#1a5fe4">ดูใบงาน →</div></div></button>`).join("")}</div>`;
-    /* การ์ดเล็ก: ดูภาพรวมทุกสาขาในจอเดียว */
-    const mini = ([b, s]) => { const w = x => (s.n ? x / s.n * 100 : 0).toFixed(1) + "%";
-      return `<button type="button" class="mini" data-pick="${S.wh}|${b}">
-        <div class="mt"><b>${b}</b><span>${s.n} ใบ ›</span></div>
-        <div class="mbar"><span style="width:${w(s.done)};background:#1a5fe4"></span><span style="width:${w(s.chk)};background:#7b61ff"></span><span style="width:${w(s.work)};background:#9cc0ff"></span><span style="width:${w(s.late)};background:#ff8a3d"></span></div>
-        <div class="mrow"><span class="q1"><b>① ${s.pct}%</b> เสร็จ</span>${s.late ? `<span class="mlate">เลยกำหนด ${s.late}</span>` : `<span class="mok">ไม่มีค้าง</span>`}</div>
-        <div class="mrow"><span class="q2"><b>② ✓ ${s.pass}</b></span><span style="color:${s.fail ? "#a8250f" : "#9aa6bd"};font-weight:700">✕ ${s.fail}</span>${s.open ? `<span class="mfail">ยังไม่แก้ ${s.open}</span>` : ""}</div></button>`; };
-    const panel = (title, L, sum) => `<section class="rgp"><div class="rgph"><b>${title}</b><span>${L.length} ${S.wh === "RDC01" ? "สาขา" : "อาคาร"}</span></div>
-        <div class="rgps">${sum}</div><div class="rgpl">${L.map(mini).join("")}</div></section>`;
-    const sumOf = L => { const s = stat(R.filter(r => L.some(([b]) => b === r.b)));
-      return `<span class="q1">① เสร็จ <b>${s.pct}%</b></span>${s.late ? ` · <b style="color:#c2410c">เลยกำหนด ${s.late}</b>` : ""}<br><span class="q2">② ผ่าน <b>${s.tested ? Math.round(s.pass / s.tested * 100) + "%" : "–"}</b></span>${s.open ? ` · <b style="color:#a8250f">ยังไม่แก้ ${s.open}</b>` : ""}`; };
-    if (S.wh !== "RDC01") { $("drill").innerHTML = `<div class="rggrid">${panel(WH[S.wh], list, sumOf(list))}</div>`; return; }
-    /* RDC: แบ่งตามภาค (ตามทีมคลังสินค้าภาคที่รับผิดชอบในระบบ) วางเป็นคอลัมน์เรียงกัน */
-    const groups = REGIONS.map(([rg, bs]) => [rg, list.filter(([b]) => bs.includes(b))]).concat([["อื่นๆ", list.filter(([b]) => !REGIONS.some(([, bs]) => bs.includes(b)))]]).filter(([, L]) => L.length);
-    $("drill").innerHTML = `<div class="rggrid">${groups.map(([rg, L]) => panel(rg, L, sumOf(L))).join("")}</div>`;
+    $("drill").innerHTML = `<div class="whcards three">${list.map(([b, s]) => bigCard(`${S.wh}|${b}|${S.rg || ""}`, C[0], C[1], isR ? S.rg : WH[S.wh], b, s, "ดูใบงาน")).join("")}</div>`;
     return;
   }
   const s = stat(rows());
-  $("drill").innerHTML = `<div class="whc" style="cursor:default"><div class="hd" style="background:linear-gradient(150deg,${WHC[S.wh][0]},${WHC[S.wh][1]})"><div style="display:grid;flex:1"><span style="font-size:12px;font-weight:600;opacity:.85">${WH[S.wh]}</span><b style="font-size:19px">${S.branch}</b></div>${verdict(s, true)}</div>
+  $("drill").innerHTML = `<div class="whc" style="cursor:default"><div class="hd" style="background:linear-gradient(150deg,${WHC[S.wh][0]},${WHC[S.wh][1]})"><div style="display:grid;flex:1"><span style="font-size:12px;font-weight:600;opacity:.85">${isR ? "คลัง RDC · " + regionOf(S.branch) : WH[S.wh]}</span><b style="font-size:19px">${S.branch}</b></div></div>
     <div class="bd" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">${q1(s)}${q2(s)}</div></div>`;
 }
 
-/* เปลี่ยนระดับ + จำไว้ในประวัติเบราว์เซอร์ ให้ปุ่ม Back ของเบราว์เซอร์/มือถือ ย้อนกลับได้ */
-function goLevel(p, b, fromHistory) {
-  if (S.wh === p && S.branch === b) return;
-  S.wh = p; S.branch = b; S.limit = 25; S.st = "all"; S.view = "overview";
-  if (!fromHistory) try { history.pushState({ wh: p, b }, ""); } catch (e) {}
+/* เปลี่ยนระดับ + จำไว้ในประวัติเบราว์เซอร์ ให้ปุ่ม Back ของเบราว์เซอร์/มือถือ/iPad ย้อนกลับได้ */
+function goLevel(p, b, rg, fromHistory) {
+  rg = rg || null;
+  if (b !== "all" && p === "RDC01") rg = regionOf(b);
+  if (S.wh === p && S.branch === b && S.rg === rg) return;
+  S.wh = p; S.branch = b; S.rg = p === "RDC01" ? rg : null; S.limit = 25; S.st = "all"; S.view = "overview";
+  if (!fromHistory) try { history.pushState({ wh: p, b, rg: S.rg }, ""); } catch (e) {}
   render();
   const c = $("crumb"); if (c && c.getBoundingClientRect().top < 0) c.scrollIntoView({ behavior: "smooth" });
 }
-window.addEventListener("popstate", e => { const st = e.state || { wh: "all", b: "all" }; goLevel(st.wh, st.b, true); });
-try { history.replaceState({ wh: "all", b: "all" }, ""); } catch (e) {}
+window.addEventListener("popstate", e => { const st = e.state || { wh: "all", b: "all", rg: null }; goLevel(st.wh, st.b, st.rg, true); });
+try { history.replaceState({ wh: "all", b: "all", rg: null }, ""); } catch (e) {}
 
 function render() { renderFilters(); renderHero(); renderTabs(); if (S.view === "overview") { renderDrill(); if (S.wh !== "all" && S.branch !== "all") renderTable(); } else renderFail(); }
 
@@ -794,7 +793,7 @@ document.addEventListener("click", e => {
     S.view = "overview"; S.per = k === "today" ? "day" : "all"; S.st = k === "late" ? "late" : "all";
     render(); $("rowTag").closest("section").scrollIntoView({ behavior: "smooth" }); return; }
   const pk = e.target.closest("[data-pick]");
-  if (pk) { const [p, b] = pk.dataset.pick.split("|"); goLevel(p, b); return; }
+  if (pk) { const [p, b, rg] = pk.dataset.pick.split("|"); goLevel(p, b, rg); return; }
   const jp = e.target.closest("[data-jump]");
   if (jp) { const el = document.getElementById(jp.dataset.jump); if (el) el.scrollIntoView({ behavior: "smooth" }); return; }
   const t = e.target.closest("[data-wh],[data-month],[data-branch],[data-type],[data-st],[data-view],[data-fst],[data-per]");
@@ -904,7 +903,7 @@ function renderHist() {
   $("histBody").innerHTML = LOG.slice().reverse().map(l => `<tr><td style="white-space:nowrap">${fmtD(l.at.slice(0, 10))} ${l.at.slice(11, 16)}<div style="font-size:11px;color:#5a6784">${l.file}</div></td><td>${fmtD(l.asof)}${l.older ? ' <span style="color:#a8250f">(เก่ากว่า)</span>' : ""}</td><td class="num">${l.total}</td><td class="num" style="color:#1a5fe4">${l.added}</td><td class="num" style="color:#c96a07">${l.changed}</td><td class="num">${l.same}</td></tr>`).join("");
 }
 $("histBtn").onclick = () => { renderHist(); $("histDlg").showModal(); };
-$("resetBtn").onclick = () => { if (!confirm("ล้างข้อมูลต้นแบบในเบราว์เซอร์นี้ (ใบงาน + สถานะการซ่อม + ประวัติ)?")) return; try { [DBK, LOGK, FIXK].forEach(k => localStorage.removeItem(k)); } catch (e) {} location.reload(); };
+$("resetBtn").onclick = e => { const bt = e.currentTarget; if (!bt.dataset.armed) { bt.dataset.armed = "1"; bt.textContent = "กดอีกครั้งเพื่อยืนยันการล้าง"; bt.style.background = "#c9301a"; bt.style.color = "#fff"; setTimeout(() => { delete bt.dataset.armed; bt.textContent = "ล้างข้อมูลต้นแบบ"; bt.style.background = ""; bt.style.color = ""; }, 4000); return; } try { [DBK, LOGK, FIXK].forEach(k => localStorage.removeItem(k)); } catch (e) {} location.reload(); };
 $("uplBtn").onclick = () => $("file").click();
 $("file").onchange = async e => {
   const f = e.target.files[0]; if (!f) return;
@@ -916,7 +915,7 @@ $("file").onchange = async e => {
     if (!rowsNew.length) throw new Error("ไม่พบข้อมูลในไฟล์");
     const dm = f.name.match(/(\d\d)_(\d\d)_(\d{4})/), fileAsof = dm ? `${dm[3]}-${dm[2]}-${dm[1]}` : new Date().toLocaleDateString("sv-SE");
     const older = fileAsof < ASOF;
-    if (older && !confirm("ไฟล์นี้เป็นข้อมูล ณ " + fmtD(fileAsof) + " ซึ่งเก่ากว่าข้อมูลปัจจุบัน (" + fmtD(ASOF) + ")\nจะเพิ่มเฉพาะใบงานที่ยังไม่มี ไม่แก้สถานะของเดิม · ดำเนินการต่อ?")) return;
+    /* ไฟล์เก่ากว่า: เพิ่มเฉพาะใบงานใหม่ ไม่ย้อนสถานะ (แจ้งในหน้าต่างสรุป) */
     const m = mergeRows(rowsNew, older);
     DATA = m.rows; if (!older) ASOF = fileAsof;
     const now = new Date(), localIso = new Date(now - now.getTimezoneOffset() * 6e4).toISOString().slice(0, 16);
