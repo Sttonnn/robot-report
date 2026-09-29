@@ -46,4 +46,7 @@ repo `sttonnn/robot-report` คือที่รวมทุก Dashboard (ต�
   - key = รหัสโรงงาน + เลขที่ใบงาน (เลขใบงานซ้ำข้ามโรงงานได้) · แถว "รอสร้างใบงาน" ไม่มีเลขใบงาน ใช้ เลขที่แผน + กำหนดการครั้งที่
   - ไฟล์มีชื่อพนักงาน ห้าม commit ไฟล์ดิบลง repo (public)
   - CSV `PMWorkOrder_*.csv` ใช้ไม่ได้: num_of_passed = 0 ทุกแถว
-- รอผู้ใช้เลือก: วิธีอัปโหลดรายวัน, ดีไซน์, งานแจ้งซ่อม
+- วิธีอัปเดต: **ทาง A** อัปโหลด Excel บนหน้าเว็บ (login) → เว็บอ่านไฟล์ → บันทึก Supabase (ผู้ใช้เลือก 29 ก.ย.)
+- Mock up: `preventive-maintenance/pm-dashboard.html` (ข้อมูลจริงตัดชื่อแล้ว, อัปโหลดยังไม่บันทึก Supabase)
+  - สร้างใหม่: `python3 preventive-maintenance/tools/pm_extract.py <xlsx> > data.json` แล้วแทน `/*__PM_DATA__*/[]` ใน `tools/pm_template.html`
+- รอผู้ใช้: ยืนยันหน้าตา mock up, งานแจ้งซ่อม, ตาราง Supabase + ระบบ login

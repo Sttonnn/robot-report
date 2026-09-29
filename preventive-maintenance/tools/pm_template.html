@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Preventive Maintenance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap">
+<style>
+  :root {
+    --bg: #eef2f8; --ink: #16213a; --ink2: #5a6784; --ink3: #2a3b5f; --chip: #dde6f5; --line: #e6ebf3;
+    --done: #13a878; --prog: #1a5fe4; --wait: #9aa6bd; --cancel: #cfd6e3; --pass: #13a878; --fail: #f0553a;
+    --shadow: 0 10px 26px rgba(22,33,58,.1); --shadow-s: 0 4px 14px rgba(22,33,58,.08);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: 'IBM Plex Sans Thai', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  button, select, input { font: inherit; }
+  .num { font-family: Archivo, 'IBM Plex Sans Thai', sans-serif; }
+  @keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+  /* hero */
+  .hero { position: relative; overflow: hidden; padding: 20px clamp(16px,3vw,40px) 30px; color: #fff;
+    background: linear-gradient(150deg,#101b2d 0%,#16283c 50%,#10333a 100%); border-radius: 0 0 36px 36px; box-shadow: 0 18px 40px rgba(16,27,45,.28); }
+  .glow { position: absolute; border-radius: 999px; pointer-events: none; }
+  .wrap { position: relative; max-width: 1440px; margin: 0 auto; }
+  .top { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .back { display: inline-flex; align-items: center; gap: 8px; color: #fff; text-decoration: none; font-size: 14px; font-weight: 700; padding: 9px 16px 9px 12px;
+    border-radius: 999px; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.24); white-space: nowrap; }
+  .back:hover { background: rgba(255,255,255,.22); }
+  .logo { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 14px; background: #fff; color: #0f3fa4; box-shadow: 0 8px 20px rgba(0,0,0,.25); flex: none; }
+  .ttl { display: grid; flex: 1 1 220px; min-width: 0; }
+  .kicker { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.72); }
+  h1 { margin: 0; font-family: Archivo, 'IBM Plex Sans Thai', sans-serif; font-size: 30px; line-height: 1.2; font-weight: 900; letter-spacing: -.01em; }
+  .asof { font-size: 12.5px; color: rgba(255,255,255,.75); }
+  .upl { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; border: 0; border-radius: 14px; padding: 11px 18px; font-size: 14px; font-weight: 700;
+    color: #0f3fa4; background: #fff; box-shadow: 0 8px 20px rgba(0,0,0,.25); white-space: nowrap; }
+  .upl:hover { background: #eaf1ff; }
+  .login { font-size: 12px; color: rgba(255,255,255,.72); display: inline-flex; align-items: center; gap: 6px; }
+
+  .seg { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 5px; margin-top: 22px; border-radius: 18px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); max-width: 100%; }
+  .seg button { cursor: pointer; border: 0; border-radius: 14px; padding: 9px 16px; text-align: left; background: transparent; color: #fff; display: grid; gap: 0; min-width: 0; }
+  .seg button b { font-size: 15px; }
+  .seg button span { font-size: 12px; opacity: .8; }
+  .seg button.on { background: #fff; color: var(--ink); box-shadow: 0 8px 20px rgba(0,0,0,.25); }
+
+  .stats { display: grid; grid-template-columns: 1.3fr repeat(4, minmax(0,1fr)); gap: 14px; margin-top: 18px; }
+  .card { border-radius: 22px; padding: 16px 18px; color: #fff; min-width: 0; position: relative; }
+  .card .lbl { font-size: 13.5px; font-weight: 600; opacity: .92; }
+  .card .val { font-family: Archivo, sans-serif; font-size: 40px; font-weight: 900; line-height: 1.1; margin-top: 10px; }
+  .card .val small { font-family: 'IBM Plex Sans Thai', sans-serif; font-size: 15px; font-weight: 600; margin-left: 4px; }
+  .card .sub { font-size: 12.5px; opacity: .85; margin-top: 2px; }
+  .gauge { display: flex; align-items: center; gap: 18px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.18); }
+  .gauge svg { flex: none; }
+
+  /* main */
+  main { max-width: 1440px; margin: 0 auto; padding: 24px clamp(16px,3vw,40px) 48px; display: grid; gap: 22px; }
+  .filters { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+  .pills { display: inline-flex; gap: 4px; padding: 4px; border-radius: 999px; background: #fff; box-shadow: var(--shadow-s); flex-wrap: wrap; }
+  .pills button { cursor: pointer; border: 0; border-radius: 999px; padding: 8px 15px; min-height: 38px; font-size: 13.5px; font-weight: 700; background: transparent; color: var(--ink3); white-space: nowrap; }
+  .pills button.on { background: var(--ink); color: #fff; }
+  .sel { display: inline-flex; align-items: center; gap: 8px; padding: 4px 6px 4px 14px; border-radius: 999px; background: #fff; box-shadow: var(--shadow-s); font-size: 13px; font-weight: 600; color: var(--ink2); }
+  .sel select { border: 0; background: var(--bg); border-radius: 999px; padding: 7px 12px; font-size: 13.5px; font-weight: 700; color: var(--ink); min-height: 32px; }
+  .chk { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--ink2); cursor: pointer; }
+
+  .grid2 { display: grid; grid-template-columns: minmax(0,1.35fr) minmax(0,1fr); gap: 18px; }
+  .panel { background: #fff; border-radius: 22px; box-shadow: var(--shadow); padding: 18px 20px; min-width: 0; animation: rise .45s ease both; }
+  .panel h2 { margin: 0; font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .panel .hint { font-size: 12.5px; color: var(--ink2); margin: 2px 0 12px; }
+  .tag { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: var(--chip); color: var(--ink3); }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12.5px; color: var(--ink2); margin-bottom: 10px; }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+
+  .brow { display: grid; grid-template-columns: 118px minmax(0,1fr) 44px; gap: 10px; align-items: center; padding: 5px 0; cursor: default; }
+  .brow .nm { font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .brow .tot { font-size: 13px; font-weight: 700; color: var(--ink2); text-align: right; }
+  .bar { display: flex; gap: 2px; height: 16px; }
+  .bar span { height: 100%; min-width: 3px; }
+  .bar span:first-child { border-radius: 4px 0 0 4px; }
+  .bar span:last-child { border-radius: 0 4px 4px 0; }
+  .bar span:only-child { border-radius: 4px; }
+  .brow:hover .nm { color: var(--prog); }
+
+  .res { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+  .rbox { border-radius: 18px; padding: 14px 16px; }
+  .rbox b { font-family: Archivo, sans-serif; font-size: 34px; font-weight: 900; display: block; line-height: 1.1; }
+  .rbox span { font-size: 13px; font-weight: 600; }
+  .fails { margin-top: 14px; display: grid; gap: 8px; max-height: 330px; overflow: auto; }
+  .fail { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 10px; align-items: center; padding: 10px 12px; border-radius: 14px; background: #fff6f3; border-left: 4px solid var(--fail); }
+  .fail .e { font-size: 14px; font-weight: 700; }
+  .fail .m { font-size: 12px; color: var(--ink2); }
+  .pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border-radius: 999px; font-size: 12.5px; font-weight: 700; white-space: nowrap; }
+
+  .types { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(210px,100%),1fr)); gap: 14px; }
+  .type { border-radius: 20px; background: #fff; box-shadow: var(--shadow); overflow: hidden; animation: rise .45s ease both; }
+  .type .hd { padding: 12px 14px; color: #fff; display: flex; align-items: center; gap: 10px; }
+  .type .hd .ic { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 11px; background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.3); }
+  .type .hd b { font-size: 15.5px; }
+  .type .bd { padding: 12px 14px; display: grid; gap: 8px; font-size: 13px; color: var(--ink2); }
+  .type .bd .row { display: flex; justify-content: space-between; gap: 8px; }
+  .type .bd .row b { color: var(--ink); }
+
+  .tbl-wrap { overflow-x: auto; margin: 0 -20px; padding: 0 20px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; min-width: 760px; }
+  th { text-align: left; font-size: 12px; font-weight: 700; letter-spacing: .04em; color: var(--ink2); background: #f5f7fb; padding: 10px 12px; position: sticky; top: 0; }
+  td { padding: 10px 12px; border-bottom: 1px solid #eef1f6; vertical-align: middle; }
+  tr.bad td { background: #fff6f3; }
+  tr.bad td:first-child { box-shadow: inset 4px 0 0 var(--fail); }
+  .search { flex: 1 1 220px; min-width: 0; display: flex; align-items: center; gap: 8px; padding: 4px 14px; border-radius: 999px; background: #fff; box-shadow: var(--shadow-s); }
+  .search input { border: 0; outline: 0; background: transparent; min-height: 38px; flex: 1; min-width: 0; font-size: 14px; }
+  .more { cursor: pointer; border: 0; border-radius: 999px; padding: 10px 18px; font-weight: 700; background: var(--chip); color: var(--ink3); justify-self: center; }
+  .note { font-size: 12px; color: var(--ink2); line-height: 1.6; }
+
+  #tip { position: fixed; pointer-events: none; z-index: 50; background: #16213a; color: #fff; font-size: 12.5px; line-height: 1.5; padding: 8px 11px; border-radius: 10px; box-shadow: 0 8px 20px rgba(0,0,0,.25); opacity: 0; transition: opacity .12s; max-width: 260px; }
+  #toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); background: #16213a; color: #fff; padding: 11px 18px; border-radius: 14px; font-size: 13.5px; font-weight: 600; box-shadow: 0 10px 26px rgba(0,0,0,.3); display: none; z-index: 60; max-width: calc(100% - 32px); }
+
+  @media (max-width: 1100px) { .stats { grid-template-columns: repeat(2, minmax(0,1fr)); } .gauge { grid-column: 1 / -1; } .grid2 { grid-template-columns: minmax(0,1fr); } }
+  @media (max-width: 760px) {
+    .hero { padding: 16px 14px 22px; border-radius: 0 0 26px 26px; }
+    h1 { font-size: 24px; }
+    .seg { display: grid; grid-template-columns: minmax(0,1fr); width: 100%; }
+    .card .val { font-size: 32px; }
+    main { padding: 18px 12px 40px; }
+    .brow { grid-template-columns: 92px minmax(0,1fr) 36px; }
+    .upl { width: 100%; justify-content: center; }
+    .tbl-wrap { margin: 0; padding: 0; overflow: visible; }
+    table { min-width: 0; }
+    thead { display: none; }
+    tbody tr { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 4px 10px; padding: 12px 4px; border-bottom: 1px solid #eef1f6; }
+    tbody td { padding: 0; border: 0; }
+    tbody td:nth-child(1) { grid-column: 1; font-size: 12.5px; }
+    tbody td:nth-child(6) { grid-column: 2; grid-row: 1; justify-self: end; }
+    tbody td:nth-child(2) { grid-column: 1 / -1; }
+    tbody td:nth-child(3), tbody td:nth-child(4) { display: none; }
+    tbody td:nth-child(5) { grid-column: 1; font-size: 12.5px; color: #5a6784; }
+    tbody td:nth-child(7) { grid-column: 2; justify-self: end; }
+    tr.bad td { background: none; }
+    tr.bad { background: #fff6f3; box-shadow: inset 4px 0 0 var(--fail); padding-left: 12px; }
+    tr.bad td:first-child { box-shadow: none; }
+    .type .bd .row { font-size: 12.5px; }
+  }
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="glow" style="top:-40%;left:-10%;width:60vw;height:60vw;background:radial-gradient(circle,rgba(38,118,246,.5),rgba(38,118,246,0) 66%)"></div>
+  <div class="glow" style="top:-50%;right:-12%;width:50vw;height:50vw;background:radial-gradient(circle,rgba(26,200,196,.4),rgba(26,200,196,0) 66%)"></div>
+  <div class="wrap">
+    <div class="top">
+      <a class="back" href="index.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>หน้าหลัก</a>
+      <span class="logo"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span>
+      <div class="ttl">
+        <span class="kicker">PCG · วิศวกรรม · งานบำรุงรักษา</span>
+        <h1>Preventive Maintenance</h1>
+        <span class="asof" id="asof"></span>
+      </div>
+      <div style="display:grid;gap:6px;justify-items:end;flex:none;max-width:100%">
+        <button class="upl" id="uplBtn" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M17 8l-5-5-5 5 M12 3v12"/></svg>อัปโหลด Excel ประจำวัน</button>
+        <span class="login"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11h14v10H5z M8 11V7a4 4 0 0 1 8 0v4"/></svg>ต้อง login ก่อนอัปโหลด · ไฟล์ TrackingReport_PM_*.xlsx</span>
+        <input type="file" id="file" accept=".xlsx,.xls" hidden>
+      </div>
+    </div>
+    <div class="seg" id="seg"></div>
+    <div class="stats" id="stats"></div>
+  </div>
+</header>
+
+<main>
+  <div class="filters">
+    <div class="pills" id="months"></div>
+    <label class="sel">สาขา / อาคาร <select id="branch"></select></label>
+    <label class="sel">ประเภท <select id="type"></select></label>
+    <label class="chk"><input type="checkbox" id="showCancel"> แสดงงานที่ยกเลิก</label>
+  </div>
+
+  <div class="grid2">
+    <section class="panel">
+      <h2>สถานะงานรายสาขา <span class="tag" id="brTag"></span></h2>
+      <p class="hint">จำนวนใบงานตามกำหนดการดำเนินงาน · เรียงจากมากไปน้อย · กดชื่อเพื่อกรอง</p>
+      <div class="legend" id="stLegend"></div>
+      <div id="bars"></div>
+    </section>
+    <section class="panel">
+      <h2>ผลการตรวจ PM</h2>
+      <p class="hint">นับเฉพาะใบงานที่มีผลตรวจแล้ว</p>
+      <div class="res" id="res"></div>
+      <h2 style="font-size:15px;margin-top:18px">ใบงานที่ไม่ผ่าน · ต้องติดตาม <span class="tag" id="failTag"></span></h2>
+      <div class="fails" id="fails"></div>
+    </section>
+  </div>
+
+  <section style="display:grid;gap:12px">
+    <h2 style="margin:0;font-size:21px">แยกตามประเภทอุปกรณ์</h2>
+    <div class="types" id="types"></div>
+  </section>
+
+  <section class="panel" style="display:grid;gap:12px">
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:space-between">
+      <h2>รายการใบงาน <span class="tag" id="rowTag"></span></h2>
+      <div class="pills" id="stFilter"></div>
+    </div>
+    <label class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a6784" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-4.3-4.3 M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14z"/></svg><input id="q" placeholder="ค้นหา เลขใบงาน / อุปกรณ์ / แผน"></label>
+    <div class="tbl-wrap"><table><thead><tr><th>ใบงาน</th><th>อุปกรณ์</th><th>ประเภท</th><th>คลัง / สาขา</th><th>กำหนดการ</th><th>สถานะ</th><th>ผล PM</th></tr></thead><tbody id="tbody"></tbody></table></div>
+    <button class="more" id="more" type="button">แสดงเพิ่ม</button>
+  </section>
+
+  <span class="note">ต้นแบบ (Mock up) · ข้อมูลจริงจาก TrackingReport_PM 29 ก.ย. 2026 (ตัดชื่อพนักงานออก) · อัปโหลดในหน้านี้ยังไม่บันทึกลง Supabase</span>
+</main>
+<div id="tip"></div><div id="toast"></div>
+
+<script>
+const DATA0 = /*__PM_DATA__*/[];
+const ASOF0 = "/*__ASOF__*/";
+const WH = { all: "ทุกคลัง", WHA05: "คลังกระจายสินค้าภายในประเทศ", RDC01: "คลัง RDC ต่างจังหวัด" };
+const WH_SUB = { WHA05: "WHA05 · WH05 / WH32", RDC01: "RDC01 · 14 สาขา" };
+const GROUP = { "เสร็จสิ้น": "done", "มอบหมายงาน": "prog", "กำลังดำเนินการ": "prog", "รอประเมินงานหลังซ่อม": "prog", "รอสร้างใบงาน": "wait", "ยกเลิกงาน": "cancel" };
+const ST = {
+  done:   { label: "ดำเนินการแล้วเสร็จ", color: "#13a878", bg: "#e3f6ee", fg: "#0a6b4d" },
+  prog:   { label: "กำลังดำเนินการ",     color: "#1a5fe4", bg: "#e3edff", fg: "#0f3fa4" },
+  wait:   { label: "รอสร้างใบงาน",       color: "#9aa6bd", bg: "#eef1f6", fg: "#5a6784" },
+  cancel: { label: "ยกเลิก",            color: "#cfd6e3", bg: "#f1f3f7", fg: "#7a849a" }
+};
+const TYPE = {
+  "เครื่องจักร": { c: ["#2f7cf6", "#1a4fc4"], ic: "M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" },
+  "Lead-Acid":   { c: ["#f39a1d", "#c96a07"], ic: "M6 7h11a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z M22 11v2 M8 12h4" },
+  "Lithium":     { c: ["#15b58a", "#0a7a5c"], ic: "M6 7h11a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z M22 11v2 M11 9l-2 3h4l-2 3" },
+  "Gas":         { c: ["#e8457a", "#b21f52"], ic: "M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z" },
+  "MHE":         { c: ["#6b5cf6", "#4331c2"], ic: "M3 17h12V7H3z M15 11h3l3 3v3h-6 M7 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4z M18 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" },
+  "-":           { c: ["#4a5877", "#333f5a"], ic: "M12 8v4 M12 16h.01 M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z" }
+};
+const TH_M = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
+const $ = id => document.getElementById(id);
+const fmtD = s => { if (!s) return "-"; const [y, m, d] = s.split("-"); return +d + " " + TH_M[+m - 1] + " " + (+y + 543 - 2500); };
+
+let DATA = DATA0, ASOF = ASOF0;
+const S = { wh: "all", month: "all", branch: "all", type: "all", cancel: false, st: "all", q: "", limit: 25 };
+
+function rows(ignore = {}) {
+  return DATA.filter(r =>
+    (S.wh === "all" || r.p === S.wh) &&
+    (ignore.month || S.month === "all" || r.due.slice(0, 7) === S.month) &&
+    (ignore.branch || S.branch === "all" || r.b === S.branch) &&
+    (ignore.type || S.type === "all" || r.t === S.type) &&
+    (S.cancel || GROUP[r.s] !== "cancel"));
+}
+const grp = r => GROUP[r.s] || "prog";
+const isFail = r => r.r.startsWith("fail");
+const overdue = r => (grp(r) === "prog" || grp(r) === "wait") && r.due && r.due < ASOF;
+
+function renderHero() {
+  $("asof").textContent = "ข้อมูล ณ " + fmtD(ASOF) + " · " + DATA.length.toLocaleString() + " ใบงาน";
+  const cnt = k => DATA.filter(r => (k === "all" || r.p === k) && GROUP[r.s] !== "cancel").length;
+  $("seg").innerHTML = ["all", "WHA05", "RDC01"].map(k =>
+    `<button type="button" class="${S.wh === k ? "on" : ""}" data-wh="${k}"><b>${WH[k]}</b><span>${k === "all" ? "รวมทุกคลัง" : WH_SUB[k]} · ${cnt(k).toLocaleString()} ใบงาน</span></button>`).join("");
+  const R = rows(), n = R.length, g = k => R.filter(r => grp(r) === k).length;
+  const pass = R.filter(r => r.r === "pass").length, fail = R.filter(isFail).length, tested = pass + fail;
+  const pct = tested ? pass / tested : 0, C = 2 * Math.PI * 44, od = R.filter(overdue).length;
+  const ring = fail ? "#ffb13d" : "#39d99a";
+  $("stats").innerHTML = `
+    <div class="card gauge"><svg width="108" height="108" viewBox="0 0 108 108"><circle cx="54" cy="54" r="44" fill="none" stroke="rgba(255,255,255,.14)" stroke-width="11"/><circle cx="54" cy="54" r="44" fill="none" stroke="${ring}" stroke-width="11" stroke-linecap="round" stroke-dasharray="${(C * pct).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 54 54)"/><text x="54" y="61" text-anchor="middle" fill="#fff" font-family="Archivo" font-weight="900" font-size="22">${tested ? Math.round(pct * 100) + "%" : "–"}</text></svg>
+      <div><div class="lbl">PM ผ่านเกณฑ์</div><div class="val" style="margin-top:4px">${pass.toLocaleString()}<small>/ ${tested.toLocaleString()}</small></div><div class="sub">ไม่ผ่าน ${fail} ใบงาน</div></div></div>
+    <div class="card" style="background:linear-gradient(150deg,#1a5fe4,#0f3fa4);box-shadow:0 12px 26px rgba(15,63,164,.4)"><div class="lbl">ใบงานทั้งหมด</div><div class="val">${n.toLocaleString()}<small>ใบ</small></div><div class="sub">${S.cancel ? "รวมงานที่ยกเลิก" : "ไม่รวมงานที่ยกเลิก"}</div></div>
+    <div class="card" style="background:linear-gradient(150deg,#13a878,#0a7353);box-shadow:0 12px 26px rgba(10,115,83,.4)"><div class="lbl">ดำเนินการแล้วเสร็จ</div><div class="val">${g("done").toLocaleString()}<small>ใบ</small></div><div class="sub">${n ? Math.round(g("done") / n * 100) : 0}% ของใบงาน</div></div>
+    <div class="card" style="background:linear-gradient(150deg,#2f7cf6,#1a4fc4);box-shadow:0 12px 26px rgba(26,79,196,.4)"><div class="lbl">กำลังดำเนินการ</div><div class="val">${g("prog").toLocaleString()}<small>ใบ</small></div><div class="sub">มอบหมาย / กำลังทำ / รอประเมิน</div></div>
+    <div class="card" style="background:${od ? "linear-gradient(150deg,#f0553a,#b8260f)" : "linear-gradient(150deg,#4a5877,#333f5a)"};box-shadow:0 12px 26px rgba(22,33,58,.3)"><div class="lbl">รอสร้างใบงาน</div><div class="val">${g("wait").toLocaleString()}<small>ใบ</small></div><div class="sub">${od ? "เลยกำหนดแล้ว " + od + " ใบ (รวมกำลังทำ)" : "ยังไม่เลยกำหนด"}</div></div>`;
+}
+
+function renderFilters() {
+  const months = [...new Set(DATA.map(r => r.due.slice(0, 7)).filter(Boolean))].sort();
+  $("months").innerHTML = [["all", "ทุกเดือน"], ...months.map(m => [m, TH_M[+m.slice(5) - 1] + " " + (+m.slice(0, 4) + 543 - 2500)])]
+    .map(([k, l]) => `<button type="button" class="${S.month === k ? "on" : ""}" data-month="${k}">${l}</button>`).join("");
+  const base = DATA.filter(r => S.wh === "all" || r.p === S.wh);
+  const brs = [...new Set(base.map(r => r.b))].sort((a, b) => (a === "ไม่ระบุ") - (b === "ไม่ระบุ") || a.localeCompare(b, "th"));
+  if (S.branch !== "all" && !brs.includes(S.branch)) S.branch = "all";
+  $("branch").innerHTML = `<option value="all">ทั้งหมด</option>` + brs.map(b => `<option ${S.branch === b ? "selected" : ""}>${b}</option>`).join("");
+  const tys = [...new Set(DATA.map(r => r.t))].filter(t => t !== "-");
+  $("type").innerHTML = `<option value="all">ทั้งหมด</option>` + tys.map(t => `<option ${S.type === t ? "selected" : ""}>${t}</option>`).join("");
+  $("showCancel").checked = S.cancel;
+}
+
+function renderBars() {
+  const R = rows({ branch: true }), keys = S.cancel ? ["done", "prog", "wait", "cancel"] : ["done", "prog", "wait"];
+  $("stLegend").innerHTML = keys.map(k => `<span><i style="background:${ST[k].color}"></i>${ST[k].label}</span>`).join("");
+  const by = {};
+  R.forEach(r => { (by[r.b] = by[r.b] || { done: 0, prog: 0, wait: 0, cancel: 0, n: 0 })[grp(r)]++; by[r.b].n++; });
+  const list = Object.entries(by).sort((a, b) => b[1].n - a[1].n), max = Math.max(1, ...list.map(x => x[1].n));
+  $("brTag").textContent = WH[S.wh] + " · " + list.length + " สาขา/อาคาร";
+  $("bars").innerHTML = list.map(([b, v]) => `
+    <div class="brow" data-branch="${b}" style="cursor:pointer;opacity:${S.branch === "all" || S.branch === b ? 1 : .35}">
+      <span class="nm" title="${b}">${b}</span>
+      <div class="bar" style="width:${(v.n / max * 100).toFixed(1)}%">${keys.filter(k => v[k]).map(k =>
+        `<span style="flex:${v[k]};background:${ST[k].color}" data-tip="<b>${b}</b><br>${ST[k].label}: ${v[k]} ใบ (${Math.round(v[k] / v.n * 100)}%)"></span>`).join("")}</div>
+      <span class="tot num">${v.n}</span>
+    </div>`).join("") || `<p class="note">ไม่มีข้อมูลในช่วงนี้</p>`;
+}
+
+function renderResult() {
+  const R = rows(), pass = R.filter(r => r.r === "pass").length, F = R.filter(isFail), tested = pass + F.length;
+  const pct = x => tested ? Math.round(x / tested * 100) + "%" : "–";
+  $("res").innerHTML = `
+    <div class="rbox" style="background:#e3f6ee;color:#0a6b4d"><span>✓ ผ่าน</span><b>${pass}</b><span>${pct(pass)} ของที่ตรวจแล้ว</span></div>
+    <div class="rbox" style="background:#ffe3dc;color:#a8250f"><span>✕ ไม่ผ่าน</span><b>${F.length}</b><span>${pct(F.length)} · รวม ${F.reduce((s, r) => s + +r.r.split(":")[1], 0)} รายการตรวจ</span></div>`;
+  $("failTag").textContent = F.length + " ใบงาน";
+  $("fails").innerHTML = F.sort((a, b) => b.due.localeCompare(a.due)).map(r => `
+    <div class="fail"><div style="min-width:0"><div class="e">${r.e}</div><div class="m">${r.w} · ${r.b} · ${r.z} · กำหนด ${fmtD(r.due)}</div></div>
+    <span class="pill" style="background:#ffe3dc;color:#a8250f">ไม่ผ่าน ${r.r.split(":")[1]} ข้อ</span></div>`).join("")
+    || `<div class="fail" style="background:#e3f6ee;border-color:#13a878"><div class="e" style="color:#0a6b4d">ไม่มีใบงานที่ไม่ผ่านในช่วงนี้</div></div>`;
+}
+
+function renderTypes() {
+  const R = rows({ type: true }), by = {};
+  R.forEach(r => { const v = by[r.t] = by[r.t] || { n: 0, done: 0, prog: 0, wait: 0, cancel: 0, pass: 0, fail: 0 }; v.n++; v[grp(r)]++; if (r.r === "pass") v.pass++; if (isFail(r)) v.fail++; });
+  $("types").innerHTML = Object.entries(by).sort((a, b) => b[1].n - a[1].n).map(([t, v]) => {
+    const T = TYPE[t] || TYPE["-"], tested = v.pass + v.fail, on = S.type === t;
+    return `<article class="type" data-type="${t}" style="cursor:pointer;outline:${on ? "2px solid #1a5fe4" : "none"}">
+      <div class="hd" style="background:linear-gradient(155deg,${T.c[0]},${T.c[1]})"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${T.ic}"/></svg></span><div style="display:grid"><span style="font-size:11px;font-weight:600;letter-spacing:.06em;opacity:.85">ประเภท</span><b>${t === "-" ? "ไม่ระบุ" : t}</b></div><span class="num" style="margin-left:auto;font-size:22px;font-weight:900">${v.n}</span></div>
+      <div class="bd">
+        <div class="bar" style="height:10px">${["done", "prog", "wait", "cancel"].filter(k => v[k]).map(k => `<span style="flex:${v[k]};background:${ST[k].color}" data-tip="${t}<br>${ST[k].label}: ${v[k]} ใบ"></span>`).join("")}</div>
+        <div class="row"><span>เสร็จ/ทำ/รอ</span><b class="num">${v.done} / ${v.prog} / ${v.wait}</b></div>
+        <div class="row"><span>PM ผ่าน</span><b class="num" style="color:${v.fail ? "#a8250f" : "#0a6b4d"}">${tested ? Math.round(v.pass / tested * 100) + "%" : "–"}${v.fail ? " · ไม่ผ่าน " + v.fail : ""}</b></div>
+      </div></article>`;
+  }).join("");
+}
+
+function renderTable() {
+  const base = rows(), q = S.q.trim().toLowerCase();
+  const cnt = k => base.filter(r => k === "all" || (k === "fail" ? isFail(r) : grp(r) === k)).length;
+  const keys = [["all", "ทั้งหมด"], ["done", "เสร็จ"], ["prog", "กำลังทำ"], ["wait", "รอสร้าง"], ["fail", "ไม่ผ่าน"]];
+  $("stFilter").innerHTML = keys.map(([k, l]) => `<button type="button" class="${S.st === k ? "on" : ""}" data-st="${k}" style="${S.st === k && k === "fail" ? "background:#c9301a" : ""}">${l} ${cnt(k)}</button>`).join("");
+  const R = base.filter(r => (S.st === "all" || (S.st === "fail" ? isFail(r) : grp(r) === S.st)) &&
+    (!q || (r.w + " " + r.e + " " + r.n).toLowerCase().includes(q))).sort((a, b) => b.due.localeCompare(a.due));
+  $("rowTag").textContent = R.length.toLocaleString() + " ใบงาน";
+  $("tbody").innerHTML = R.slice(0, S.limit).map(r => {
+    const g = ST[grp(r)], od = overdue(r);
+    const res = r.r === "pass" ? `<span class="pill" style="background:#e3f6ee;color:#0a6b4d">✓ ผ่าน</span>` : isFail(r) ? `<span class="pill" style="background:#ffe3dc;color:#a8250f">✕ ไม่ผ่าน ${r.r.split(":")[1]}</span>` : `<span style="color:#9aa6bd">–</span>`;
+    return `<tr class="${isFail(r) ? "bad" : ""}"><td class="num" style="font-weight:700;white-space:nowrap">${r.w === "-" ? "<span style='color:#9aa6bd'>ยังไม่มีเลข</span>" : r.w}</td>
+      <td><div style="font-weight:700">${r.e}</div><div style="font-size:12px;color:#5a6784">${r.n}</div></td><td>${r.t === "-" ? "ไม่ระบุ" : r.t}</td>
+      <td style="white-space:nowrap">${r.p}<div style="font-size:12px;color:#5a6784">${r.b}</div></td>
+      <td style="white-space:nowrap">${fmtD(r.due)}${od ? `<div style="font-size:12px;color:#a8250f;font-weight:700">เลยกำหนด</div>` : ""}</td>
+      <td><span class="pill" style="background:${g.bg};color:${g.fg}">${r.s}</span></td><td>${res}</td></tr>`;
+  }).join("") || `<tr><td colspan="7" style="text-align:center;color:#5a6784;padding:22px">ไม่พบใบงาน</td></tr>`;
+  $("more").style.display = R.length > S.limit ? "" : "none";
+  $("more").textContent = "แสดงเพิ่ม (" + (R.length - S.limit).toLocaleString() + " ใบ)";
+}
+
+function render() { renderFilters(); renderHero(); renderBars(); renderResult(); renderTypes(); renderTable(); }
+
+document.addEventListener("click", e => {
+  const t = e.target.closest("[data-wh],[data-month],[data-branch],[data-type],[data-st]");
+  if (!t) return;
+  if (t.dataset.wh) { S.wh = t.dataset.wh; S.branch = "all"; }
+  if (t.dataset.month) S.month = t.dataset.month;
+  if (t.dataset.branch) S.branch = S.branch === t.dataset.branch ? "all" : t.dataset.branch;
+  if (t.dataset.type) S.type = S.type === t.dataset.type ? "all" : t.dataset.type;
+  if (t.dataset.st) S.st = t.dataset.st;
+  S.limit = 25; render();
+});
+$("branch").onchange = e => { S.branch = e.target.value; render(); };
+$("type").onchange = e => { S.type = e.target.value; render(); };
+$("showCancel").onchange = e => { S.cancel = e.target.checked; render(); };
+$("q").oninput = e => { S.q = e.target.value; S.limit = 25; renderTable(); };
+$("more").onclick = () => { S.limit += 50; renderTable(); };
+
+const tip = $("tip");
+document.addEventListener("mousemove", e => {
+  const el = e.target.closest("[data-tip]");
+  if (!el) { tip.style.opacity = 0; return; }
+  tip.innerHTML = el.dataset.tip; tip.style.opacity = 1;
+  tip.style.left = Math.min(e.clientX + 14, innerWidth - tip.offsetWidth - 8) + "px"; tip.style.top = (e.clientY + 16) + "px";
+});
+
+/* ---- Upload (ทาง A): อ่าน Excel ในเบราว์เซอร์ ---- */
+const BR = ["เชียงใหม่","เชียงราย","พิษณุโลก","ปากเกร็ด","หนองแขม","สายไหม","ลาดพร้าว","สุราษฎร์ธานี","หาดใหญ่","ราชบุรี","ศรีราชา","อุบลราชธานี","ขอนแก่น","โคราช"];
+const ALIAS = { "สุราษ": "สุราษฎร์ธานี", "อุบล": "อุบลราชธานี" };
+const iso = v => { const m = String(v || "").match(/(\d\d)\/(\d\d)\/(\d{4})/); return m ? `${m[3]}-${m[2]}-${m[1]}` : ""; };
+function normalize(aoa) {
+  const h = aoa[0].map(x => String(x || "").trim()), ix = n => h.indexOf(n);
+  const need = ["เลขที่ใบงาน", "รหัสโรงงาน", "ชื่ออุปกรณ์", "ชื่อแผน", "ผลการตรวจสอบ", "กำหนดการดำเนินงาน", "สถานะ"];
+  const miss = need.filter(n => ix(n) < 0); if (miss.length) throw new Error("ไม่พบคอลัมน์: " + miss.join(", "));
+  return aoa.slice(1).filter(r => r && r.length).map(r => {
+    const g = n => String(r[ix(n)] ?? "").trim(), p = g("รหัสโรงงาน"), plan = g("ชื่อแผน"), eq = g("ชื่ออุปกรณ์"), z = g("สถานที่ตั้ง");
+    let b;
+    if (p === "RDC01") b = BR.find(x => plan.includes(x)) || Object.entries(ALIAS).find(([k]) => plan.includes(k))?.[1] || "ไม่ระบุ";
+    else { const m = (eq + " " + z).match(/WH ?(05|32)/); b = m ? "WH" + m[1] : z.includes("24-35") ? "WH32" : z.includes("1-23") ? "WH05" : "ไม่ระบุ"; }
+    const res = g("ผลการตรวจสอบ"), f = res.match(/ไม่ผ่าน\s*(\d+)/);
+    return { w: g("เลขที่ใบงาน"), p, b, z: z.replace("Zone ", "").replace("ถายนอก", "ภายนอก"), e: eq, t: g("ประเภทเครื่องจักร/อุปกรณ์"), n: plan,
+      k: g("รายการตรวจสอบ"), due: iso(r[ix("กำหนดการดำเนินงาน")]), done: iso(r[ix("วันที่เสร็จสิ้น")]), s: g("สถานะ"), r: f ? "fail:" + f[1] : res === "ผ่าน" ? "pass" : "" };
+  });
+}
+function toast(msg) { const t = $("toast"); t.textContent = msg; t.style.display = "block"; clearTimeout(t._h); t._h = setTimeout(() => t.style.display = "none", 4200); }
+function loadXLSX() {
+  return window.XLSX ? Promise.resolve() : new Promise((ok, no) => { const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"; s.onload = ok; s.onerror = () => no(new Error("โหลดตัวอ่าน Excel ไม่สำเร็จ")); document.head.appendChild(s); });
+}
+$("uplBtn").onclick = () => $("file").click();
+$("file").onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  try {
+    toast("กำลังอ่านไฟล์ " + f.name + " …");
+    await loadXLSX();
+    const wb = XLSX.read(await f.arrayBuffer()), aoa = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, raw: false });
+    DATA = normalize(aoa);
+    const m = f.name.match(/(\d\d)_(\d\d)_(\d{4})/); ASOF = m ? `${m[3]}-${m[2]}-${m[1]}` : new Date().toLocaleDateString("sv-SE");
+    S.month = "all"; S.branch = "all"; render();
+    toast("อ่านสำเร็จ " + DATA.length.toLocaleString() + " ใบงาน · (ต้นแบบ: ยังไม่บันทึกลง Supabase)");
+  } catch (err) { toast("อัปโหลดไม่สำเร็จ: " + err.message); }
+  e.target.value = "";
+};
+
+render();
+</script>
+</body>
+</html>
