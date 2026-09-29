@@ -110,10 +110,44 @@
   .more { cursor: pointer; border: 0; border-radius: 999px; padding: 10px 18px; font-weight: 700; background: var(--chip); color: var(--ink3); justify-self: center; }
   .note { font-size: 12px; color: var(--ink2); line-height: 1.6; }
 
+  .tabs { display: inline-flex; gap: 6px; padding: 6px; border-radius: 18px; background: #fff; box-shadow: var(--shadow-s); flex-wrap: wrap; }
+  .tabs button { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; border: 0; border-radius: 13px; padding: 10px 18px; font-size: 14.5px; font-weight: 700; background: transparent; color: var(--ink3); }
+  .tabs button.on { background: linear-gradient(150deg,#1a5fe4,#0f3fa4); color: #fff; box-shadow: 0 8px 18px rgba(15,63,164,.3); }
+  .tabs .cnt { font-size: 12px; padding: 2px 8px; border-radius: 999px; background: #ffe3dc; color: #a8250f; }
+  .fail.fixed { background: #f1fbf6; border-left-color: #13a878; }
+  .fail .acts { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+  .btn { cursor: pointer; border: 0; border-radius: 999px; padding: 6px 12px; font-size: 12.5px; font-weight: 700; white-space: nowrap; }
+  .btn.fix { background: #13a878; color: #fff; }
+  .btn.fix:hover { background: #0a7353; }
+  .btn.ghost { background: #eef1f6; color: #2a3b5f; }
+  .hintx { font-size: 12px; color: #0a6b4d; font-weight: 600; }
+  .kpis { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 14px; }
+  .kpi { background: #fff; border-radius: 20px; box-shadow: var(--shadow); padding: 14px 16px; min-width: 0; }
+  .kpi .l { font-size: 13px; font-weight: 600; color: var(--ink2); }
+  .kpi .v { font-family: Archivo, sans-serif; font-size: 32px; font-weight: 900; line-height: 1.15; margin-top: 6px; }
+  .kpi .v small { font-family: 'IBM Plex Sans Thai', sans-serif; font-size: 14px; font-weight: 600; margin-left: 4px; color: var(--ink2); }
+  .kpi .s { font-size: 12px; color: var(--ink2); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .vbars { display: flex; align-items: flex-end; gap: 18px; height: 190px; padding: 8px 4px 0; border-bottom: 1px solid var(--line); }
+  .vcol { flex: 1; display: grid; justify-items: center; gap: 6px; height: 100%; align-content: end; min-width: 0; }
+  .vstack { width: min(56px, 100%); display: flex; flex-direction: column-reverse; gap: 2px; }
+  .vstack span { display: block; min-height: 3px; }
+  .vstack span:last-child { border-radius: 4px 4px 0 0; }
+  .vlab { display: flex; justify-content: space-around; gap: 18px; font-size: 12.5px; color: var(--ink2); padding-top: 6px; }
+  .vlab span { flex: 1; text-align: center; }
+  .days { font-family: Archivo, sans-serif; font-weight: 800; }
+  dialog { border: 0; border-radius: 22px; padding: 0; width: min(440px, calc(100% - 32px)); box-shadow: 0 24px 60px rgba(16,27,45,.35); }
+  dialog::backdrop { background: rgba(16,27,45,.45); }
+  dialog form { padding: 20px; display: grid; gap: 12px; }
+  dialog h3 { margin: 0; font-size: 18px; }
+  dialog label { display: grid; gap: 6px; font-size: 13px; font-weight: 600; color: var(--ink2); }
+  dialog input, dialog textarea, dialog select { border: 1px solid #d6deeb; border-radius: 12px; padding: 10px 12px; font-size: 14.5px; color: var(--ink); background: #fff; }
+  .seg2 { display: flex; gap: 6px; flex-wrap: wrap; }
+  .seg2 button { flex: 1; cursor: pointer; border: 1px solid #d6deeb; background: #fff; border-radius: 12px; padding: 10px; font-weight: 700; font-size: 13.5px; color: var(--ink3); }
+  .seg2 button.on { border-color: transparent; color: #fff; }
   #tip { position: fixed; pointer-events: none; z-index: 50; background: #16213a; color: #fff; font-size: 12.5px; line-height: 1.5; padding: 8px 11px; border-radius: 10px; box-shadow: 0 8px 20px rgba(0,0,0,.25); opacity: 0; transition: opacity .12s; max-width: 260px; }
   #toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); background: #16213a; color: #fff; padding: 11px 18px; border-radius: 14px; font-size: 13.5px; font-weight: 600; box-shadow: 0 10px 26px rgba(0,0,0,.3); display: none; z-index: 60; max-width: calc(100% - 32px); }
 
-  @media (max-width: 1100px) { .stats { grid-template-columns: repeat(2, minmax(0,1fr)); } .gauge { grid-column: 1 / -1; } .grid2 { grid-template-columns: minmax(0,1fr); } }
+  @media (max-width: 1100px) { .kpis { grid-template-columns: repeat(2, minmax(0,1fr)); } .stats { grid-template-columns: repeat(2, minmax(0,1fr)); } .gauge { grid-column: 1 / -1; } .grid2 { grid-template-columns: minmax(0,1fr); } }
   @media (max-width: 760px) {
     .hero { padding: 16px 14px 22px; border-radius: 0 0 26px 26px; }
     h1 { font-size: 24px; }
@@ -165,6 +199,7 @@
 </header>
 
 <main>
+  <div class="tabs" id="tabs"></div>
   <div class="filters">
     <div class="pills" id="months"></div>
     <label class="sel">สาขา / อาคาร <select id="branch"></select></label>
@@ -172,6 +207,7 @@
     <label class="chk"><input type="checkbox" id="showCancel"> แสดงงานที่ยกเลิก</label>
   </div>
 
+  <div id="vOverview" style="display:grid;gap:22px">
   <div class="grid2">
     <section class="panel">
       <h2>สถานะงานรายสาขา <span class="tag" id="brTag"></span></h2>
@@ -202,9 +238,47 @@
     <div class="tbl-wrap"><table><thead><tr><th>ใบงาน</th><th>อุปกรณ์</th><th>ประเภท</th><th>คลัง / สาขา</th><th>กำหนดการ</th><th>สถานะ</th><th>ผล PM</th></tr></thead><tbody id="tbody"></tbody></table></div>
     <button class="more" id="more" type="button">แสดงเพิ่ม</button>
   </section>
+  </div>
 
-  <span class="note">ต้นแบบ (Mock up) · ข้อมูลจริงจาก TrackingReport_PM 29 ก.ย. 2026 (ตัดชื่อพนักงานออก) · อัปโหลดในหน้านี้ยังไม่บันทึกลง Supabase</span>
+  <div id="vFail" style="display:none;gap:22px">
+    <div class="kpis" id="fKpis"></div>
+    <div class="grid2">
+      <section class="panel">
+        <h2>ไม่ผ่านรายเดือน</h2>
+        <p class="hint">นับจากวันที่ตรวจพบ · แยกตามสถานะการซ่อม</p>
+        <div class="legend"><span><i style="background:#f0553a"></i>ยังไม่แก้ไข</span><span><i style="background:#ffb13d"></i>กำลังซ่อม</span><span><i style="background:#13a878"></i>แก้ไขแล้ว</span></div>
+        <div class="vbars" id="fMonth"></div><div class="vlab" id="fMonthLab"></div>
+      </section>
+      <section class="panel">
+        <h2>อุปกรณ์ที่ไม่ผ่านบ่อยที่สุด</h2>
+        <p class="hint">Top 10 · จำนวนครั้งที่ไม่ผ่าน และรวมวันที่เสีย</p>
+        <div id="fTop"></div>
+      </section>
+    </div>
+    <section class="panel">
+      <h2>ไม่ผ่านรายสาขา / อาคาร</h2>
+      <p class="hint">จำนวนครั้งที่ไม่ผ่าน · สีแดงคือยังไม่แก้ไข</p>
+      <div id="fBranch"></div>
+    </section>
+    <section class="panel" style="display:grid;gap:12px">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:space-between">
+        <h2>ประวัติการเสียทั้งหมด <span class="tag" id="fTag"></span></h2>
+        <div class="pills" id="fFilter"></div>
+      </div>
+      <div class="tbl-wrap"><table><thead><tr><th>ใบงาน</th><th>อุปกรณ์</th><th>ประเภท</th><th>คลัง / สาขา</th><th>วันที่พบ</th><th>สถานะซ่อม</th><th>เสีย (วัน)</th></tr></thead><tbody id="fBody"></tbody></table></div>
+    </section>
+  </div>
+
+  <span class="note">ต้นแบบ (Mock up) · ข้อมูลจริงจาก TrackingReport_PM 29 ก.ย. 2026 (ตัดชื่อพนักงานออก) · อัปโหลดและสถานะการซ่อมยังเก็บในเบราว์เซอร์นี้เท่านั้น (ของจริงเก็บใน Supabase ทุกคนเห็นเหมือนกัน)</span>
 </main>
+<dialog id="dlg"><form method="dialog" id="dlgForm">
+  <h3 id="dlgTitle">อัปเดตสถานะการซ่อม</h3>
+  <div style="font-size:13px;color:#5a6784" id="dlgSub"></div>
+  <div class="seg2" id="dlgSt"></div>
+  <label>วันที่แก้ไขเสร็จ <input type="date" id="dlgDate"></label>
+  <label>หมายเหตุ / สิ่งที่แก้ไข <textarea id="dlgNote" rows="3" placeholder="เช่น เปลี่ยนแบตเตอรี่, ซ่อมระบบไฟ"></textarea></label>
+  <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn ghost" value="cancel" type="submit" style="padding:10px 16px">ยกเลิก</button><button class="btn fix" value="ok" type="submit" style="padding:10px 18px">บันทึก</button></div>
+</form></dialog>
 <div id="tip"></div><div id="toast"></div>
 
 <script>
@@ -232,7 +306,27 @@ const $ = id => document.getElementById(id);
 const fmtD = s => { if (!s) return "-"; const [y, m, d] = s.split("-"); return +d + " " + TH_M[+m - 1] + " " + (+y + 543 - 2500); };
 
 let DATA = DATA0, ASOF = ASOF0;
-const S = { wh: "all", month: "all", branch: "all", type: "all", cancel: false, st: "all", q: "", limit: 25 };
+/* สถานะการซ่อมของใบงานที่ไม่ผ่าน: เก็บแยกจากไฟล์ Excel อัปโหลดใหม่ก็ไม่หาย
+   (ต้นแบบเก็บในเบราว์เซอร์ · ของจริงเก็บตาราง Supabase pm_fail_followup) */
+const FIXK = "pcg-pm-fix";
+let FIX = {}; try { FIX = JSON.parse(localStorage.getItem(FIXK) || "{}"); } catch (e) {}
+const saveFix = () => { try { localStorage.setItem(FIXK, JSON.stringify(FIX)); } catch (e) {} };
+const fkey = r => r.p + "|" + r.w;
+const REP = {
+  open:   { label: "ยังไม่แก้ไข", color: "#f0553a", bg: "#ffe3dc", fg: "#a8250f" },
+  fixing: { label: "กำลังซ่อม",   color: "#ffb13d", bg: "#fff1d6", fg: "#8a5200" },
+  fixed:  { label: "แก้ไขแล้ว",   color: "#13a878", bg: "#e3f6ee", fg: "#0a6b4d" }
+};
+const repSt = r => (FIX[fkey(r)] || {}).st || "open";
+const failDate = r => r.done || r.due;
+const dayDiff = (a, b) => Math.max(0, Math.round((new Date(b + "T00:00:00") - new Date(a + "T00:00:00")) / 864e5));
+const downDays = r => { const f = FIX[fkey(r)] || {}; return dayDiff(failDate(r), f.st === "fixed" && f.date ? f.date : ASOF); };
+/* รอบถัดไปของแผนเดียวกันผ่านแล้ว = น่าจะแก้ไขแล้ว (แนะนำ ไม่เปลี่ยนเอง) */
+const nextPass = r => DATA.filter(x => x.p === r.p && x.e === r.e && x.n === r.n && x.r === "pass" && failDate(x) > failDate(r)).sort((a, b) => failDate(a).localeCompare(failDate(b)))[0];
+const daysPill = r => { const d = downDays(r), st = repSt(r);
+  return st === "fixed" ? `<span class="pill" style="background:#e3f6ee;color:#0a6b4d">ใช้เวลาแก้ <span class="days">${d}</span> วัน</span>`
+    : `<span class="pill" style="background:${d > 7 ? "#c9301a" : "#ffe3dc"};color:${d > 7 ? "#fff" : "#a8250f"}">เสียมาแล้ว <span class="days">${d}</span> วัน</span>`; };
+const S = { view: "overview", fst: "all", wh: "all", month: "all", branch: "all", type: "all", cancel: false, st: "all", q: "", limit: 25 };
 
 function rows(ignore = {}) {
   return DATA.filter(r =>
@@ -298,12 +392,62 @@ function renderResult() {
   const pct = x => tested ? Math.round(x / tested * 100) + "%" : "–";
   $("res").innerHTML = `
     <div class="rbox" style="background:#e3f6ee;color:#0a6b4d"><span>✓ ผ่าน</span><b>${pass}</b><span>${pct(pass)} ของที่ตรวจแล้ว</span></div>
-    <div class="rbox" style="background:#ffe3dc;color:#a8250f"><span>✕ ไม่ผ่าน</span><b>${F.length}</b><span>${pct(F.length)} · รวม ${F.reduce((s, r) => s + +r.r.split(":")[1], 0)} รายการตรวจ</span></div>`;
-  $("failTag").textContent = F.length + " ใบงาน";
-  $("fails").innerHTML = F.sort((a, b) => b.due.localeCompare(a.due)).map(r => `
-    <div class="fail"><div style="min-width:0"><div class="e">${r.e}</div><div class="m">${r.w} · ${r.b} · ${r.z} · กำหนด ${fmtD(r.due)}</div></div>
-    <span class="pill" style="background:#ffe3dc;color:#a8250f">ไม่ผ่าน ${r.r.split(":")[1]} ข้อ</span></div>`).join("")
+    <div class="rbox" style="background:#ffe3dc;color:#a8250f"><span>✕ ไม่ผ่าน</span><b>${F.length}</b><span>${pct(F.length)} · ยังไม่แก้ไข ${F.filter(r => repSt(r) !== "fixed").length} ใบ</span></div>`;
+  const open = F.filter(r => repSt(r) !== "fixed");
+  $("failTag").textContent = "ค้าง " + open.length + " · แก้แล้ว " + (F.length - open.length);
+  $("fails").innerHTML = F.sort((a, b) => (repSt(a) === "fixed") - (repSt(b) === "fixed") || downDays(b) - downDays(a)).map(failCard).join("")
     || `<div class="fail" style="background:#e3f6ee;border-color:#13a878"><div class="e" style="color:#0a6b4d">ไม่มีใบงานที่ไม่ผ่านในช่วงนี้</div></div>`;
+}
+
+function failCard(r) {
+  const st = repSt(r), f = FIX[fkey(r)] || {}, np = st !== "fixed" && nextPass(r), R = REP[st];
+  return `<div class="fail ${st === "fixed" ? "fixed" : ""}"><div style="min-width:0">
+      <div class="e">${r.e} <span class="pill" style="background:${R.bg};color:${R.fg};padding:2px 9px;font-size:11.5px">${R.label}</span></div>
+      <div class="m">${r.w} · ${r.b} · ${r.z} · พบ ${fmtD(failDate(r))} · ไม่ผ่าน ${r.r.split(":")[1]} ข้อ${st === "fixed" ? " · แก้เสร็จ " + fmtD(f.date) : ""}</div>
+      ${f.note ? `<div class="m" style="color:#2a3b5f">📝 ${f.note}</div>` : ""}
+      ${np ? `<div class="hintx">✓ รอบถัดไปตรวจผ่านแล้ว ${fmtD(failDate(np))} · <a href="#" data-quickfix="${fkey(r)}" data-date="${failDate(np)}">ปิดเป็นแก้ไขแล้ว</a></div>` : ""}
+    </div>
+    <div class="acts">${daysPill(r)}<button class="btn ${st === "fixed" ? "ghost" : "fix"}" type="button" data-edit="${fkey(r)}">${st === "fixed" ? "แก้ไข" : "อัปเดตการซ่อม"}</button></div></div>`;
+}
+
+function renderFail() {
+  const F = rows().filter(isFail), T = F.length;
+  const open = F.filter(r => repSt(r) === "open"), fixing = F.filter(r => repSt(r) === "fixing"), fixed = F.filter(r => repSt(r) === "fixed");
+  const mttr = fixed.length ? (fixed.reduce((s, r) => s + downDays(r), 0) / fixed.length) : null;
+  const pend = open.concat(fixing).sort((a, b) => downDays(b) - downDays(a)), worst = pend[0];
+  const items = F.reduce((s, r) => s + +r.r.split(":")[1], 0);
+  $("fKpis").innerHTML = `
+    <div class="kpi"><div class="l">ไม่ผ่านทั้งหมด</div><div class="v">${T}<small>ใบงาน</small></div><div class="s">รวม ${items} รายการตรวจ</div></div>
+    <div class="kpi" style="box-shadow:0 12px 26px rgba(201,48,26,.18)"><div class="l" style="color:#a8250f">ยังไม่แก้ไข</div><div class="v" style="color:#c9301a">${open.length}<small>ใบงาน</small></div><div class="s">กำลังซ่อมอีก ${fixing.length} ใบ</div></div>
+    <div class="kpi"><div class="l" style="color:#0a6b4d">แก้ไขแล้ว</div><div class="v" style="color:#0a7353">${fixed.length}<small>ใบงาน</small></div><div class="s">${T ? Math.round(fixed.length / T * 100) : 0}% ของที่ไม่ผ่าน</div></div>
+    <div class="kpi"><div class="l">เวลาแก้ไขเฉลี่ย</div><div class="v">${mttr == null ? "–" : mttr.toFixed(1)}<small>วัน</small></div><div class="s">จากวันที่พบถึงวันที่แก้เสร็จ</div></div>
+    <div class="kpi"><div class="l">ค้างนานที่สุด</div><div class="v" style="color:${worst ? "#c9301a" : "inherit"}">${worst ? downDays(worst) : "–"}<small>วัน</small></div><div class="s">${worst ? worst.e + " · " + worst.b : "ไม่มีงานค้าง"}</div></div>`;
+  // รายเดือน
+  const months = [...new Set(DATA.map(r => failDate(r).slice(0, 7)).filter(Boolean))].sort();
+  const bm = months.map(m => { const L = F.filter(r => failDate(r).slice(0, 7) === m); return { m, o: L.filter(r => repSt(r) === "open").length, g: L.filter(r => repSt(r) === "fixing").length, f: L.filter(r => repSt(r) === "fixed").length, n: L.length }; });
+  const mx = Math.max(1, ...bm.map(x => x.n)), lab = m => TH_M[+m.slice(5) - 1] + " " + (+m.slice(0, 4) + 543 - 2500);
+  $("fMonth").innerHTML = bm.map(x => `<div class="vcol"><span class="num" style="font-size:13px;font-weight:800">${x.n || ""}</span><div class="vstack" style="height:${(x.n / mx * 150).toFixed(0)}px">${[["f", "#13a878", "แก้ไขแล้ว"], ["g", "#ffb13d", "กำลังซ่อม"], ["o", "#f0553a", "ยังไม่แก้ไข"]].filter(([k]) => x[k]).map(([k, c, l]) => `<span style="flex:${x[k]};background:${c}" data-tip="<b>${lab(x.m)}</b><br>${l}: ${x[k]} ใบ"></span>`).join("")}</div></div>`).join("");
+  $("fMonthLab").innerHTML = bm.map(x => `<span>${lab(x.m)}</span>`).join("");
+  // top อุปกรณ์
+  const by = {}; F.forEach(r => { const k = r.e + " · " + r.b, v = by[k] = by[k] || { n: 0, d: 0, o: 0 }; v.n++; v.d += downDays(r); if (repSt(r) !== "fixed") v.o++; });
+  const top = Object.entries(by).sort((a, b) => b[1].n - a[1].n || b[1].d - a[1].d).slice(0, 10), tm = Math.max(1, ...top.map(x => x[1].n));
+  $("fTop").innerHTML = top.map(([k, v]) => `<div class="brow" style="grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) 92px"><span class="nm" title="${k}">${k}</span>
+    <div class="bar" style="width:${(v.n / tm * 100).toFixed(0)}%">${v.n - v.o ? `<span style="flex:${v.n - v.o};background:#13a878" data-tip="${k}<br>แก้ไขแล้ว ${v.n - v.o} ครั้ง"></span>` : ""}${v.o ? `<span style="flex:${v.o};background:#f0553a" data-tip="${k}<br>ยังไม่แก้ไข ${v.o} ครั้ง"></span>` : ""}</div>
+    <span class="tot" style="white-space:nowrap">${v.n} ครั้ง · ${v.d} วัน</span></div>`).join("") || `<p class="note">ไม่มีข้อมูล</p>`;
+  // รายสาขา
+  const bb = {}; F.forEach(r => { const v = bb[r.b] = bb[r.b] || { n: 0, o: 0 }; v.n++; if (repSt(r) !== "fixed") v.o++; });
+  const bl = Object.entries(bb).sort((a, b) => b[1].n - a[1].n), bmx = Math.max(1, ...bl.map(x => x[1].n));
+  $("fBranch").innerHTML = bl.map(([b, v]) => `<div class="brow"><span class="nm">${b}</span><div class="bar" style="width:${(v.n / bmx * 100).toFixed(0)}%">${v.n - v.o ? `<span style="flex:${v.n - v.o};background:#13a878" data-tip="${b}<br>แก้ไขแล้ว ${v.n - v.o}"></span>` : ""}${v.o ? `<span style="flex:${v.o};background:#f0553a" data-tip="${b}<br>ยังไม่แก้ไข ${v.o}"></span>` : ""}</div><span class="tot num">${v.n}</span></div>`).join("") || `<p class="note">ไม่มีข้อมูล</p>`;
+  // ตาราง
+  const fk = [["all", "ทั้งหมด", T], ["open", "ยังไม่แก้", open.length], ["fixing", "กำลังซ่อม", fixing.length], ["fixed", "แก้แล้ว", fixed.length]];
+  $("fFilter").innerHTML = fk.map(([k, l, n]) => `<button type="button" class="${S.fst === k ? "on" : ""}" data-fst="${k}">${l} ${n}</button>`).join("");
+  const L = F.filter(r => S.fst === "all" || repSt(r) === S.fst).sort((a, b) => failDate(b).localeCompare(failDate(a)));
+  $("fTag").textContent = L.length + " ใบงาน";
+  $("fBody").innerHTML = L.map(r => { const st = repSt(r), R = REP[st], f = FIX[fkey(r)] || {};
+    return `<tr class="${st === "fixed" ? "" : "bad"}"><td class="num" style="font-weight:700;white-space:nowrap">${r.w}</td>
+      <td><div style="font-weight:700">${r.e}</div><div style="font-size:12px;color:#5a6784">ไม่ผ่าน ${r.r.split(":")[1]} ข้อ${f.note ? " · 📝 " + f.note : ""}</div></td><td>${r.t === "-" ? "ไม่ระบุ" : r.t}</td>
+      <td style="white-space:nowrap">${r.p}<div style="font-size:12px;color:#5a6784">${r.b}</div></td><td style="white-space:nowrap">${fmtD(failDate(r))}${st === "fixed" ? `<div style="font-size:12px;color:#0a6b4d">แก้เสร็จ ${fmtD(f.date)}</div>` : ""}</td>
+      <td><button type="button" class="pill" data-edit="${fkey(r)}" style="cursor:pointer;border:0;background:${R.bg};color:${R.fg}">${R.label} ✎</button></td><td>${daysPill(r)}</td></tr>`; }).join("") || `<tr><td colspan="7" style="text-align:center;color:#5a6784;padding:22px">ไม่มีใบงานที่ไม่ผ่าน</td></tr>`;
 }
 
 function renderTypes() {
@@ -342,11 +486,24 @@ function renderTable() {
   $("more").textContent = "แสดงเพิ่ม (" + (R.length - S.limit).toLocaleString() + " ใบ)";
 }
 
-function render() { renderFilters(); renderHero(); renderBars(); renderResult(); renderTypes(); renderTable(); }
+function renderTabs() {
+  const n = rows().filter(r => isFail(r) && repSt(r) !== "fixed").length;
+  $("tabs").innerHTML = [["overview", "ภาพรวม PM", "M3 3v16a2 2 0 0 0 2 2h16 M7 16h8 M7 11h12 M7 6h3"], ["fail", "สถิติการเสีย", "M12 9v4 M12 17h.01 M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"]]
+    .map(([k, l, ic]) => `<button type="button" class="${S.view === k ? "on" : ""}" data-view="${k}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="${ic}"/></svg>${l}${k === "fail" && n ? ` <span class="cnt">ค้าง ${n}</span>` : ""}</button>`).join("");
+  $("vOverview").style.display = S.view === "overview" ? "grid" : "none";
+  $("vFail").style.display = S.view === "fail" ? "grid" : "none";
+}
+function render() { renderFilters(); renderHero(); renderTabs(); if (S.view === "overview") { renderBars(); renderResult(); renderTypes(); renderTable(); } else renderFail(); }
 
 document.addEventListener("click", e => {
-  const t = e.target.closest("[data-wh],[data-month],[data-branch],[data-type],[data-st]");
+  const q = e.target.closest("[data-quickfix]");
+  if (q) { e.preventDefault(); FIX[q.dataset.quickfix] = { st: "fixed", date: q.dataset.date, note: "รอบถัดไปตรวจผ่าน" }; saveFix(); render(); toast("ปิดเป็นแก้ไขแล้ว"); return; }
+  const ed = e.target.closest("[data-edit]");
+  if (ed) { openDlg(ed.dataset.edit); return; }
+  const t = e.target.closest("[data-wh],[data-month],[data-branch],[data-type],[data-st],[data-view],[data-fst]");
   if (!t) return;
+  if (t.dataset.view) S.view = t.dataset.view;
+  if (t.dataset.fst) S.fst = t.dataset.fst;
   if (t.dataset.wh) { S.wh = t.dataset.wh; S.branch = "all"; }
   if (t.dataset.month) S.month = t.dataset.month;
   if (t.dataset.branch) S.branch = S.branch === t.dataset.branch ? "all" : t.dataset.branch;
@@ -366,6 +523,24 @@ document.addEventListener("mousemove", e => {
   if (!el) { tip.style.opacity = 0; return; }
   tip.innerHTML = el.dataset.tip; tip.style.opacity = 1;
   tip.style.left = Math.min(e.clientX + 14, innerWidth - tip.offsetWidth - 8) + "px"; tip.style.top = (e.clientY + 16) + "px";
+});
+
+/* ---- อัปเดตสถานะการซ่อม ---- */
+let DK = null, DST = "open";
+function paintDlgSt() { $("dlgSt").innerHTML = Object.entries(REP).map(([k, R]) => `<button type="button" class="${DST === k ? "on" : ""}" data-dst="${k}" style="${DST === k ? "background:" + R.color : ""}">${R.label}</button>`).join(""); $("dlgDate").parentElement.style.display = DST === "fixed" ? "" : "none"; }
+function openDlg(k) {
+  const r = DATA.find(x => fkey(x) === k); if (!r) return; const f = FIX[k] || {};
+  DK = k; DST = f.st || "open";
+  $("dlgSub").textContent = r.w + " · " + r.e + " · " + r.b + " · พบ " + fmtD(failDate(r)) + " · ไม่ผ่าน " + r.r.split(":")[1] + " ข้อ";
+  $("dlgDate").value = f.date || ASOF; $("dlgDate").min = failDate(r); $("dlgNote").value = f.note || "";
+  paintDlgSt(); $("dlg").showModal();
+}
+$("dlgSt").onclick = e => { const b = e.target.closest("[data-dst]"); if (b) { DST = b.dataset.dst; paintDlgSt(); } };
+$("dlg").addEventListener("close", () => {
+  if ($("dlg").returnValue !== "ok" || !DK) return;
+  if (DST === "open" && !$("dlgNote").value.trim()) delete FIX[DK];
+  else FIX[DK] = { st: DST, date: DST === "fixed" ? $("dlgDate").value : "", note: $("dlgNote").value.trim(), at: new Date().toISOString() };
+  saveFix(); render(); toast("บันทึกสถานะการซ่อมแล้ว");
 });
 
 /* ---- Upload (ทาง A): อ่าน Excel ในเบราว์เซอร์ ---- */
