@@ -29,9 +29,13 @@ repo `sttonnn/robot-report` คือที่รวมทุก Dashboard (ต�
 - PCG Project Portal (index.html) — การ์ด Daily Machine Check ยัง Coming Soon
 
 ## งานค้าง
+**Daily Machine Check: พักไว้ก่อน (29 ก.ย.)** — ผู้ใช้สั่งให้ไปทำ Preventive Maintenance Data ก่อน
 1. สร้าง Flow A / Flow B ตาม BACKEND.md (รอผู้ใช้ส่งลิงก์ฟอร์มและชื่อคำถาม)
 2. รัน supabase/schema.sql
 3. สร้างแอปจริงจาก design/ + ต่อข้อมูล Supabase/CSV
 4. ตั้ง GitHub Actions + secrets
 5. ~~ใส่รูปเครื่อง 22 รูป~~ ยกเลิก: หน้าแรกเปลี่ยนเป็นเช็กลิสต์ไม่มีรูป (29 ก.ย.)
 6. ลิงก์จาก Portal พร้อมป้าย LIVE
+
+## งานใหม่: Preventive Maintenance Data (เริ่ม 29 ก.ย.)
+- รอผู้ใช้ส่งรายละเอียด: ขอบเขต, แหล่งข้อมูล, ดีไซน์
