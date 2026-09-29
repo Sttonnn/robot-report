@@ -212,6 +212,7 @@
     <div class="pills" id="months"></div>
     <label class="sel">สาขา / อาคาร <select id="branch"></select></label>
     <label class="sel">ประเภท <select id="type"></select></label>
+    <label class="chk"><input type="checkbox" id="showPlan"> แสดงแผนงาน (ยังไม่ออกใบงาน)</label>
     <label class="chk"><input type="checkbox" id="showCancel"> แสดงงานที่ยกเลิก</label>
   </div>
 
@@ -312,7 +313,7 @@ const GROUP = { "เสร็จสิ้น": "done", "มอบหมายง
 const ST = {
   done:   { label: "ดำเนินการแล้วเสร็จ", color: "#13a878", bg: "#e3f6ee", fg: "#0a6b4d" },
   prog:   { label: "กำลังดำเนินการ",     color: "#1a5fe4", bg: "#e3edff", fg: "#0f3fa4" },
-  wait:   { label: "รอสร้างใบงาน",       color: "#9aa6bd", bg: "#eef1f6", fg: "#5a6784" },
+  wait:   { label: "แผนงาน (ยังไม่ออกใบงาน)", color: "#9aa6bd", bg: "#eef1f6", fg: "#5a6784" },
   cancel: { label: "ยกเลิก",            color: "#cfd6e3", bg: "#f1f3f7", fg: "#7a849a" }
 };
 const TYPE = {
@@ -354,7 +355,7 @@ const nextPass = r => DATA.filter(x => x.p === r.p && x.e === r.e && x.n === r.n
 const daysPill = r => { const d = downDays(r), st = repSt(r);
   return st === "fixed" ? `<span class="pill" style="background:#e3f6ee;color:#0a6b4d">ใช้เวลาแก้ <span class="days">${d}</span> วัน</span>`
     : `<span class="pill" style="background:${d > 7 ? "#c9301a" : "#ffe3dc"};color:${d > 7 ? "#fff" : "#a8250f"}">เสียมาแล้ว <span class="days">${d}</span> วัน</span>`; };
-const S = { view: "overview", fst: "all", wh: "all", month: "all", branch: "all", type: "all", cancel: false, st: "all", q: "", limit: 25 };
+const S = { view: "overview", fst: "all", wh: "all", month: "all", branch: "all", type: "all", cancel: false, plan: false, st: "all", q: "", limit: 25 };
 
 function rows(ignore = {}) {
   return DATA.filter(r =>
@@ -362,29 +363,32 @@ function rows(ignore = {}) {
     (ignore.month || S.month === "all" || r.due.slice(0, 7) === S.month) &&
     (ignore.branch || S.branch === "all" || r.b === S.branch) &&
     (ignore.type || S.type === "all" || r.t === S.type) &&
-    (S.cancel || GROUP[r.s] !== "cancel"));
+    (S.cancel || GROUP[r.s] !== "cancel") &&
+    (ignore.plan || S.plan || GROUP[r.s] !== "wait"));
 }
 const grp = r => GROUP[r.s] || "prog";
 const isFail = r => r.r.startsWith("fail");
-const overdue = r => (grp(r) === "prog" || grp(r) === "wait") && r.due && r.due < ASOF;
+/* "รอสร้างใบงาน" = แผนงาน ยังไม่เกิดงานจริง → ไม่นับเป็นงานค้าง/เลยกำหนด */
+const overdue = r => grp(r) === "prog" && r.due && r.due < ASOF;
 
 function renderHero() {
   const last = LOG[LOG.length - 1];
-  $("asof").textContent = "ข้อมูล ณ " + fmtD(ASOF) + " · " + DATA.length.toLocaleString() + " ใบงาน" + (last ? " · อัปโหลดล่าสุด " + fmtD(last.at.slice(0, 10)) + " " + last.at.slice(11, 16) + " น." : "");
-  const cnt = k => DATA.filter(r => (k === "all" || r.p === k) && GROUP[r.s] !== "cancel").length;
+  $("asof").textContent = "ข้อมูล ณ " + fmtD(ASOF) + " · " + DATA.length.toLocaleString() + " รายการในระบบ" + (last ? " · อัปโหลดล่าสุด " + fmtD(last.at.slice(0, 10)) + " " + last.at.slice(11, 16) + " น." : "");
+  const cnt = k => DATA.filter(r => (k === "all" || r.p === k) && GROUP[r.s] !== "cancel" && GROUP[r.s] !== "wait").length;
   $("seg").innerHTML = ["all", "WHA05", "RDC01"].map(k =>
     `<button type="button" class="${S.wh === k ? "on" : ""}" data-wh="${k}"><b>${WH[k]}</b><span>${k === "all" ? "รวมทุกคลัง" : WH_SUB[k]} · ${cnt(k).toLocaleString()} ใบงาน</span></button>`).join("");
   const R = rows(), n = R.length, g = k => R.filter(r => grp(r) === k).length;
   const pass = R.filter(r => r.r === "pass").length, fail = R.filter(isFail).length, tested = pass + fail;
   const pct = tested ? pass / tested : 0, C = 2 * Math.PI * 44, od = R.filter(overdue).length;
+  const plans = rows({ plan: true }).filter(r => grp(r) === "wait").length;
   const ring = fail ? "#ffb13d" : "#39d99a";
   $("stats").innerHTML = `
     <div class="card gauge"><svg width="108" height="108" viewBox="0 0 108 108"><circle cx="54" cy="54" r="44" fill="none" stroke="rgba(255,255,255,.14)" stroke-width="11"/><circle cx="54" cy="54" r="44" fill="none" stroke="${ring}" stroke-width="11" stroke-linecap="round" stroke-dasharray="${(C * pct).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 54 54)"/><text x="54" y="61" text-anchor="middle" fill="#fff" font-family="Archivo" font-weight="900" font-size="22">${tested ? Math.round(pct * 100) + "%" : "–"}</text></svg>
       <div><div class="lbl">PM ผ่านเกณฑ์</div><div class="val" style="margin-top:4px">${pass.toLocaleString()}<small>/ ${tested.toLocaleString()}</small></div><div class="sub">ไม่ผ่าน ${fail} ใบงาน</div></div></div>
-    <div class="card" style="background:linear-gradient(150deg,#1a5fe4,#0f3fa4);box-shadow:0 12px 26px rgba(15,63,164,.4)"><div class="lbl">ใบงานทั้งหมด</div><div class="val">${n.toLocaleString()}<small>ใบ</small></div><div class="sub">${S.cancel ? "รวมงานที่ยกเลิก" : "ไม่รวมงานที่ยกเลิก"}</div></div>
+    <div class="card" style="background:linear-gradient(150deg,#1a5fe4,#0f3fa4);box-shadow:0 12px 26px rgba(15,63,164,.4)"><div class="lbl">ใบงานทั้งหมด</div><div class="val">${n.toLocaleString()}<small>ใบ</small></div><div class="sub">${[S.plan ? "รวมแผนงาน" : "ไม่รวมแผนงาน", S.cancel ? "รวมยกเลิก" : "ไม่รวมยกเลิก"].join(" · ")}</div></div>
     <div class="card" style="background:linear-gradient(150deg,#13a878,#0a7353);box-shadow:0 12px 26px rgba(10,115,83,.4)"><div class="lbl">ดำเนินการแล้วเสร็จ</div><div class="val">${g("done").toLocaleString()}<small>ใบ</small></div><div class="sub">${n ? Math.round(g("done") / n * 100) : 0}% ของใบงาน</div></div>
     <div class="card" style="background:linear-gradient(150deg,#2f7cf6,#1a4fc4);box-shadow:0 12px 26px rgba(26,79,196,.4)"><div class="lbl">กำลังดำเนินการ</div><div class="val">${g("prog").toLocaleString()}<small>ใบ</small></div><div class="sub">มอบหมาย / กำลังทำ / รอประเมิน</div></div>
-    <div class="card" style="background:${od ? "linear-gradient(150deg,#f0553a,#b8260f)" : "linear-gradient(150deg,#4a5877,#333f5a)"};box-shadow:0 12px 26px rgba(22,33,58,.3)"><div class="lbl">รอสร้างใบงาน</div><div class="val">${g("wait").toLocaleString()}<small>ใบ</small></div><div class="sub">${od ? "เลยกำหนดแล้ว " + od + " ใบ (รวมกำลังทำ)" : "ยังไม่เลยกำหนด"}</div></div>`;
+    <div class="card" style="background:${od ? "linear-gradient(150deg,#f0553a,#b8260f)" : "linear-gradient(150deg,#4a5877,#333f5a)"};box-shadow:0 12px 26px rgba(22,33,58,.3)"><div class="lbl">เลยกำหนด · ยังไม่เสร็จ</div><div class="val">${od.toLocaleString()}<small>ใบ</small></div><div class="sub">แผนงานที่ยังไม่ออกใบงาน ${plans.toLocaleString()} รายการ (ไม่นับ)</div></div>`;
 }
 
 function renderFilters() {
@@ -398,10 +402,11 @@ function renderFilters() {
   const tys = [...new Set(DATA.map(r => r.t))].filter(t => t !== "-");
   $("type").innerHTML = `<option value="all">ทั้งหมด</option>` + tys.map(t => `<option ${S.type === t ? "selected" : ""}>${t}</option>`).join("");
   $("showCancel").checked = S.cancel;
+  $("showPlan").checked = S.plan;
 }
 
 function renderBars() {
-  const R = rows({ branch: true }), keys = S.cancel ? ["done", "prog", "wait", "cancel"] : ["done", "prog", "wait"];
+  const R = rows({ branch: true }), keys = ["done", "prog", "wait", "cancel"].filter(k => (k !== "wait" || S.plan) && (k !== "cancel" || S.cancel));
   $("stLegend").innerHTML = keys.map(k => `<span><i style="background:${ST[k].color}"></i>${ST[k].label}</span>`).join("");
   const by = {};
   R.forEach(r => { (by[r.b] = by[r.b] || { done: 0, prog: 0, wait: 0, cancel: 0, n: 0 })[grp(r)]++; by[r.b].n++; });
@@ -488,7 +493,7 @@ function renderTypes() {
       <div class="hd" style="background:linear-gradient(155deg,${T.c[0]},${T.c[1]})"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${T.ic}"/></svg></span><div style="display:grid"><span style="font-size:11px;font-weight:600;letter-spacing:.06em;opacity:.85">ประเภท</span><b>${t === "-" ? "ไม่ระบุ" : t}</b></div><span class="num" style="margin-left:auto;font-size:22px;font-weight:900">${v.n}</span></div>
       <div class="bd">
         <div class="bar" style="height:10px">${["done", "prog", "wait", "cancel"].filter(k => v[k]).map(k => `<span style="flex:${v[k]};background:${ST[k].color}" data-tip="${t}<br>${ST[k].label}: ${v[k]} ใบ"></span>`).join("")}</div>
-        <div class="row"><span>เสร็จ/ทำ/รอ</span><b class="num">${v.done} / ${v.prog} / ${v.wait}</b></div>
+        <div class="row"><span>เสร็จ / กำลังทำ</span><b class="num">${v.done} / ${v.prog}</b></div>
         <div class="row"><span>PM ผ่าน</span><b class="num" style="color:${v.fail ? "#a8250f" : "#0a6b4d"}">${tested ? Math.round(v.pass / tested * 100) + "%" : "–"}${v.fail ? " · ไม่ผ่าน " + v.fail : ""}</b></div>
       </div></article>`;
   }).join("");
@@ -496,10 +501,12 @@ function renderTypes() {
 
 function renderTable() {
   const base = rows(), q = S.q.trim().toLowerCase();
-  const cnt = k => base.filter(r => k === "all" || (k === "fail" ? isFail(r) : grp(r) === k)).length;
-  const keys = [["all", "ทั้งหมด"], ["done", "เสร็จ"], ["prog", "กำลังทำ"], ["wait", "รอสร้าง"], ["fail", "ไม่ผ่าน"]];
-  $("stFilter").innerHTML = keys.map(([k, l]) => `<button type="button" class="${S.st === k ? "on" : ""}" data-st="${k}" style="${S.st === k && k === "fail" ? "background:#c9301a" : ""}">${l} ${cnt(k)}</button>`).join("");
-  const R = base.filter(r => (S.st === "all" || (S.st === "fail" ? isFail(r) : grp(r) === S.st)) &&
+  const hit = (r, k) => k === "all" || (k === "fail" ? isFail(r) : k === "late" ? overdue(r) : grp(r) === k);
+  const cnt = k => base.filter(r => hit(r, k)).length;
+  const keys = [["all", "ทั้งหมด"], ["done", "เสร็จ"], ["prog", "กำลังทำ"], ["late", "เลยกำหนด"], ["fail", "ไม่ผ่าน"]].concat(S.plan ? [["wait", "แผนงาน"]] : []);
+  if (!keys.some(([k]) => k === S.st)) S.st = "all";
+  $("stFilter").innerHTML = keys.map(([k, l]) => `<button type="button" class="${S.st === k ? "on" : ""}" data-st="${k}" style="${S.st === k && (k === "fail" || k === "late") ? "background:#c9301a" : ""}">${l} ${cnt(k)}</button>`).join("");
+  const R = base.filter(r => hit(r, S.st) &&
     (!q || (r.w + " " + r.e + " " + r.n).toLowerCase().includes(q))).sort((a, b) => b.due.localeCompare(a.due));
   $("rowTag").textContent = R.length.toLocaleString() + " ใบงาน";
   $("tbody").innerHTML = R.slice(0, S.limit).map(r => {
@@ -543,6 +550,7 @@ document.addEventListener("click", e => {
 $("branch").onchange = e => { S.branch = e.target.value; render(); };
 $("type").onchange = e => { S.type = e.target.value; render(); };
 $("showCancel").onchange = e => { S.cancel = e.target.checked; render(); };
+$("showPlan").onchange = e => { S.plan = e.target.checked; render(); };
 $("q").oninput = e => { S.q = e.target.value; S.limit = 25; renderTable(); };
 $("more").onclick = () => { S.limit += 50; renderTable(); };
 
