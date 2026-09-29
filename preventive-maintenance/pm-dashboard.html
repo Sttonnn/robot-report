@@ -156,6 +156,34 @@
   .fcard .todo { font-size: 12.5px; font-weight: 600; opacity: .85; }
   .fcard .go { justify-self: start; margin-top: 4px; cursor: pointer; border: 0; border-radius: 999px; padding: 8px 14px; font-size: 13px; font-weight: 700; color: #fff; }
   @media (max-width: 1100px) { .fcards { grid-template-columns: minmax(0,1fr); } }
+  .crumb { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 15px; font-weight: 700; }
+  .crumb button { cursor: pointer; border: 0; background: #fff; box-shadow: var(--shadow-s); border-radius: 999px; padding: 8px 14px; font-weight: 700; color: #1a5fe4; }
+  .crumb .cur { padding: 8px 4px; color: var(--ink); font-size: 18px; }
+  .howto { display: flex; gap: 10px 24px; flex-wrap: wrap; font-size: 13px; color: var(--ink2); padding: 10px 14px; border-radius: 14px; background: #fff; box-shadow: var(--shadow-s); }
+  .howto .sw { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin: 0 4px 0 8px; vertical-align: -1px; }
+  .q1 { color: #0f3fa4; } .q2 { color: #0a6b4d; }
+  .whcards { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 18px; }
+  .whc { cursor: pointer; text-align: left; border: 0; background: #fff; border-radius: 22px; box-shadow: var(--shadow); padding: 0; overflow: hidden; display: grid; transition: transform .2s; animation: rise .45s ease both; }
+  .whc:hover { transform: translateY(-4px); }
+  .whc .hd { padding: 16px 18px; color: #fff; display: flex; align-items: center; gap: 12px; }
+  .whc .bd { padding: 16px 18px; display: grid; gap: 16px; }
+  .vb { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 999px; font-size: 13px; font-weight: 800; white-space: nowrap; }
+  .qbox { display: grid; gap: 8px; }
+  .qbox .qt { font-size: 13px; font-weight: 800; }
+  .qbox .qline { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .qbox .qbig { font-family: Archivo, sans-serif; font-size: 30px; font-weight: 900; line-height: 1; }
+  .pbar { display: flex; height: 14px; border-radius: 999px; overflow: hidden; background: #eef1f6; gap: 2px; }
+  .pbar span { height: 100%; }
+  .pf { display: flex; gap: 8px; flex-wrap: wrap; }
+  .pf span { display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 999px; font-size: 14px; font-weight: 800; }
+  .brlist { background: #fff; border-radius: 22px; box-shadow: var(--shadow); overflow: hidden; }
+  .brh, .brr { display: grid; grid-template-columns: minmax(150px,1.1fr) minmax(0,1.6fr) minmax(0,1.2fr) 28px; gap: 16px; align-items: center; padding: 12px 18px; }
+  .brh { background: #f5f7fb; font-size: 12.5px; font-weight: 800; color: var(--ink2); }
+  .brr { cursor: pointer; width: 100%; border: 0; border-top: 1px solid #eef1f6; background: #fff; text-align: left; }
+  .brr:hover { background: #f7faff; }
+  .brr .nm2 { font-size: 15.5px; font-weight: 800; color: var(--ink); }
+  .brr .cap { font-size: 12.5px; color: var(--ink2); margin-top: 4px; }
+  @media (max-width: 900px) { .whcards { grid-template-columns: minmax(0,1fr); } .brh { display: none; } .brr { grid-template-columns: minmax(0,1fr) 20px; } .brr > :nth-child(2), .brr > :nth-child(3) { grid-column: 1; } .brr > :nth-child(4) { grid-row: 1; grid-column: 2; } }
   .pernav { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 16px; background: #f5f7fb; }
   .navb { cursor: pointer; border: 0; width: 38px; height: 38px; border-radius: 12px; background: #fff; color: #16213a; font-weight: 800; box-shadow: var(--shadow-s); flex: none; }
   .navb:hover { background: #eaf1ff; }
@@ -227,7 +255,6 @@
 
 <main>
   <div class="tabs" id="tabs"></div>
-  <section class="focus" id="focus"></section>
   <div class="filters">
     <div class="pills" id="months"></div>
     <label class="sel">สาขา / อาคาร <select id="branch"></select></label>
@@ -237,28 +264,14 @@
   </div>
 
   <div id="vOverview" style="display:grid;gap:22px">
-  <div class="grid2">
-    <section class="panel">
-      <h2>สถานะงานรายสาขา <span class="tag" id="brTag"></span></h2>
-      <p class="hint">จำนวนใบงานตามกำหนดการดำเนินงาน · เรียงจากมากไปน้อย · กดชื่อเพื่อกรอง</p>
-      <div class="legend" id="stLegend"></div>
-      <div id="bars"></div>
-    </section>
-    <section class="panel">
-      <h2>ผลการตรวจ PM</h2>
-      <p class="hint">นับเฉพาะใบงานที่มีผลตรวจแล้ว</p>
-      <div class="res" id="res"></div>
-      <h2 style="font-size:15px;margin-top:18px">ใบงานที่ไม่ผ่าน · ต้องติดตาม <span class="tag" id="failTag"></span></h2>
-      <div class="fails" id="fails"></div>
-    </section>
+  <nav class="crumb" id="crumb"></nav>
+  <div class="howto">
+    <span><b class="q1">① งานทำครบไหม?</b> <i class="sw" style="background:#1a5fe4"></i>เสร็จแล้ว <i class="sw" style="background:#9cc0ff"></i>กำลังทำ <i class="sw" style="background:#ff8a3d"></i>เลยกำหนด</span>
+    <span><b class="q2">② เครื่องปกติไหม?</b> <span style="color:#0a6b4d;font-weight:700">✓ ผ่าน</span> · <span style="color:#a8250f;font-weight:700">✕ ไม่ผ่าน</span> (นับเฉพาะงานที่ตรวจแล้ว)</span>
   </div>
+  <div id="drill"></div>
 
-  <section style="display:grid;gap:12px">
-    <h2 style="margin:0;font-size:21px">แยกตามประเภทอุปกรณ์</h2>
-    <div class="types" id="types"></div>
-  </section>
-
-  <section class="panel" style="display:grid;gap:12px">
+  <section class="panel" id="tblSec" style="display:grid;gap:12px">
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:space-between">
       <h2>รายการใบงาน <span class="tag" id="rowTag"></span></h2>
       <div class="pills" id="perTabs"></div>
@@ -273,7 +286,7 @@
       <div class="pills" id="stFilter"></div>
       <label class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a6784" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-4.3-4.3 M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14z"/></svg><input id="q" placeholder="ค้นหา เลขใบงาน / อุปกรณ์ / แผน"></label>
     </div>
-    <div class="tbl-wrap"><table><thead><tr><th>ใบงาน</th><th>อุปกรณ์</th><th>ประเภท</th><th>คลัง / สาขา</th><th>กำหนดการ</th><th>สถานะ</th><th>ผล PM</th></tr></thead><tbody id="tbody"></tbody></table></div>
+    <div class="tbl-wrap"><table><thead><tr><th>ใบงาน</th><th>อุปกรณ์</th><th>ประเภท</th><th>คลัง / สาขา</th><th>กำหนดการ</th><th>① สถานะงาน</th><th>② ผลตรวจ</th></tr></thead><tbody id="tbody"></tbody></table></div>
     <button class="more" id="more" type="button">แสดงเพิ่ม</button>
   </section>
   </div>
@@ -388,7 +401,7 @@ const S = { view: "overview", fst: "all", wh: "all", month: "all", branch: "all"
 
 function rows(ignore = {}) {
   return DATA.filter(r =>
-    (S.wh === "all" || r.p === S.wh) &&
+    (ignore.wh || S.wh === "all" || r.p === S.wh) &&
     (ignore.month || S.month === "all" || r.due.slice(0, 7) === S.month) &&
     (ignore.branch || S.branch === "all" || r.b === S.branch) &&
     (ignore.type || S.type === "all" || r.t === S.type) &&
@@ -568,7 +581,7 @@ function renderTable() {
   $("rowTag").textContent = R.length.toLocaleString() + " ใบงาน";
   $("tbody").innerHTML = R.slice(0, S.limit).map(r => {
     const g = ST[grp(r)], od = overdue(r);
-    const res = r.r === "pass" ? `<span class="pill" style="background:#e3f6ee;color:#0a6b4d">✓ ผ่าน</span>` : isFail(r) ? `<span class="pill" style="background:#ffe3dc;color:#a8250f">✕ ไม่ผ่าน ${r.r.split(":")[1]}</span>` : `<span style="color:#9aa6bd">–</span>`;
+    const res = r.r === "pass" ? `<span class="pill" style="background:#e3f6ee;color:#0a6b4d">✓ ผ่าน</span>` : isFail(r) ? `<span class="pill" style="background:#ffe3dc;color:#a8250f">✕ ไม่ผ่าน ${r.r.split(":")[1]}</span><div style="margin-top:6px;display:flex;gap:6px;align-items:center;flex-wrap:wrap"><span class="pill" style="padding:3px 9px;font-size:11.5px;background:${REP[repSt(r)].bg};color:${REP[repSt(r)].fg}">${REP[repSt(r)].label}</span><button type="button" class="btn ${repSt(r) === "fixed" ? "ghost" : "fix"}" data-edit="${fkey(r)}" style="padding:4px 10px;font-size:11.5px">อัปเดตการซ่อม</button></div>` : `<span style="color:#9aa6bd">ยังไม่ตรวจ</span>`;
     return `<tr class="${isFail(r) ? "bad" : ""}"><td class="num" style="font-weight:700;white-space:nowrap">${r.w === "-" ? "<span style='color:#9aa6bd'>ยังไม่มีเลข</span>" : r.w}</td>
       <td><div style="font-weight:700">${r.e}</div><div style="font-size:12px;color:#5a6784">${r.n}</div></td><td>${r.t === "-" ? "ไม่ระบุ" : r.t}</td>
       <td style="white-space:nowrap"><button type="button" data-pick="${r.p}|${r.b}" title="กรองเฉพาะ ${r.b}" style="cursor:pointer;border:0;text-align:left;padding:4px 10px;border-radius:10px;background:${S.branch === r.b ? "#16213a" : "#eef2f8"};color:${S.branch === r.b ? "#fff" : "#16213a"};font-size:13px;font-weight:700">${r.p === "WHA05" ? "คลังในประเทศ" : "RDC ต่างจังหวัด"}<div style="font-size:12px;font-weight:600;opacity:.75">${r.b}</div></button></td>
@@ -627,7 +640,64 @@ function renderFocus() {
     </div>`;
 }
 
-function render() { renderFilters(); renderHero(); renderTabs(); renderFocus(); if (S.view === "overview") { renderBars(); renderResult(); renderTypes(); renderTable(); } else renderFail(); }
+/* ---- ดูจากใหญ่ไปเล็ก: คลัง → สาขา/อาคาร → ใบงาน ----
+   ทุกระดับตอบ 2 คำถามแยกกัน: ① งานทำครบไหม (สีน้ำเงิน/ส้ม)  ② เครื่องปกติไหม (เขียว ✓ / แดง ✕) */
+function stat(L) {
+  const n = L.length, done = L.filter(r => grp(r) === "done").length, prog = L.filter(r => grp(r) === "prog").length;
+  const late = L.filter(overdue), pass = L.filter(r => r.r === "pass").length, fail = L.filter(isFail);
+  const open = fail.filter(r => repSt(r) !== "fixed");
+  const bad = late.some(r => dayDiff(r.due, ASOF) > 7) || open.some(r => downDays(r) > 7);
+  return { n, done, prog, late: late.length, pass, fail: fail.length, open: open.length, tested: pass + fail.length,
+    pct: n ? Math.round(done / n * 100) : 0, lv: bad ? 2 : late.length || open.length ? 1 : 0 };
+}
+const VERD = [["✓ ปกติ", "#e3f6ee", "#0a6b4d"], ["! ต้องดู", "#fff1d6", "#8a5200"], ["!! ต้องแก้", "#c9301a", "#fff"]];
+const verdict = s => `<span class="vb" style="background:${VERD[s.lv][1]};color:${VERD[s.lv][2]}">${VERD[s.lv][0]}</span>`;
+function q1(s, compact) {
+  const w = x => (s.n ? x / s.n * 100 : 0).toFixed(1) + "%";
+  return `<div class="qbox">${compact ? "" : `<div class="qt q1">① งานทำครบไหม?</div>`}
+    <div class="qline"><span class="qbig" style="color:#0f3fa4;${compact ? "font-size:22px" : ""}">${s.pct}%</span><span style="font-size:13.5px;color:#2a3b5f">เสร็จ <b>${s.done}</b> จาก ${s.n} ใบ</span></div>
+    <div class="pbar"><span style="width:${w(s.done)};background:#1a5fe4" data-tip="เสร็จแล้ว ${s.done} ใบ"></span><span style="width:${w(s.prog - s.late)};background:#9cc0ff" data-tip="กำลังทำ (ยังไม่เลยกำหนด) ${s.prog - s.late} ใบ"></span><span style="width:${w(s.late)};background:#ff8a3d" data-tip="เลยกำหนด ${s.late} ใบ"></span></div>
+    <div style="font-size:12.5px;color:#5a6784">กำลังทำ ${s.prog - s.late} · ${s.late ? `<b style="color:#c2410c">เลยกำหนด ${s.late}</b>` : "ไม่มีเลยกำหนด"}</div></div>`;
+}
+function q2(s, compact) {
+  return `<div class="qbox">${compact ? "" : `<div class="qt q2">② เครื่องปกติไหม?</div>`}
+    ${s.tested ? `<div class="pf"><span style="background:#e3f6ee;color:#0a6b4d">✓ ผ่าน ${s.pass}</span><span style="background:${s.fail ? "#ffe3dc" : "#f1f3f7"};color:${s.fail ? "#a8250f" : "#7a849a"}">✕ ไม่ผ่าน ${s.fail}</span></div>
+    <div style="font-size:12.5px;color:#5a6784">ผ่าน ${Math.round(s.pass / s.tested * 100)}% ของที่ตรวจแล้ว · ${s.open ? `<b style="color:#a8250f">ยังไม่ได้แก้ ${s.open}</b>` : s.fail ? "แก้ครบแล้ว" : "ไม่มีเครื่องเสีย"}</div>`
+    : `<div style="font-size:13px;color:#5a6784">ยังไม่มีผลตรวจในช่วงนี้</div>`}</div>`;
+}
+const WHC = { WHA05: ["#1a5fe4", "#0f3fa4", "WH05 / WH32"], RDC01: ["#15a6a0", "#0b6f7a", "14 สาขาต่างจังหวัด"] };
+function renderDrill() {
+  const lvl = S.wh === "all" ? 1 : S.branch === "all" ? 2 : 3;
+  const cr = [];
+  cr.push(lvl === 1 ? `<span class="cur">ภาพรวมทุกคลัง</span>` : `<button type="button" data-pick="all|all">ทุกคลัง</button>`);
+  if (lvl >= 2) cr.push(lvl === 2 ? `<span class="cur">${WH[S.wh]}</span>` : `<button type="button" data-pick="${S.wh}|all">${WH[S.wh]}</button>`);
+  if (lvl === 3) cr.push(`<span class="cur">${S.branch}</span>`);
+  $("crumb").innerHTML = cr.join(`<span style="color:#9aa6bd">›</span>`) + `<span style="margin-left:auto;font-size:12.5px;font-weight:600;color:#5a6784">${lvl === 1 ? "กดที่คลังเพื่อดูรายสาขา" : lvl === 2 ? "กดที่สาขาเพื่อดูใบงาน" : ""}</span>`;
+  $("tblSec").style.display = lvl === 3 ? "grid" : "none";
+  if (lvl === 1) {
+    const R = rows({ wh: true, branch: true });
+    $("drill").innerHTML = `<div class="whcards">${["WHA05", "RDC01"].map(p => {
+      const L = R.filter(r => r.p === p), s = stat(L), nb = new Set(L.map(r => r.b)).size, C = WHC[p];
+      return `<button type="button" class="whc" data-pick="${p}|all"><div class="hd" style="background:linear-gradient(150deg,${C[0]},${C[1]})">
+          <div style="display:grid;flex:1;min-width:0"><span style="font-size:12px;font-weight:600;opacity:.85">${p} · ${C[2]}</span><b style="font-size:19px">${WH[p]}</b></div>${verdict(s)}</div>
+        <div class="bd">${q1(s)}${q2(s)}<div style="font-size:13.5px;font-weight:800;color:#1a5fe4">ดู ${nb} สาขา/อาคาร →</div></div></button>`;
+    }).join("")}</div>`;
+    return;
+  }
+  if (lvl === 2) {
+    const R = rows({ branch: true }), by = {};
+    R.forEach(r => (by[r.b] = by[r.b] || []).push(r));
+    const list = Object.entries(by).map(([b, L]) => [b, stat(L)]).sort((a, b) => b[1].lv - a[1].lv || b[1].late - a[1].late || b[1].open - a[1].open);
+    $("drill").innerHTML = `<div class="brlist"><div class="brh"><span>สาขา / อาคาร</span><span class="q1">① งานทำครบไหม?</span><span class="q2">② เครื่องปกติไหม?</span><span></span></div>
+      ${list.map(([b, s]) => `<button type="button" class="brr" data-pick="${S.wh}|${b}"><div><div class="nm2">${b}</div><div style="margin-top:6px">${verdict(s)}</div></div>${q1(s, true)}${q2(s, true)}<span style="font-size:20px;color:#9aa6bd">›</span></button>`).join("")}</div>`;
+    return;
+  }
+  const s = stat(rows());
+  $("drill").innerHTML = `<div class="whc" style="cursor:default"><div class="hd" style="background:linear-gradient(150deg,${WHC[S.wh][0]},${WHC[S.wh][1]})"><div style="display:grid;flex:1"><span style="font-size:12px;font-weight:600;opacity:.85">${WH[S.wh]}</span><b style="font-size:19px">${S.branch}</b></div>${verdict(s)}</div>
+    <div class="bd" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">${q1(s)}${q2(s)}</div></div>`;
+}
+
+function render() { renderFilters(); renderHero(); renderTabs(); if (S.view === "overview") { renderDrill(); if (S.wh !== "all" && S.branch !== "all") renderTable(); } else renderFail(); }
 
 document.addEventListener("click", e => {
   const q = e.target.closest("[data-quickfix]");
