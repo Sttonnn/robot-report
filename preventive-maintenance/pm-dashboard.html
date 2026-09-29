@@ -171,7 +171,8 @@
     tbody td:nth-child(1) { grid-column: 1; font-size: 12.5px; }
     tbody td:nth-child(6) { grid-column: 2; grid-row: 1; justify-self: end; }
     tbody td:nth-child(2) { grid-column: 1 / -1; }
-    tbody td:nth-child(3), tbody td:nth-child(4) { display: none; }
+    tbody td:nth-child(3) { display: none; }
+    tbody td:nth-child(4) { grid-column: 1 / -1; }
     tbody td:nth-child(5) { grid-column: 1; font-size: 12.5px; color: #5a6784; }
     tbody td:nth-child(7) { grid-column: 2; justify-self: end; }
     tr.bad td { background: none; }
@@ -244,6 +245,7 @@
       <div class="pills" id="stFilter"></div>
     </div>
     <label class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5a6784" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-4.3-4.3 M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14z"/></svg><input id="q" placeholder="ค้นหา เลขใบงาน / อุปกรณ์ / แผน"></label>
+    <div id="whChips" style="display:grid;gap:8px"></div>
     <div class="tbl-wrap"><table><thead><tr><th>ใบงาน</th><th>อุปกรณ์</th><th>ประเภท</th><th>คลัง / สาขา</th><th>กำหนดการ</th><th>สถานะ</th><th>ผล PM</th></tr></thead><tbody id="tbody"></tbody></table></div>
     <button class="more" id="more" type="button">แสดงเพิ่ม</button>
   </section>
@@ -509,12 +511,23 @@ function renderTable() {
   const R = base.filter(r => hit(r, S.st) &&
     (!q || (r.w + " " + r.e + " " + r.n).toLowerCase().includes(q))).sort((a, b) => b.due.localeCompare(a.due));
   $("rowTag").textContent = R.length.toLocaleString() + " ใบงาน";
+  /* ปุ่มกรองคลัง / สาขา (นับตามสถานะและคำค้นที่เลือกอยู่) */
+  const pool = DATA.filter(r => (S.month === "all" || r.due.slice(0, 7) === S.month) && (S.type === "all" || r.t === S.type) &&
+    (S.cancel || grp(r) !== "cancel") && (S.plan || grp(r) !== "wait") && hit(r, S.st) && (!q || (r.w + " " + r.e + " " + r.n).toLowerCase().includes(q)));
+  const chip = (on, pick, label, n, sub) => `<button type="button" data-pick="${pick}" style="cursor:pointer;border:0;border-radius:999px;padding:7px 13px;font-size:13px;font-weight:700;white-space:nowrap;background:${on ? "#16213a" : "#fff"};color:${on ? "#fff" : "#2a3b5f"};box-shadow:${on ? "none" : "0 0 0 1px #dde3ee inset"}">${label}${sub ? ` <span style="font-weight:600;opacity:.7">${sub}</span>` : ""} <span class="num" style="opacity:.75">${n}</span></button>`;
+  const whs = [["all", "ทุกคลัง"], ["WHA05", "คลังกระจายสินค้าภายในประเทศ"], ["RDC01", "คลัง RDC ต่างจังหวัด"]];
+  const brOf = p => { const c = {}; pool.filter(r => p === "all" || r.p === p).forEach(r => c[r.b] = (c[r.b] || 0) + 1);
+    return Object.entries(c).sort((a, b) => (a[0] === "ไม่ระบุ") - (b[0] === "ไม่ระบุ") || b[1] - a[1]); };
+  $("whChips").innerHTML = `<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><span style="font-size:12.5px;font-weight:700;color:#5a6784;margin-right:4px">คลังสินค้า</span>${whs.map(([k, l]) =>
+      chip(S.wh === k && S.branch === "all", k + "|all", l, pool.filter(r => k === "all" || r.p === k).length, k === "all" ? "" : k)).join("")}</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><span style="font-size:12.5px;font-weight:700;color:#5a6784;margin-right:4px">สาขา / อาคาร</span>${
+      (S.wh === "all" ? ["WHA05", "RDC01"] : [S.wh]).map(p => brOf(p).map(([b, n]) => chip(S.branch === b, p + "|" + b, b, n)).join("")).join('<span style="width:1px;height:22px;background:#dde3ee;margin:0 4px"></span>')}</div>`;
   $("tbody").innerHTML = R.slice(0, S.limit).map(r => {
     const g = ST[grp(r)], od = overdue(r);
     const res = r.r === "pass" ? `<span class="pill" style="background:#e3f6ee;color:#0a6b4d">✓ ผ่าน</span>` : isFail(r) ? `<span class="pill" style="background:#ffe3dc;color:#a8250f">✕ ไม่ผ่าน ${r.r.split(":")[1]}</span>` : `<span style="color:#9aa6bd">–</span>`;
     return `<tr class="${isFail(r) ? "bad" : ""}"><td class="num" style="font-weight:700;white-space:nowrap">${r.w === "-" ? "<span style='color:#9aa6bd'>ยังไม่มีเลข</span>" : r.w}</td>
       <td><div style="font-weight:700">${r.e}</div><div style="font-size:12px;color:#5a6784">${r.n}</div></td><td>${r.t === "-" ? "ไม่ระบุ" : r.t}</td>
-      <td style="white-space:nowrap">${r.p}<div style="font-size:12px;color:#5a6784">${r.b}</div></td>
+      <td style="white-space:nowrap"><button type="button" data-pick="${r.p}|${r.b}" title="กรองเฉพาะ ${r.b}" style="cursor:pointer;border:0;text-align:left;padding:4px 10px;border-radius:10px;background:${S.branch === r.b ? "#16213a" : "#eef2f8"};color:${S.branch === r.b ? "#fff" : "#16213a"};font-size:13px;font-weight:700">${r.p === "WHA05" ? "คลังในประเทศ" : "RDC ต่างจังหวัด"}<div style="font-size:12px;font-weight:600;opacity:.75">${r.b}</div></button></td>
       <td style="white-space:nowrap">${fmtD(r.due)}${od ? `<div style="font-size:12px;color:#a8250f;font-weight:700">เลยกำหนด</div>` : ""}</td>
       <td><span class="pill" style="background:${g.bg};color:${g.fg}">${r.s}</span></td><td>${res}</td></tr>`;
   }).join("") || `<tr><td colspan="7" style="text-align:center;color:#5a6784;padding:22px">ไม่พบใบงาน</td></tr>`;
@@ -536,6 +549,9 @@ document.addEventListener("click", e => {
   if (q) { e.preventDefault(); FIX[q.dataset.quickfix] = { st: "fixed", date: q.dataset.date, note: "รอบถัดไปตรวจผ่าน" }; saveFix(); render(); toast("ปิดเป็นแก้ไขแล้ว"); return; }
   const ed = e.target.closest("[data-edit]");
   if (ed) { openDlg(ed.dataset.edit); return; }
+  const pk = e.target.closest("[data-pick]");
+  if (pk) { const [p, b] = pk.dataset.pick.split("|"); const same = S.wh === p && S.branch === b && b !== "all";
+    S.wh = p; S.branch = same ? "all" : b; S.limit = 25; render(); return; }
   const t = e.target.closest("[data-wh],[data-month],[data-branch],[data-type],[data-st],[data-view],[data-fst]");
   if (!t) return;
   if (t.dataset.view) S.view = t.dataset.view;
