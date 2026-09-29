@@ -144,6 +144,18 @@
   .seg2 { display: flex; gap: 6px; flex-wrap: wrap; }
   .seg2 button { flex: 1; cursor: pointer; border: 1px solid #d6deeb; background: #fff; border-radius: 12px; padding: 10px; font-weight: 700; font-size: 13.5px; color: var(--ink3); }
   .seg2 button.on { border-color: transparent; color: #fff; }
+  .focus { background: #fff; border-radius: 22px; box-shadow: var(--shadow); padding: 18px 20px; display: grid; gap: 14px; animation: rise .45s ease both; }
+  .focus-hd { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .verdict { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 999px; font-size: 15px; font-weight: 800; }
+  .fcards { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px; }
+  .fcard { border-radius: 18px; padding: 14px 16px; display: grid; gap: 6px; align-content: start; border: 1px solid transparent; }
+  .fcard .top { display: flex; align-items: baseline; gap: 8px; }
+  .fcard .big { font-family: Archivo, sans-serif; font-size: 36px; font-weight: 900; line-height: 1; }
+  .fcard .ttl2 { font-size: 15px; font-weight: 700; }
+  .fcard .why { font-size: 13px; line-height: 1.55; }
+  .fcard .todo { font-size: 12.5px; font-weight: 600; opacity: .85; }
+  .fcard .go { justify-self: start; margin-top: 4px; cursor: pointer; border: 0; border-radius: 999px; padding: 8px 14px; font-size: 13px; font-weight: 700; color: #fff; }
+  @media (max-width: 1100px) { .fcards { grid-template-columns: minmax(0,1fr); } }
   .pernav { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 16px; background: #f5f7fb; }
   .navb { cursor: pointer; border: 0; width: 38px; height: 38px; border-radius: 12px; background: #fff; color: #16213a; font-weight: 800; box-shadow: var(--shadow-s); flex: none; }
   .navb:hover { background: #eaf1ff; }
@@ -215,6 +227,7 @@
 
 <main>
   <div class="tabs" id="tabs"></div>
+  <section class="focus" id="focus"></section>
   <div class="filters">
     <div class="pills" id="months"></div>
     <label class="sel">สาขา / อาคาร <select id="branch"></select></label>
@@ -519,12 +532,14 @@ function renderTypes() {
 const addD = (iso, n) => { const d = new Date(iso + "T00:00:00"); d.setDate(d.getDate() + n); return d.toLocaleDateString("sv-SE"); };
 function perRange() {
   const a = S.anchor || ASOF, d = new Date(a + "T00:00:00");
+  if (S.per === "all") return ["0000-00-00", "9999-99-99"];
   if (S.per === "day") return [a, a];
   if (S.per === "week") { const s = addD(a, -((d.getDay() + 6) % 7)); return [s, addD(s, 6)]; }
   const s = a.slice(0, 8) + "01", e = new Date(d.getFullYear(), d.getMonth() + 1, 0).toLocaleDateString("sv-SE"); return [s, e];
 }
 function perLabel([s, e]) {
   const TH_D = ["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัสบดี","ศุกร์","เสาร์"];
+  if (S.per === "all") return "ทุกช่วงเวลา";
   if (S.per === "day") return TH_D[new Date(s + "T00:00:00").getDay()] + " " + fmtD(s);
   if (S.per === "week") return "สัปดาห์ " + (+s.slice(8)) + (s.slice(5, 7) === e.slice(5, 7) ? "" : " " + TH_M[+s.slice(5, 7) - 1]) + " – " + fmtD(e);
   const FULL = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
@@ -538,8 +553,9 @@ function shiftPer(n) { const a = S.anchor || ASOF;
 function renderTable() {
   const [ps, pe] = perRange(), q = S.q.trim().toLowerCase();
   const base = rows({ month: true }).filter(r => r.due >= ps && r.due <= pe);
-  $("perTabs").innerHTML = [["day", "Daily"], ["week", "Weekly"], ["month", "Monthly"]].map(([k, l]) => `<button type="button" class="${S.per === k ? "on" : ""}" data-per="${k}">${l}</button>`).join("");
+  $("perTabs").innerHTML = [["day", "Daily"], ["week", "Weekly"], ["month", "Monthly"], ["all", "ทั้งหมด"]].map(([k, l]) => `<button type="button" class="${S.per === k ? "on" : ""}" data-per="${k}">${l}</button>`).join("");
   $("perLabel").textContent = perLabel([ps, pe]);
+  ["perPrev", "perNext", "perToday"].forEach(id => $(id).style.visibility = S.per === "all" ? "hidden" : "");
   const nOf = f => base.filter(f).length;
   $("perSum").innerHTML = base.length ? `กำหนดทำ <b>${base.length}</b> ใบ · เสร็จ <b style="color:#0a6b4d">${nOf(r => grp(r) === "done")}</b> · กำลังทำ <b style="color:#0f3fa4">${nOf(r => grp(r) === "prog")}</b> · เลยกำหนด <b style="color:#a8250f">${nOf(overdue)}</b> · ไม่ผ่าน <b style="color:#a8250f">${nOf(isFail)}</b>` : "ไม่มีใบงานที่กำหนดทำในช่วงนี้";
   const hit = (r, k) => k === "all" || (k === "fail" ? isFail(r) : k === "late" ? overdue(r) : grp(r) === k);
@@ -570,13 +586,59 @@ function renderTabs() {
   $("vOverview").style.display = S.view === "overview" ? "grid" : "none";
   $("vFail").style.display = S.view === "fail" ? "grid" : "none";
 }
-function render() { renderFilters(); renderHero(); renderTabs(); if (S.view === "overview") { renderBars(); renderResult(); renderTypes(); renderTable(); } else renderFail(); }
+/* กล่อง "วันนี้ต้องดูอะไร": สรุปเป็นภาษาคน 3 เรื่อง + ปุ่มพาไปดูรายการ */
+function renderFocus() {
+  const box = $("focus");
+  if (S.view !== "overview") { box.style.display = "none"; return; }
+  box.style.display = "";
+  const R = rows({ month: true }), late = R.filter(overdue), age = r => dayDiff(r.due, ASOF);
+  const late7 = late.filter(r => age(r) > 7);
+  const byB = {}; late.forEach(r => byB[r.b] = (byB[r.b] || 0) + 1);
+  const topB = Object.entries(byB).sort((a, b) => b[1] - a[1]).slice(0, 3);
+  const fo = R.filter(r => isFail(r) && repSt(r) !== "fixed").sort((a, b) => downDays(b) - downDays(a)), fo7 = fo.filter(r => downDays(r) > 7);
+  const td = R.filter(r => r.due === ASOF && grp(r) !== "cancel"), tdDone = td.filter(r => grp(r) === "done").length;
+  const level = late7.length || fo7.length ? "bad" : late.length || fo.length ? "warn" : "ok";
+  const V = { bad: ["ต้องแก้", "#c9301a", "#fff"], warn: ["ต้องดู", "#ffb13d", "#5a3a00"], ok: ["ปกติ", "#13a878", "#fff"] }[level];
+  const parts = [];
+  if (late.length) parts.push(`งานเลยกำหนด <b>${late.length}</b> ใบ${late7.length ? ` (เกิน 7 วัน <b>${late7.length}</b>)` : ""}`);
+  if (fo.length) parts.push(`เครื่องที่ตรวจไม่ผ่านยังไม่ได้แก้ <b>${fo.length}</b> ใบ`);
+  const card = (tone, big, unit, title, why, todo, go, label) => {
+    const T = { red: ["#fff4f1", "#ffc9bd", "#a8250f", "#c9301a"], amber: ["#fff8ea", "#ffe0a3", "#8a5200", "#c96a07"], blue: ["#eef4ff", "#cddcff", "#0f3fa4", "#1a5fe4"], green: ["#effaf5", "#bfe8d5", "#0a6b4d", "#13a878"] }[tone];
+    return `<div class="fcard" style="background:${T[0]};border-color:${T[1]};color:${T[2]}"><div class="top"><span class="big">${big}</span><span style="font-weight:700">${unit}</span></div>
+      <div class="ttl2">${title}</div><div class="why">${why}</div><div class="todo">👉 ${todo}</div>
+      ${go ? `<button type="button" class="go" data-go="${go}" style="background:${T[3]}">${label} →</button>` : ""}</div>`;
+  };
+  const scope = S.wh === "all" ? "ทุกคลัง" : WH[S.wh];
+  box.innerHTML = `<div class="focus-hd"><h2 style="margin:0;font-size:19px">วันนี้ต้องดูอะไร</h2><span class="tag">${scope}${S.branch !== "all" ? " · " + S.branch : ""} · ข้อมูล ณ ${fmtD(ASOF)}</span>
+      <span class="verdict" style="background:${V[1]};color:${V[2]}">${level === "ok" ? "✓" : "!"} ${V[0]}</span></div>
+    <div style="font-size:14.5px;color:#2a3b5f">${parts.length ? parts.join(" และ ") : "ไม่มีงานเลยกำหนด และไม่มีเครื่องที่ไม่ผ่านค้างอยู่"}</div>
+    <div class="fcards">
+      ${late.length ? card(late7.length ? "red" : "amber", late.length, "ใบ", "งานเลยกำหนด ยังไม่ปิดงาน",
+          "ค้างมากสุด: " + topB.map(([b, n]) => `<b>${b}</b> ${n}`).join(" · ") + (late.length ? `<br>นานที่สุด ${Math.max(...late.map(age))} วัน` : ""),
+          "โทรตามสาขาที่ค้างมากก่อน ถามว่าทำแล้วยังไม่ปิดในระบบ หรือยังไม่ได้ทำ", "late", "ดูรายการเลยกำหนด")
+        : card("green", "0", "ใบ", "ไม่มีงานเลยกำหนด", "ทุกใบงานที่ถึงกำหนดปิดครบแล้ว", "ไม่ต้องทำอะไร", "", "")}
+      ${fo.length ? card(fo7.length ? "red" : "amber", fo.length, "ใบ", "ตรวจไม่ผ่าน ยังไม่ได้แก้",
+          `ค้างนานสุด <b>${fo[0].e}</b> · ${fo[0].b} เสียมาแล้ว <b>${downDays(fo[0])}</b> วัน`,
+          "ถามช่างว่าซ่อมแล้วหรือยัง แล้วกด “อัปเดตการซ่อม” ให้เป็นปัจจุบัน", "fail", "ดูเครื่องที่ยังไม่แก้")
+        : card("green", "0", "ใบ", "ไม่มีเครื่องค้างซ่อม", "ทุกใบงานที่ไม่ผ่านแก้ไขแล้ว", "ไม่ต้องทำอะไร", "", "")}
+      ${card("blue", `${tdDone}/${td.length}`, "ใบ", "งานที่กำหนดทำวันนี้",
+          td.length ? `ปิดแล้ว ${tdDone} ใบ เหลืออีก <b>${td.length - tdDone}</b> ใบ` : "วันนี้ไม่มีงาน PM ที่ถึงกำหนด",
+          "เช็กก่อนเลิกงานว่าปิดครบ ถ้าไม่ครบพรุ่งนี้จะกลายเป็นงานเลยกำหนด", td.length ? "today" : "", "ดูงานวันนี้")}
+    </div>`;
+}
+
+function render() { renderFilters(); renderHero(); renderTabs(); renderFocus(); if (S.view === "overview") { renderBars(); renderResult(); renderTypes(); renderTable(); } else renderFail(); }
 
 document.addEventListener("click", e => {
   const q = e.target.closest("[data-quickfix]");
   if (q) { e.preventDefault(); FIX[q.dataset.quickfix] = { st: "fixed", date: q.dataset.date, note: "รอบถัดไปตรวจผ่าน" }; saveFix(); render(); toast("ปิดเป็นแก้ไขแล้ว"); return; }
   const ed = e.target.closest("[data-edit]");
   if (ed) { openDlg(ed.dataset.edit); return; }
+  const go = e.target.closest("[data-go]");
+  if (go) { const k = go.dataset.go; S.anchor = null; S.limit = 25; S.q = ""; $("q").value = "";
+    if (k === "fail") { S.view = "fail"; S.fst = "open"; render(); $("fBody").closest("section").scrollIntoView({ behavior: "smooth" }); return; }
+    S.view = "overview"; S.per = k === "today" ? "day" : "all"; S.st = k === "late" ? "late" : "all";
+    render(); $("rowTag").closest("section").scrollIntoView({ behavior: "smooth" }); return; }
   const pk = e.target.closest("[data-pick]");
   if (pk) { const [p, b] = pk.dataset.pick.split("|"); const same = S.wh === p && S.branch === b && b !== "all";
     S.wh = p; S.branch = same ? "all" : b; S.limit = 25; render(); return; }
