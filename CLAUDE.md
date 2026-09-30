@@ -25,6 +25,7 @@
 ## ระบบที่เกี่ยวข้อง
 repo `sttonnn/robot-report` คือที่รวมทุก Dashboard (ตอนนี้มีแค่ Robot Dashboard เป็น `index.html`; `Index.html` เป็นเวอร์ชันซ้ำ รอผู้ใช้ตัดสินใจ)
 - Robot Performance Dashboard (robot-dashboard.html) ใช้ pipeline Excel → Power Automate → Dropbox robot.csv → Supabase
+  - 30 ก.ย.: ซ่อนตู้ที่ 4 วันที่ 29/09/2026 (แถวไม่มีสายส่ง) ด้วย `PHANTOM` ใน renderVals ของ index.html · แก้ถาวร = Clear contents แถวนั้นใน Excel แล้วเอา PHANTOM ออกได้
 - PCG Warehouse Dashboard + warehouse-map.html (ตาราง Supabase `warehouses`)
 - PCG Project Portal (index.html) — การ์ด Daily Machine Check ยัง Coming Soon
 
