@@ -26,6 +26,7 @@
 repo `sttonnn/robot-report` คือที่รวมทุก Dashboard (ตอนนี้มีแค่ Robot Dashboard เป็น `index.html`; `Index.html` เป็นเวอร์ชันซ้ำ รอผู้ใช้ตัดสินใจ)
 - Robot Performance Dashboard (robot-dashboard.html) ใช้ pipeline Excel → Power Automate → Dropbox robot.csv → Supabase
   - 30 ก.ย.: ซ่อนตู้ที่ไม่มีสายส่งของวันที่ 29/09/2026 (โชว์เป็นตู้ 4 — เลขบนจอเป็นลำดับ seqOf ไม่ใช่เลขตู้ในไฟล์) ด้วย `PHANTOM` (key = วันที่) ใน renderVals ของ index.html · แก้ถาวร = Clear contents แถวนั้นใน Excel แล้วเอา PHANTOM ออกได้
+  - 30 ก.ย.: ปุ่ม "ลบ" ข้างเลขตู้ในตารางรายละเอียดตู้ = ซ่อนชั่วคราว (hideCont → Supabase robot_entries.hidden, ทุกเครื่องเห็นตรงกัน) · กู้คืนด้วย "เลิกซ่อนทั้งหมด" · ตัวกรองเช็กทั้งคีย์ วันที่#ตู้ และ วันที่#S<สายส่ง>
 - PCG Warehouse Dashboard + warehouse-map.html (ตาราง Supabase `warehouses`)
 - PCG Project Portal (index.html) — การ์ด Daily Machine Check ยัง Coming Soon
 
