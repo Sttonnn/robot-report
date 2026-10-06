@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IOT Dashboard · PCG</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap">
+<style>
+/* IOT Dashboard (6 ต.ค. 2569) · ข้อมูลจาก Tuya → GitHub Actions ทุก 15 นาที → Supabase iot_devices / iot_readings
+   ธีม: น้ำเงินเข้ม → ฟ้าไซแอน (สไตล์ Portal: โค้ง ไล่สี เงา) · สีทั้งหน้าอยู่ใน :root */
+:root{
+  --bg:#eef3f8; --card:#fff; --ink:#17212b; --ink2:#4a5866; --mute:#7d8a97; --line:#e1e8ef; --grid:#edf1f5;
+  --h1:#0b2a4a; --h2:#0f5c8c; --h3:#12a5c2;
+  --acc:#0f7fb0; --temp:#0f7fb0; --hum:#5b6bd6; --pow:#7a4fc9;
+  --ok:#1f9d61; --warn:#c77a06; --bad:#c7362b; --off:#8a96a3;
+  --r:20px; --sh:0 10px 30px rgba(16,42,72,.10), 0 2px 6px rgba(16,42,72,.06);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:14px/1.5 "IBM Plex Sans Thai",system-ui,sans-serif}
+a{color:inherit}
+.num{font-family:Archivo,"IBM Plex Sans Thai",sans-serif;font-variant-numeric:tabular-nums}
+.wrap{max-width:1320px;margin:0 auto;padding:0 20px 40px}
+header.hero{background:linear-gradient(120deg,var(--h1),var(--h2) 55%,var(--h3));color:#fff;border-radius:0 0 28px 28px;box-shadow:var(--sh);margin-bottom:22px}
+.hero .wrap{padding-top:18px;padding-bottom:22px}
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.home{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);padding:6px 12px;border-radius:999px;text-decoration:none;font-weight:600;font-size:13px}
+.home:hover{background:rgba(255,255,255,.24)}
+.badge{font-size:12px;font-weight:700;background:#34d399;color:#053b26;padding:3px 10px;border-radius:999px;letter-spacing:.04em}
+h1{margin:14px 0 2px;font:800 30px/1.15 Archivo,"IBM Plex Sans Thai",sans-serif;letter-spacing:-.01em}
+.sub{opacity:.85}
+.ctrl{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:16px}
+.seg{display:inline-flex;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:3px}
+.seg button{font:inherit;font-weight:600;font-size:13px;color:#fff;background:none;border:0;border-radius:999px;padding:6px 14px;cursor:pointer}
+.seg button.on{background:#fff;color:var(--h1)}
+.upd{margin-left:auto;font-size:13px;opacity:.9}
+.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;margin-bottom:22px}
+.kpi{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:16px 18px;position:relative;overflow:hidden}
+.kpi:before{content:"";position:absolute;inset:0 0 auto 0;height:4px;background:var(--c,var(--acc))}
+.kpi .l{color:var(--ink2);font-weight:600;font-size:13px}
+.kpi .v{font:800 30px/1.1 Archivo,sans-serif;margin-top:6px;font-variant-numeric:tabular-nums}
+.kpi .v small{font-size:15px;font-weight:700;color:var(--ink2);margin-left:3px}
+.kpi .s{color:var(--mute);font-size:12.5px;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+section{margin-bottom:26px}
+.sh{display:flex;align-items:center;gap:10px;margin:0 0 12px}
+.sh h2{margin:0;font:700 19px/1.2 "IBM Plex Sans Thai",sans-serif}
+.sh .ic{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,var(--a1),var(--a2));box-shadow:0 4px 12px rgba(0,0,0,.12)}
+.sh .ic svg{width:19px;height:19px}
+.sh .cnt{color:var(--mute);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.dev{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:14px 16px 10px;cursor:pointer;border:1px solid transparent;transition:transform .12s,border-color .12s;text-align:left;font:inherit;color:inherit;width:100%}
+.dev:hover,.dev:focus-visible{transform:translateY(-2px);border-color:#bfd3e4;outline:none}
+.dev .hd{display:flex;align-items:center;gap:8px}
+.dev .nm{font-weight:700;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chip{font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:999px;background:#eef2f6;color:var(--ink2);white-space:nowrap}
+.st{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;white-space:nowrap}
+.st i{width:8px;height:8px;border-radius:50%;background:currentColor;display:inline-block}
+.st.ok{color:var(--ok)} .st.off{color:var(--off)} .st.stale{color:var(--warn)}
+.dev .big{display:flex;align-items:baseline;gap:14px;margin:8px 0 2px}
+.dev .big .v{font:800 30px/1 Archivo,sans-serif;font-variant-numeric:tabular-nums}
+.dev .big .v small{font-size:14px;color:var(--ink2);font-weight:700;margin-left:2px}
+.dev .big .v2{color:var(--ink2);font-weight:600}
+.dev .meta{color:var(--mute);font-size:12px;display:flex;justify-content:space-between;gap:8px}
+.dev.isoff .big .v{color:var(--off)}
+.spark{display:block;width:100%;height:56px;margin-top:4px}
+.sw{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.swi{background:var(--card);border-radius:16px;box-shadow:var(--sh);padding:12px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;border:1px solid transparent;font:inherit;color:inherit;text-align:left;width:100%}
+.swi:hover{border-color:#bfd3e4}
+.swi .nm{font-weight:700;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.swi .sub2{font-size:12px;color:var(--mute)}
+.pill{font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;white-space:nowrap}
+.pill.on{background:#e3f6ec;color:#11683f} .pill.offp{background:#f1f3f5;color:#5d6873} .pill.na{background:#f1f3f5;color:#8a96a3}
+.note{background:#fff8e6;border:1px solid #f1d58c;color:#6b4d00;border-radius:16px;padding:14px 16px;margin-bottom:20px}
+.note b{display:block;margin-bottom:4px}
+.empty{color:var(--mute);background:var(--card);border-radius:16px;padding:16px;box-shadow:var(--sh)}
+.tip{position:fixed;pointer-events:none;background:#17212b;color:#fff;border-radius:10px;padding:7px 10px;font-size:12.5px;box-shadow:0 8px 20px rgba(0,0,0,.25);z-index:50;display:none;white-space:nowrap}
+.tip b{font:700 15px Archivo,sans-serif;display:block}
+.tip .k{display:inline-block;width:12px;height:2px;vertical-align:middle;margin-right:6px}
+/* รายละเอียดอุปกรณ์ */
+.dlg{position:fixed;inset:0;background:rgba(12,24,38,.5);display:none;align-items:flex-start;justify-content:center;padding:28px 16px;z-index:40;overflow:auto}
+.dlg.open{display:flex}
+.box{background:var(--card);border-radius:24px;box-shadow:0 24px 60px rgba(0,0,0,.3);width:min(860px,100%);padding:20px 22px}
+.box .bh{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.box h3{margin:0;font-size:20px;flex:1;min-width:0}
+.x{font:inherit;font-weight:700;border:0;background:#eef2f6;border-radius:12px;padding:7px 12px;cursor:pointer}
+.chartT{font-weight:700;margin:16px 0 4px;color:var(--ink2);font-size:13.5px}
+.chart{display:block;width:100%;height:200px}
+.tbl{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px}
+.tbl th,.tbl td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+.tbl th:first-child,.tbl td:first-child{text-align:left}
+.tbl th{color:var(--mute);font-weight:600}
+.tblw{max-height:260px;overflow:auto;border-radius:12px;border:1px solid var(--line);margin-top:8px}
+details summary{cursor:pointer;color:var(--acc);font-weight:600;margin-top:12px}
+@media (max-width:1100px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:640px){
+  .wrap{padding:0 16px 32px} h1{font-size:24px}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))} .kpi .v{font-size:24px}
+  .upd{margin-left:0;width:100%}
+}
+</style>
+</head>
+<body>
+<header class="hero"><div class="wrap">
+  <div class="top"><a class="home" href="../index.html">← หน้าหลัก</a><span class="badge">LIVE</span></div>
+  <h1>IOT Dashboard</h1>
+  <div class="sub">อุณหภูมิ/ความชื้น · ไฟฟ้า/พลังงาน · สถานะเครื่อง จากอุปกรณ์ Tuya · อัปเดตอัตโนมัติทุก 15 นาที</div>
+  <div class="ctrl">
+    <div class="seg" id="segSite" role="group" aria-label="เลือกคลัง"></div>
+    <div class="seg" id="segRange" role="group" aria-label="ช่วงเวลา">
+      <button data-r="24" class="on">24 ชม.</button><button data-r="168">7 วัน</button>
+    </div>
+    <div class="upd" id="upd">กำลังโหลด…</div>
+  </div>
+</div></header>
+
+<main class="wrap">
+  <div id="msg"></div>
+  <div class="kpis" id="kpis"></div>
+  <section id="secTemp"></section>
+  <section id="secPow"></section>
+  <section id="secSw"></section>
+</main>
+
+<div class="tip" id="tip"></div>
+<div class="dlg" id="dlg" role="dialog" aria-modal="true"><div class="box" id="box"></div></div>
+
+<script>
+const SB = "https://mgnshovnibcmiptoxdfe.supabase.co";
+const ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1nbnNob3ZuaWJjbWlwdG94ZGZlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkzNzI1NDIsImV4cCI6MjEwNDk0ODU0Mn0.UoPu-i6ODMEgyuqoO6oKHf0JIqFKpWkSpBkOKrpITwQ";
+const DEMO = /[?&]demo=1/.test(location.search);
+const S = { site: "", range: 24, devs: [], reads: {} };
+const STALE_MIN = 45;           // ไม่ได้ค่าใหม่เกิน 45 นาที = ข้อมูลค้าง
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const f1 = (x, d = 1) => x == null || isNaN(x) ? "–" : Number(x).toLocaleString("th-TH", { minimumFractionDigits: d, maximumFractionDigits: d });
+const TH_TIME = (d) => d.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Bangkok" });
+const TH_DT = (d) => d.toLocaleString("th-TH", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Bangkok" });
+const ago = (t) => { const m = Math.round((Date.now() - t) / 60000); return m < 1 ? "เมื่อสักครู่" : m < 60 ? m + " นาทีที่แล้ว" : m < 1440 ? Math.floor(m / 60) + " ชม. ที่แล้ว" : Math.floor(m / 1440) + " วันที่แล้ว"; };
+
+const KIND = (d) => ({ qxj: "temp", wnykq: "temp", dlq: "pow", kg: "sw", znjdq: "sw", infrared_ac: "ir" })[d.category] || "sw";
+
+/* ---------- โหลดข้อมูล ---------- */
+async function get(path) {
+  const out = [];
+  for (let off = 0; off < 100000; off += 1000) {
+    const r = await fetch(SB + "/rest/v1/" + path, { headers: { apikey: ANON, Authorization: "Bearer " + ANON, Range: off + "-" + (off + 999), "Range-Unit": "items" } });
+    if (!r.ok) throw new Error(r.status + " " + (await r.text()).slice(0, 200));
+    const j = await r.json(); out.push(...j); if (j.length < 1000) break;
+  }
+  return out;
+}
+async function load() {
+  $("#upd").textContent = "กำลังโหลด…";
+  try {
+    let devs, rows;
+    if (DEMO) ({ devs, rows } = demo());
+    else {
+      const since = new Date(Date.now() - S.range * 3600e3).toISOString();
+      [devs, rows] = await Promise.all([
+        get("iot_devices?select=id,name,category,product,site,online,updated_at&order=name"),
+        get("iot_readings?select=device_id,ts,online,temp_c,humidity,power_w,voltage_v,current_a,energy_kwh,switch_on&ts=gte." + since + "&order=ts")
+      ]);
+    }
+    S.devs = devs; S.reads = {};
+    for (const r of rows) (S.reads[r.device_id] = S.reads[r.device_id] || []).push({ ...r, t: new Date(r.ts).getTime() });
+    $("#msg").innerHTML = devs.length ? "" : `<div class="note"><b>ยังไม่มีข้อมูล</b>ตาราง iot_devices ยังว่าง · รอ GitHub Actions "IOT · ดึงข้อมูล Tuya ทุก 15 นาที" รันสำเร็จครั้งแรก (ต้องมี secret SUPABASE_SERVICE_ROLE)</div>`;
+    render();
+  } catch (e) {
+    $("#upd").textContent = "โหลดไม่สำเร็จ";
+    $("#msg").innerHTML = `<div class="note"><b>โหลดข้อมูลจาก Supabase ไม่สำเร็จ</b>${/PGRST205|404|does not exist/.test(e.message) ? "ยังไม่มีตาราง iot_devices / iot_readings → รัน iot/tools/iot.sql ใน Supabase" : esc(e.message)}</div>`;
+  }
+}
+
+/* ---------- สรุปต่ออุปกรณ์ ---------- */
+function info(d) {
+  const rs = S.reads[d.id] || [];
+  const last = rs[rs.length - 1];
+  const t = last ? last.t : new Date(d.updated_at).getTime();
+  const state = !d.online ? "off" : (Date.now() - t > STALE_MIN * 60000 ? "stale" : "ok");
+  return { rs, last: last || {}, t, state };
+}
+const stHtml = (s) => s === "ok" ? '<span class="st ok"><i></i>ออนไลน์</span>' : s === "stale" ? '<span class="st stale"><i></i>ข้อมูลค้าง</span>' : '<span class="st off"><i></i>ออฟไลน์</span>';
+// พลังงานที่ใช้ในช่วง = ค่าสะสมล่าสุด − แรกสุด (ถ้ามิเตอร์รีเซ็ต รวมเฉพาะช่วงที่เพิ่ม)
+function used(rs) { let s = 0; for (let i = 1; i < rs.length; i++) { const a = rs[i - 1].energy_kwh, b = rs[i].energy_kwh; if (a != null && b != null && b >= a) s += b - a; } return s; }
+
+/* ---------- แสดงผล ---------- */
+function render() {
+  const sites = [...new Set(S.devs.map(d => d.site || "อื่นๆ"))].sort((a, b) => (a === "อื่นๆ") - (b === "อื่นๆ") || a.localeCompare(b, "th", { numeric: true }));
+  $("#segSite").innerHTML = [["", "ทุกคลัง"], ...sites.map(s => [s, s])].map(([k, l]) => `<button data-s="${esc(k)}" class="${S.site === k ? "on" : ""}">${esc(l)}</button>`).join("");
+  const devs = S.devs.filter(d => !S.site || (d.site || "อื่นๆ") === S.site);
+  const I = new Map(devs.map(d => [d.id, info(d)]));
+  const lastT = Math.max(0, ...[...I.values()].map(x => x.t || 0));
+  $("#upd").textContent = lastT ? "ข้อมูลล่าสุด " + TH_DT(new Date(lastT)) + " · " + ago(lastT) : "–";
+
+  const temps = devs.filter(d => KIND(d) === "temp"), pows = devs.filter(d => KIND(d) === "pow"), sws = devs.filter(d => KIND(d) === "sw" || KIND(d) === "ir");
+  const on = devs.filter(d => d.online).length;
+  const liveT = temps.filter(d => I.get(d.id).state === "ok" && I.get(d.id).last.temp_c != null);
+  const hot = liveT.slice().sort((a, b) => I.get(b.id).last.temp_c - I.get(a.id).last.temp_c)[0];
+  const pNow = pows.filter(d => I.get(d.id).state === "ok").reduce((s, d) => s + (I.get(d.id).last.power_w || 0), 0);
+  const kwh = pows.reduce((s, d) => s + used(I.get(d.id).rs), 0);
+  const off = devs.filter(d => I.get(d.id).state !== "ok");
+  const kpi = (c, l, v, s) => `<div class="kpi" style="--c:${c}"><div class="l">${l}</div><div class="v">${v}</div><div class="s" title="${esc(s)}">${esc(s)}</div></div>`;
+  $("#kpis").innerHTML =
+    kpi("var(--ok)", "อุปกรณ์ออนไลน์", `${on}<small>/ ${devs.length}</small>`, devs.length ? Math.round(on / devs.length * 100) + "% ของทั้งหมด" : "") +
+    kpi("var(--temp)", "อุณหภูมิสูงสุดตอนนี้", hot ? `${f1(I.get(hot.id).last.temp_c)}<small>°C</small>` : "–", hot ? hot.name : "ไม่มีเซนเซอร์ออนไลน์") +
+    kpi("var(--hum)", "อุณหภูมิเฉลี่ยตอนนี้", liveT.length ? `${f1(liveT.reduce((s, d) => s + I.get(d.id).last.temp_c, 0) / liveT.length)}<small>°C</small>` : "–", `จากเซนเซอร์ออนไลน์ ${liveT.length} ตัว`) +
+    kpi("var(--pow)", "กำลังไฟรวมตอนนี้", `${f1(pNow / 1000, 2)}<small>kW</small>`, `ใช้ไป ${f1(kwh, 2)} kWh ใน ${S.range === 24 ? "24 ชม." : "7 วัน"}`) +
+    kpi(off.length ? "var(--bad)" : "var(--ok)", "ออฟไลน์ / ข้อมูลค้าง", `${off.length}<small>เครื่อง</small>`, off.length ? off.map(d => d.name).join(", ") : "ทุกเครื่องปกติ");
+
+  const ICON = {
+    temp: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 14.8V4a2 2 0 1 0-4 0v10.8a4 4 0 1 0 4 0z"/></svg>',
+    pow: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>',
+    sw: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v8"/><path d="M6.4 6.6a8 8 0 1 0 11.2 0"/></svg>'
+  };
+  const head = (ic, a1, a2, t, n) => `<div class="sh"><span class="ic" style="--a1:${a1};--a2:${a2}">${ic}</span><h2>${t}</h2><span class="cnt">${n} เครื่อง</span></div>`;
+  const byState = (a, b) => ({ ok: 0, stale: 1, off: 2 }[I.get(a.id).state] - { ok: 0, stale: 1, off: 2 }[I.get(b.id).state]) || a.name.localeCompare(b.name, "th", { numeric: true });
+
+  $("#secTemp").innerHTML = temps.length ? head(ICON.temp, "#12a5c2", "#0f5c8c", "อุณหภูมิ / ความชื้น", temps.length) + `<div class="grid">${temps.sort(byState).map(d => {
+    const x = I.get(d.id);
+    return `<button class="dev ${x.state === "off" ? "isoff" : ""}" data-id="${esc(d.id)}"><div class="hd"><span class="nm" title="${esc(d.name)}">${esc(d.name)}</span>${d.site ? `<span class="chip">${esc(d.site)}</span>` : ""}</div>
+      <div class="big"><span class="v">${f1(x.last.temp_c)}<small>°C</small></span><span class="v2">💧 ${f1(x.last.humidity, 0)}%</span></div>
+      <svg class="spark" data-spark="${esc(d.id)}" data-k="temp_c"></svg>
+      <div class="meta">${stHtml(x.state)}<span>${x.t ? ago(x.t) : ""}</span></div></button>`; }).join("")}</div>` : "";
+
+  $("#secPow").innerHTML = pows.length ? head(ICON.pow, "#9b6be0", "#5b2fa6", "ไฟฟ้า / พลังงาน", pows.length) + `<div class="grid">${pows.sort(byState).map(d => {
+    const x = I.get(d.id);
+    return `<button class="dev ${x.state === "off" ? "isoff" : ""}" data-id="${esc(d.id)}"><div class="hd"><span class="nm" title="${esc(d.name)}">${esc(d.name)}</span>${d.site ? `<span class="chip">${esc(d.site)}</span>` : ""}</div>
+      <div class="big"><span class="v">${f1((x.last.power_w || 0) / 1000, 2)}<small>kW</small></span><span class="v2">${f1(x.last.voltage_v, 0)} V · ${f1(x.last.current_a, 1)} A</span></div>
+      <svg class="spark" data-spark="${esc(d.id)}" data-k="power_w"></svg>
+      <div class="meta">${stHtml(x.state)}<span>ใช้ไป ${f1(used(x.rs), 2)} kWh</span></div></button>`; }).join("")}</div>` : "";
+
+  $("#secSw").innerHTML = sws.length ? head(ICON.sw, "#34c38f", "#1f7a55", "สถานะเครื่อง (สวิตช์ / แอร์)", sws.length) + `<div class="sw">${sws.sort(byState).map(d => {
+    const x = I.get(d.id), ir = KIND(d) === "ir";
+    const sOn = x.last.switch_on;
+    const pct = !ir && x.rs.length ? Math.round(x.rs.filter(r => r.switch_on).length / x.rs.length * 100) : null;
+    const pill = ir ? '<span class="pill na">สั่งผ่านรีโมต</span>' : sOn == null ? '<span class="pill na">–</span>' : sOn ? '<span class="pill on">เปิด</span>' : '<span class="pill offp">ปิด</span>';
+    return `<button class="swi" data-id="${esc(d.id)}"><div style="flex:1;min-width:0"><div class="nm" title="${esc(d.name)}">${esc(d.name)}</div>
+      <div class="sub2">${stHtml(x.state)}${pct != null ? ` · เปิด ${pct}% ของช่วง` : ""}</div></div>${pill}</button>`; }).join("")}</div>` : "";
+
+  document.querySelectorAll("svg[data-spark]").forEach(el => { const rs = S.reads[el.dataset.spark] || []; line(el, rs, el.dataset.k, { spark: true }); });
+}
+
+/* ---------- กราฟเส้น (1 ชุดต่อกราฟ · crosshair + tooltip) ---------- */
+const UNIT = { temp_c: "°C", humidity: "%", power_w: "W", voltage_v: "V" };
+const COL = { temp_c: "var(--temp)", humidity: "var(--hum)", power_w: "var(--pow)", voltage_v: "var(--pow)" };
+function line(svg, rs, k, o = {}) {
+  const W = svg.clientWidth || 300, H = svg.clientHeight || 56;
+  const pts = rs.filter(r => r[k] != null).map(r => [r.t, +r[k]]);
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  if (pts.length < 2) { svg.innerHTML = `<text x="${W / 2}" y="${H / 2 + 4}" text-anchor="middle" fill="#9aa6b2" font-size="12">${pts.length ? "รอข้อมูลเพิ่ม" : "ไม่มีข้อมูลในช่วงนี้"}</text>`; return; }
+  const pl = o.spark ? 2 : 44, pr = o.spark ? 2 : 10, pt = o.spark ? 6 : 10, pb = o.spark ? 4 : 24;
+  const t0 = Date.now() - S.range * 3600e3, t1 = Date.now();
+  let lo = Math.min(...pts.map(p => p[1])), hi = Math.max(...pts.map(p => p[1]));
+  if (k === "power_w") lo = 0;
+  if (hi - lo < 1) { hi += .5; lo -= .5; }
+  const pad = (hi - lo) * .1; hi += pad; if (k !== "power_w") lo -= pad;
+  const X = t => pl + (t - t0) / (t1 - t0) * (W - pl - pr), Y = v => pt + (1 - (v - lo) / (hi - lo)) * (H - pt - pb);
+  // ตัดเส้นเมื่อขาดข้อมูลเกิน 45 นาที
+  let d = "", prev = null;
+  for (const [t, v] of pts) { d += (prev == null || t - prev > 45 * 60000 ? "M" : "L") + X(t).toFixed(1) + "," + Y(v).toFixed(1); prev = t; }
+  let g = "";
+  if (!o.spark) {
+    const ticks = 4;
+    for (let i = 0; i <= ticks; i++) { const v = lo + (hi - lo) * i / ticks, y = Y(v);
+      g += `<line x1="${pl}" x2="${W - pr}" y1="${y}" y2="${y}" stroke="var(--grid)"/><text x="${pl - 6}" y="${y + 4}" text-anchor="end" fill="#7d8a97" font-size="11">${f1(v, k === "power_w" && hi > 1000 ? 0 : 1)}</text>`; }
+    const step = S.range === 24 ? 6 * 3600e3 : 24 * 3600e3;
+    for (let t = Math.ceil(t0 / step) * step; t <= t1; t += step)
+      g += `<text x="${X(t)}" y="${H - 6}" text-anchor="middle" fill="#7d8a97" font-size="11">${S.range === 24 ? TH_TIME(new Date(t)) : new Date(t).toLocaleDateString("th-TH", { day: "numeric", month: "short", timeZone: "Asia/Bangkok" })}</text>`;
+  }
+  const [lt, lv] = pts[pts.length - 1];
+  svg.innerHTML = g + `<path d="${d}" fill="none" stroke="${COL[k]}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="${X(lt)}" cy="${Y(lv)}" r="3.5" fill="${COL[k]}" stroke="#fff" stroke-width="2"/>
+    <line class="xh" y1="${pt}" y2="${H - pb}" stroke="#9aa6b2" stroke-width="1" style="display:none"/><circle class="xd" r="4" fill="${COL[k]}" stroke="#fff" stroke-width="2" style="display:none"/>
+    <rect x="${pl}" y="0" width="${W - pl - pr}" height="${H}" fill="transparent"/>`;
+  const xh = svg.querySelector(".xh"), xd = svg.querySelector(".xd"), tip = $("#tip");
+  svg.onpointermove = (e) => {
+    const r = svg.getBoundingClientRect(), mx = (e.clientX - r.left) * W / r.width;
+    const t = t0 + (mx - pl) / (W - pl - pr) * (t1 - t0);
+    let best = pts[0]; for (const p of pts) if (Math.abs(p[0] - t) < Math.abs(best[0] - t)) best = p;
+    const x = X(best[0]), y = Y(best[1]);
+    xh.setAttribute("x1", x); xh.setAttribute("x2", x); xh.style.display = ""; xd.setAttribute("cx", x); xd.setAttribute("cy", y); xd.style.display = "";
+    tip.innerHTML = ""; const b = document.createElement("b"); b.textContent = f1(best[1], k === "power_w" ? 0 : 1) + " " + UNIT[k];
+    const s = document.createElement("div"); s.textContent = TH_DT(new Date(best[0])); tip.append(b, s);
+    tip.style.display = "block"; tip.style.left = Math.min(e.clientX + 14, innerWidth - tip.offsetWidth - 8) + "px"; tip.style.top = (e.clientY - 46) + "px";
+  };
+  svg.onpointerleave = () => { xh.style.display = xd.style.display = "none"; tip.style.display = "none"; };
+}
+
+/* ---------- หน้าต่างรายละเอียด ---------- */
+function openDev(id) {
+  const d = S.devs.find(x => x.id === id); if (!d) return;
+  const x = info(d), k = KIND(d);
+  const charts = k === "temp" ? [["temp_c", "อุณหภูมิ (°C)"], ["humidity", "ความชื้น (%)"]] : k === "pow" ? [["power_w", "กำลังไฟ (W)"], ["voltage_v", "แรงดัน (V)"]] : [];
+  const cols = k === "temp" ? [["temp_c", "°C", 1], ["humidity", "%", 0]] : k === "pow" ? [["power_w", "W", 0], ["voltage_v", "V", 1], ["current_a", "A", 2], ["energy_kwh", "kWh สะสม", 3]] : [["switch_on", "สถานะ"]];
+  const rows = x.rs.slice().reverse();
+  $("#box").innerHTML = `<div class="bh"><h3>${esc(d.name)}</h3>${d.site ? `<span class="chip">${esc(d.site)}</span>` : ""}${stHtml(x.state)}<button class="x" id="xClose">ปิด ✕</button></div>
+    <div style="color:var(--mute);font-size:12.5px;margin-top:4px">${esc(d.product || d.category)} · อัปเดต ${x.t ? TH_DT(new Date(x.t)) + " (" + ago(x.t) + ")" : "–"} · ${S.range === 24 ? "24 ชม." : "7 วัน"}ล่าสุด ${x.rs.length} ค่า</div>
+    ${charts.map(([kk, t]) => `<div class="chartT">${t}</div><svg class="chart" data-k="${kk}"></svg>`).join("") || (k === "ir" ? '<p class="empty" style="margin-top:14px">แอร์ที่สั่งผ่านรีโมตอินฟราเรด Tuya ไม่ส่งค่าสถานะกลับมา จึงแสดงได้แค่ออนไลน์/ออฟไลน์</p>' : "")}
+    ${rows.length ? `<details ${charts.length ? "" : "open"}><summary>ตารางค่าทั้งหมด (${rows.length})</summary><div class="tblw"><table class="tbl"><thead><tr><th>เวลา</th>${cols.map(c => `<th>${c[1]}</th>`).join("")}</tr></thead><tbody>${rows.map(r => `<tr><td>${TH_DT(new Date(r.t))}</td>${cols.map(c => `<td class="num">${c[0] === "switch_on" ? (r.switch_on == null ? "–" : r.switch_on ? "เปิด" : "ปิด") : f1(r[c[0]], c[2])}</td>`).join("")}</tr>`).join("")}</tbody></table></div></details>` : ""}`;
+  $("#dlg").classList.add("open");
+  $("#box").querySelectorAll("svg.chart").forEach(el => line(el, x.rs, el.dataset.k));
+  $("#xClose").onclick = closeDev; $("#xClose").focus();
+}
+function closeDev() { $("#dlg").classList.remove("open"); $("#tip").style.display = "none"; }
+
+/* ---------- เหตุการณ์ ---------- */
+document.addEventListener("click", (e) => {
+  const s = e.target.closest("#segSite button"); if (s) { S.site = s.dataset.s; render(); return; }
+  const r = e.target.closest("#segRange button"); if (r) { S.range = +r.dataset.r; document.querySelectorAll("#segRange button").forEach(b => b.classList.toggle("on", b === r)); load(); return; }
+  const d = e.target.closest("[data-id]"); if (d) { openDev(d.dataset.id); return; }
+  if (e.target.id === "dlg") closeDev();
+});
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeDev(); });
+let rz; addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(render, 150); });
+setInterval(() => { if (!document.hidden && !$("#dlg").classList.contains("open")) load(); }, 5 * 60000);
+
+/* ---------- ข้อมูลตัวอย่าง (?demo=1) ---------- */
+function demo() {
+  const L = [["WH5-5AN", "qxj", "WH5", 29.8, 74], ["WH5-5BF", "qxj", "WH5", 29.8, 73], ["WH8-DRVBC", "qxj", "WH8", 30.2, 73], ["WH8-5BU", "qxj", "WH8", 29.7, 75], ["WH29-cool room1", "qxj", "WH29", 35, 50, 0], ["WH29-cool room2", "qxj", "WH29", 26, 60],
+    ["WH5-CANTEEN AIR1", "wnykq", "WH5", 26.5, 67], ["WH8-BW-SHUTTLE", "dlq", "WH8", 4850], ["WH8-FAN1", "dlq", "WH8", 0, 0, 0], ["WH5-FAN2", "kg", "WH5"], ["SKYLIGHT_AA-AH", "znjdq", null], ["Air ทีมadmin", "infrared_ac", null, 0, 0, 0]];
+  const now = Date.now(), devs = [], rows = [];
+  L.forEach(([name, cat, site, a, b, on = 1], i) => {
+    const id = "demo" + i; devs.push({ id, name, category: cat, site, online: !!on, updated_at: new Date(now).toISOString() });
+    for (let t = now - S.range * 3600e3; t <= now; t += 15 * 60000) {
+      const h = new Date(t).getHours() + new Date(t).getMinutes() / 60, wave = Math.sin((h - 9) / 24 * 2 * Math.PI);
+      const r = { device_id: id, ts: new Date(t).toISOString(), online: !!on };
+      if (cat === "qxj" || cat === "wnykq") { r.temp_c = +(a + wave * 2 + Math.random() * .3).toFixed(1); r.humidity = Math.round(b - wave * 6); }
+      if (cat === "dlq") { const w = h > 7 && h < 20 ? a * (0.8 + Math.random() * .3) : a * .1; r.power_w = on ? Math.round(w) : 0; r.voltage_v = 230 + Math.random() * 5; r.current_a = r.power_w / 230; r.energy_kwh = (t - now) / 3600e3 * a / 1000 + 100; }
+      if (cat === "kg" || cat === "znjdq") r.switch_on = h > 6 && h < 19;
+      if (!on && t > now - 5 * 3600e3) continue;
+      rows.push(r);
+    }
+  });
+  return { devs, rows };
+}
+load();
+</script>
+</body>
+</html>
