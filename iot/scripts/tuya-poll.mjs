@@ -9,7 +9,7 @@ const HOSTS = { sg: "https://openapi-sg.iotbing.com", us: "https://openapi.tuyau
   eu: "https://openapi.tuyaeu.com", weaz: "https://openapi-weaz.tuyaeu.com", in: "https://openapi.tuyain.com", cn: "https://openapi.tuyacn.com" };
 const HOST = HOSTS[REGION];
 const SB = process.env.SUPABASE_URL || "https://mgnshovnibcmiptoxdfe.supabase.co";
-const SR = process.env.SUPABASE_SERVICE_ROLE || "";
+const SR = (process.env.SUPABASE_SERVICE_ROLE || "").trim();
 const DRY = process.argv.includes("--dry");
 
 const out = [];
@@ -20,6 +20,13 @@ function finish(code) {
 }
 const fail = (s) => { log("❌ " + s); finish(1); };
 
+// fetch ซ้ำได้ 3 ครั้ง (เน็ตสะดุดชั่วคราว) · error บอกปลายทาง
+async function rfetch(url, opt, n = 3) {
+  for (let i = 1; ; i++) {
+    try { return await fetch(url, opt); }
+    catch (e) { if (i >= n) throw new Error(`เชื่อม ${new URL(url).host} ไม่ได้: ${e.cause ? e.cause.code || e.cause.message : e.message}`); await new Promise(r => setTimeout(r, 2000 * i)); }
+  }
+}
 const sha256 = (s) => crypto.createHash("sha256").update(s).digest("hex");
 async function tuya(method, path, token = "") {
   const t = Date.now().toString(), nonce = crypto.randomUUID();
@@ -29,11 +36,11 @@ async function tuya(method, path, token = "") {
   const sign = crypto.createHmac("sha256", SECRET).update(ID + token + t + nonce + sts).digest("hex").toUpperCase();
   const h = { client_id: ID, sign, t, nonce, sign_method: "HMAC-SHA256" };
   if (token) h.access_token = token;
-  const r = await fetch(HOST + path, { method, headers: h });
+  const r = await rfetch(HOST + path, { method, headers: h });
   return r.json();
 }
 async function sb(path, rows, prefer) {
-  const r = await fetch(SB + "/rest/v1/" + path, { method: "POST",
+  const r = await rfetch(SB + "/rest/v1/" + path, { method: "POST",
     headers: { apikey: SR, Authorization: "Bearer " + SR, "Content-Type": "application/json", Prefer: prefer },
     body: JSON.stringify(rows) });
   if (!r.ok) throw new Error(`Supabase ${path}: ${r.status} ${(await r.text()).slice(0, 300)}`);
