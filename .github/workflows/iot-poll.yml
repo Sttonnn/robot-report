@@ -1,0 +1,25 @@
+name: IOT · ดึงข้อมูล Tuya ทุก 15 นาที
+on:
+  schedule:
+    - cron: "7,22,37,52 * * * *"
+  workflow_dispatch:
+  push:
+    branches: [claude/wonderful-ride-myzde3]
+    paths: [iot/scripts/tuya-poll.mjs, .github/workflows/iot-poll.yml]
+permissions:
+  contents: read
+concurrency: { group: iot-poll, cancel-in-progress: false }
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: node iot/scripts/tuya-poll.mjs
+        env:
+          TUYA_ACCESS_ID: ${{ secrets.TUYA_ACCESS_ID }}
+          TUYA_ACCESS_SECRET: ${{ secrets.TUYA_ACCESS_SECRET }}
+          TUYA_REGION: ${{ secrets.TUYA_REGION }}
+          SUPABASE_SERVICE_ROLE: ${{ secrets.SUPABASE_SERVICE_ROLE }}
