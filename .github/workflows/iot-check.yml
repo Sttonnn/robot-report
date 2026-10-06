@@ -1,0 +1,20 @@
+name: IOT · ตรวจการเชื่อม Tuya
+on:
+  workflow_dispatch:
+  push:
+    branches: [claude/wonderful-ride-myzde3]
+    paths: [iot/scripts/tuya-check.mjs, .github/workflows/iot-check.yml]
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: node iot/scripts/tuya-check.mjs
+        env:
+          TUYA_ACCESS_ID: ${{ secrets.TUYA_ACCESS_ID }}
+          TUYA_ACCESS_SECRET: ${{ secrets.TUYA_ACCESS_SECRET }}
+          TUYA_REGION: ${{ secrets.TUYA_REGION }}
