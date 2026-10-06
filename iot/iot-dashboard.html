@@ -52,7 +52,7 @@ h1{margin:14px 0 2px;font:800 30px/1.15 Archivo,"IBM Plex Sans Thai",sans-serif;
 /* ต้องดูตอนนี้ */
 .alerts{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:14px 18px;margin-bottom:22px;border-left:5px solid var(--bad)}
 .alerts.okk{border-left-color:var(--ok)}
-.alerts h3{margin:0 0 8px;font-size:15px}
+.alerts h3{margin:0 0 8px;font-size:15px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}.alerts h3 .b{font-size:11.5px;font-weight:800;border-radius:999px;padding:2px 8px}
 .al{display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid var(--line);cursor:pointer}
 .al:first-of-type{border-top:0}
 .al .ic{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-size:14px;flex-shrink:0}
@@ -237,12 +237,81 @@ details summary{cursor:pointer;color:var(--acc);font-weight:600;margin-top:12px}
   .shd{padding:14px 16px} .sbody{padding:4px 16px 16px} .stats{margin-left:0}
   .setT .hideM{display:none}
 }
+
+/* ===== รูปแบบหน้าจอ A / B / C (ผู้ใช้ขอให้ออกแบบใหม่เป็นตัวเลือก 6 ต.ค.) ===== */
+.uisw{display:inline-flex;align-items:center;gap:2px;margin-left:auto;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:3px 3px 3px 10px}
+.uisw span{font-size:12px;font-weight:600;opacity:.85;margin-right:4px}
+.uisw button{border:0;background:none;color:inherit;font-weight:700;font-size:12px;border-radius:999px;padding:5px 10px;cursor:pointer}
+.uisw button.on{background:#fff;color:var(--h1)}
+.uisw + .hbtn{margin-left:0}
+.topgrid{display:block}
+.sidep .kpis{margin-top:0}
+/* B · แบ่งจอ (สว่าง): หัวบาง · แผนที่ซ้าย สรุป+แจ้งเตือนขวา */
+body.ui-b header.hero{background:#fff;color:var(--ink);border-radius:0;box-shadow:0 1px 0 var(--line)}
+body.ui-b .hero .wrap{padding-top:12px;padding-bottom:12px}
+body.ui-b h1{font-size:22px;margin:8px 0 0;color:var(--h1)} body.ui-b .sub{display:none}
+body.ui-b .home,body.ui-b .hbtn,body.ui-b .uisw,body.ui-b .seg{background:#f1f5f9;border-color:var(--line);color:var(--ink)}
+body.ui-b .seg button{color:var(--ink2)} body.ui-b .seg button.on,body.ui-b .uisw button.on{background:linear-gradient(135deg,var(--h2),var(--h1));color:#fff}
+body.ui-b .ctrl{margin-top:10px} body.ui-b .upd{color:var(--mute)}
+body.ui-b .badge{background:#dcfce7}
+body.ui-a .topgrid,body.ui-b .topgrid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:18px;align-items:start;margin-bottom:22px}
+body.ui-a .mapcard,body.ui-b .mapcard{margin:0}
+body.ui-a #map3d,body.ui-b #map3d{height:600px}
+body.ui-a .sidep .kpis,body.ui-b .sidep .kpis{grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+body.ui-a .kpi,body.ui-b .kpi{padding:12px 14px}
+body.ui-a .kpi .v,body.ui-b .kpi .v{font-size:26px}
+body.ui-a .alerts,body.ui-b .alerts{margin:0;max-height:330px;overflow:auto}
+/* A · ห้องควบคุม (โทนมืด แบบ Digital Twin) */
+body.ui-a{--bg:#0a1320;--card:#111d2e;--ink:#e6edf5;--ink2:#a9b8c8;--mute:#71849a;--line:#1f3049;--grid:#1a2a40;--sh:0 10px 30px rgba(0,0,0,.35)}
+body.ui-a header.hero{background:linear-gradient(120deg,#07101c,#0b2238 60%,#0c3550);border-radius:0;box-shadow:0 1px 0 #1f3049}
+body.ui-a .hero .wrap{padding-top:12px;padding-bottom:12px} body.ui-a h1{font-size:22px;margin:8px 0 0;color:#7dd3fc} body.ui-a .sub{display:none}
+body.ui-a .ctrl{margin-top:10px}
+body.ui-a .dev,body.ui-a .swi{background:#0e1a2a;border-color:#1f3049}
+body.ui-a .dev.hot{background:#2a1416;border-color:#7f2b25} body.ui-a .dev.cold{background:#101d36}
+body.ui-a .stat{background:#0e1a2a;border-color:#1f3049;color:var(--ink2)} body.ui-a .stat b{color:var(--ink)}
+body.ui-a .stat.bad{background:#3a1715;border-color:#7f2b25;color:#fca5a5}
+body.ui-a .shd{background:linear-gradient(120deg,#0f2034,#0c2a40);border-color:#1f3049} body.ui-a .shd .nm{color:#7dd3fc}
+body.ui-a .tabs{background:#0b1626} body.ui-a .tabs button{color:var(--ink2)}
+body.ui-a .tools button{background:#0e1a2a;border-color:#1f3049;color:var(--ink)} body.ui-a .tools button.on{background:#0ea5e9;border-color:#0ea5e9;color:#04121f}
+body.ui-a .mlegend,body.ui-a .hlegend,body.ui-a .mlist,body.ui-a .mcard,body.ui-a .unplaced{background:rgba(13,24,39,.92);color:var(--ink)}
+body.ui-a .mlegend span{color:var(--ink2)} body.ui-a .mli:hover,body.ui-a .mli.sel{background:#16304a} body.ui-a .mli .v{color:var(--ink)}
+body.ui-a .mtime button{background:#0e1a2a;color:var(--ink)} body.ui-a .mtime .tl{color:var(--ink2)}
+body.ui-a .pin .pb{background:#0d1827;color:#e6edf5;box-shadow:0 0 0 1px rgba(125,211,252,.25),0 6px 18px rgba(0,0,0,.5)}
+body.ui-a .pin.off .pb{background:#0d1827;color:#71849a}
+body.ui-a .alerts{background:var(--card)} body.ui-a .al{border-color:var(--line)}
+body.ui-a .ic.hot{background:#3a1715} body.ui-a .ic.offl{background:#1a2738;color:#a9b8c8}
+body.ui-a .note{background:#2b2410;border-color:#6b5514;color:#f6d77a}
+body.ui-a .box{background:#111d2e;color:var(--ink)} body.ui-a .x,body.ui-a .inp{background:#0e1a2a;color:var(--ink);border-color:#1f3049}
+body.ui-a .tbl th{background:#111d2e} body.ui-a .pill.offp{background:#1a2738;color:#a9b8c8} body.ui-a .pill.on{background:#0f3324;color:#6ee7b7}
+body.ui-a .mapbar{border-color:var(--line)} body.ui-a .mtime{border-color:var(--line)}
+body.ui-a .kpi .v small{color:var(--ink2)}
+/* C · แผนที่เต็มจอ: แผนที่ใหญ่ สรุป+แจ้งเตือนลอยบนแผนที่ด้านขวา */
+body.ui-c header.hero{border-radius:0;margin-bottom:0}
+body.ui-c .hero .wrap{padding-top:12px;padding-bottom:14px} body.ui-c h1{font-size:22px;margin:8px 0 0} body.ui-c .sub{display:none} body.ui-c .ctrl{margin-top:10px}
+body.ui-c main.wrap{max-width:none;padding:0 0 40px}
+body.ui-c .topgrid{position:relative;margin-bottom:22px}
+body.ui-c .mapcard{border-radius:0;margin:0;box-shadow:none}
+body.ui-c #map3d{height:calc(100vh - 230px);min-height:520px}
+body.ui-c .sidep{position:absolute;right:16px;top:70px;width:320px;max-height:calc(100% - 150px);overflow:auto;z-index:2700;display:flex;flex-direction:column;gap:10px}
+body.ui-c .sidep .kpis{grid-template-columns:1fr 1fr;gap:8px;margin:0}
+body.ui-c .kpi{background:rgba(255,255,255,.9);backdrop-filter:blur(8px);padding:10px 12px} body.ui-c .kpi .v{font-size:22px} body.ui-c .kpi .s{display:none}
+body.ui-c .alerts{margin:0;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);max-height:300px;overflow:auto}
+body.ui-c #sites,body.ui-c #msg{max-width:1320px;margin-left:auto;margin-right:auto;padding:0 20px}
+body.ui-c .hlegend{right:350px}
+@media (max-width:1100px){
+  body.ui-a .topgrid,body.ui-b .topgrid{grid-template-columns:1fr}
+  body.ui-c .sidep{position:static;width:auto;max-height:none;padding:12px 16px}
+  body.ui-c .hlegend{right:12px}
+}
+@media (max-width:640px){.uisw span{display:none}.uisw{margin-left:0;order:3;width:100%;justify-content:space-between}.uisw button{padding:5px 8px}
+  body.ui-a #map3d,body.ui-b #map3d{height:440px} body.ui-c #map3d{height:62vh;min-height:380px}}
 </style>
 </head>
 <body>
 <header class="hero"><div class="wrap">
   <div class="top"><a class="home" href="https://sttonnn.github.io/pcg-logistics/index.html">← หน้าหลัก</a><span class="badge">LIVE</span>
-    <button class="hbtn" id="btnSet" type="button">⚙ ตั้งชื่อ / เกณฑ์อุณหภูมิ</button></div>
+    <div class="uisw" id="uiSw" role="group" aria-label="รูปแบบหน้าจอ"><span>รูปแบบ</span><button data-ui="a">A · ห้องควบคุม</button><button data-ui="b">B · แบ่งจอ</button><button data-ui="c">C · แผนที่เต็มจอ</button></div>
+    <button class="hbtn" id="btnSet" type="button">⚙ ตั้งชื่อ / เกณฑ์</button></div>
   <h1>IOT Dashboard</h1>
   <div class="sub">อุณหภูมิ/ความชื้น · ไฟฟ้า · สถานะเครื่อง แยกตามคลัง · อัปเดตอัตโนมัติทุก 15 นาที</div>
   <div class="ctrl">
@@ -256,12 +325,13 @@ details summary{cursor:pointer;color:var(--acc);font-weight:600;margin-top:12px}
 
 <main class="wrap">
   <div id="msg"></div>
+  <div class="topgrid">
   <section class="mapcard"><div class="mapbar"><h2>🗺️ แผนที่คลัง 3D</h2><div class="tabs" id="mapTabs"></div>
     <div class="tools"><button data-v="3d" class="on">มุม 3D</button><button data-v="top">มุมบน</button><button id="btnHeat" class="on">🌡 Heatmap</button><button id="btnSpin">⟳ หมุน</button><button id="btnFull" title="เต็มจอ">⛶ เต็มจอ</button><button id="btnPlace">📍 วางหมุด</button></div></div>
     <div id="map3d"><div id="pins"></div><div class="mhint" id="mhint"></div><div id="mside"></div><div id="mlist"></div><div class="mcard" id="mcard"></div><div class="hlegend" id="hlegend"></div>
       <div class="mlegend"><span><i style="background:#0f7fb0"></i>อุณหภูมิ</span><span><i style="background:#7a4fc9"></i>ไฟฟ้า</span><span><i style="background:#1f9d61"></i>สวิตช์/แอร์</span><span><i style="background:#c7362b"></i>ผิดเกณฑ์</span><span><i style="background:#8a96a3"></i>ออฟไลน์</span><span class="mtip" style="color:var(--mute);font-weight:500">ลากหมุน · ล้อเมาส์/สองนิ้วซูม · คลิกขวา/สามนิ้วเลื่อน</span></div></div><div class="mtime" id="mtime"></div></section>
-  <div class="kpis" id="kpis"></div>
-  <div id="alerts"></div>
+  <aside class="sidep"><div class="kpis" id="kpis"></div><div id="alerts"></div></aside>
+  </div>
   <div id="sites"></div>
 </main>
 
@@ -274,6 +344,16 @@ const SB = "https://mgnshovnibcmiptoxdfe.supabase.co";
 const ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1nbnNob3ZuaWJjbWlwdG94ZGZlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkzNzI1NDIsImV4cCI6MjEwNDk0ODU0Mn0.UoPu-i6ODMEgyuqoO6oKHf0JIqFKpWkSpBkOKrpITwQ";
 const H = { apikey: ANON, Authorization: "Bearer " + ANON };
 const DEMO = /[?&]demo=1/.test(location.search);
+// รูปแบบหน้าจอ A/B/C · ?ui=a|b|c หรือจำค่าล่าสุดในเครื่อง
+const UI_KEY = "pcg-iot-ui";
+function setUI(u) {
+  u = ["a", "b", "c"].includes(u) ? u : "b";
+  document.body.classList.remove("ui-a", "ui-b", "ui-c"); document.body.classList.add("ui-" + u);
+  document.querySelectorAll("#uiSw [data-ui]").forEach(b => b.classList.toggle("on", b.dataset.ui === u));
+  try { localStorage.setItem(UI_KEY, u); } catch {}
+  if (window.IOT3D) { IOT3D.theme(u === "a" ? "dark" : "light"); setTimeout(() => IOT3D.show(S.map), 30); }
+  window.__ui = u;
+}
 const CONTROL_ON = false;       // ปุ่มเปิด/ปิด: เปิดใช้หลังติดตั้ง Edge Function iot-control (ผู้ใช้ขอให้ทำหน้าให้เรียบร้อยก่อน 6 ต.ค.)
 const S = { site: "", range: 24, devs: [], reads: {}, open: {}, showAllAl: false, map: "wha", placeMode: false, placeSel: "", heat: true, tAt: null, selPin: null, hoverId: null, listOpen: false };
 const STALE_MIN = 45;           // ไม่ได้ค่าใหม่เกิน 45 นาที = ข้อมูลค้าง
@@ -418,7 +498,7 @@ function render() {
     ...offs.map(d => ({ d, k: "offl", t: (I.get(d.id).state === "stale" ? "ข้อมูลค้าง · " : "ออฟไลน์ · ") + "ค่าล่าสุด " + ago(I.get(d.id).t), v: "" }))];
   const AIC = { hot: "▲", cold: "▼", humi: "💧", offl: "⏻" };
   const shown = S.showAllAl ? items : items.slice(0, Math.max(al.length, 4));
-  $("#alerts").innerHTML = items.length ? `<div class="alerts ${al.length ? "" : "okk"}"><h3>${al.length ? `⚠ ต้องดูตอนนี้ · ผิดเกณฑ์ ${al.length} เครื่อง` : "✓ อุณหภูมิอยู่ในเกณฑ์ทุกเครื่อง"}${offs.length ? ` · ออฟไลน์/ข้อมูลค้าง ${offs.length} เครื่อง` : ""}</h3>
+  $("#alerts").innerHTML = items.length ? `<div class="alerts ${al.length ? "" : "okk"}"><h3>${al.length ? "⚠ ต้องดูตอนนี้" : "✓ อุณหภูมิอยู่ในเกณฑ์"} ${al.length ? `<span class="b r">ผิดเกณฑ์ ${al.length}</span>` : ""}${offs.length ? `<span class="b g">ออฟไลน์ ${offs.length}</span>` : ""}</h3>
     ${shown.map(x => `<div class="al" data-id="${esc(x.d.id)}"><span class="ic ${x.k}">${AIC[x.k]}</span><div class="t"><b>${esc(nameOf(x.d))}</b><span>${esc(siteOf(x.d))} · ${esc(x.t)}</span></div><span class="v">${x.v}</span></div>`).join("")}
     ${items.length > shown.length ? `<button class="more" id="alMore">แสดงทั้งหมด ${items.length} รายการ ▾</button>` : S.showAllAl && items.length > 4 ? `<button class="more" id="alMore">ย่อ ▴</button>` : ""}</div>` : "";
 
@@ -592,6 +672,7 @@ function closeDev() { $("#dlg").classList.remove("open"); $("#tip").style.displa
 
 /* ---------- เหตุการณ์ ---------- */
 document.addEventListener("click", (e) => {
+  const ub = e.target.closest("#uiSw [data-ui]"); if (ub) { setUI(ub.dataset.ui); return; }
   const s = e.target.closest("#segSite button"); if (s) { S.site = s.dataset.s; const k = mapOfSite(S.site); if (k) S.map = k; render(); return; }
   const r = e.target.closest("#segRange button"); if (r) { S.range = +r.dataset.r; S.tAt = null; stopPlay(); document.querySelectorAll("#segRange button").forEach(b => b.classList.toggle("on", b === r)); load(); return; }
   const o = e.target.closest("[data-off]"); if (o) { S.open[o.dataset.off] = !S.open[o.dataset.off]; render(); return; }
@@ -825,6 +906,8 @@ function demo() {
   });
   return { devs, rows };
 }
+setUI((location.search.match(/[?&]ui=([abc])/) || [])[1] || (() => { try { return localStorage.getItem(UI_KEY); } catch { return null; } })() || "b");
+addEventListener("iot3d-ready", () => setUI(window.__ui));
 load();
 </script>
 </body>

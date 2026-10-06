@@ -9,7 +9,9 @@ const el = document.getElementById("map3d");
 const pinLayer = document.getElementById("pins");
 const COL = { navy: 0x1f4e79, beam: 0xf28c28, wood: 0xb98a55, box: [0xd8c19a, 0xcfae7c, 0xe3d2b0, 0xbfa070], shelf: 0x16a3c9, flow: 0xe8b80c, floor: 0xf6f9fc, slab: 0xffffff };
 
-let renderer, scene, camera, controls, root, floor, cur = null, raf = 0, placing = null, needs = true;
+let renderer, scene, camera, controls, root, floor, ground, cur = null, raf = 0, placing = null, needs = true, THEME = "light";
+const TH = { light: { bg: 0xe9f0f7, ground: 0xdfe7ef, floor: 0xf6f9fc, wall: 0x7fb3d5, cap: 0x0f5c8c, wo: .14 }, dark: { bg: 0x0a1320, ground: 0x0e1b2b, floor: 0x16283d, wall: 0x38bdf8, cap: 0x38bdf8, wo: .1 } };
+const wallMats = [], capMats = [];
 const ray = new THREE.Raycaster(), v2 = new THREE.Vector2(), tmp = new THREE.Vector3();
 
 function init() {
@@ -19,8 +21,8 @@ function init() {
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   el.prepend(renderer.domElement);
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xe9f0f7);
-  scene.fog = new THREE.Fog(0xe9f0f7, 4000, 9000);
+  scene.background = new THREE.Color(TH[THEME].bg);
+  scene.fog = new THREE.Fog(TH[THEME].bg, 4000, 9000);
   camera = new THREE.PerspectiveCamera(38, 1, 5, 20000);
   controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true; controls.dampingFactor = .08;
@@ -69,9 +71,9 @@ function build(key) {
   root = new THREE.Group(); scene.add(root); cur = key; heat = null;
   const [x0, y0, x1, y1] = M.bounds, W = x1 - x0, D = y1 - y0, cx = (x0 + x1) / 2, cz = (y0 + y1) / 2, H = M.rackH;
   // พื้นรอบอาคาร + พื้นอาคาร
-  const ground = new THREE.Mesh(new THREE.PlaneGeometry(W * 3, D * 3), new THREE.MeshStandardMaterial({ color: 0xdfe7ef, roughness: 1 }));
+  ground = new THREE.Mesh(new THREE.PlaneGeometry(W * 3, D * 3), new THREE.MeshStandardMaterial({ color: TH[THEME].ground, roughness: 1 }));
   ground.rotation.x = -Math.PI / 2; ground.position.set(cx, -1, cz); ground.receiveShadow = true; root.add(ground);
-  floor = new THREE.Mesh(new THREE.BoxGeometry(W, 4, D), new THREE.MeshStandardMaterial({ color: COL.floor, roughness: .9 }));
+  floor = new THREE.Mesh(new THREE.BoxGeometry(W, 4, D), new THREE.MeshStandardMaterial({ color: TH[THEME].floor, roughness: .9 }));
   floor.position.set(cx, -2, cz); floor.receiveShadow = true; root.add(floor);
   // โซนพื้น
   for (const z of M.zones || []) {
@@ -80,12 +82,13 @@ function build(key) {
     if (z.t) { const s = textSprite(z.t, Math.min(28, zh * .35), "#b58500"); s.position.set(zx + zw / 2, 1.2, zy + zh / 2); root.add(s); }
   }
   // ผนังโปร่ง + ขอบบน
-  const wallH = H * 1.35, wallMat = { color: 0x7fb3d5, transparent: true, opacity: .14, depthWrite: false };
+  const wallH = H * 1.35, wallMat = { color: TH[THEME].wall, transparent: true, opacity: TH[THEME].wo, depthWrite: false };
+  wallMats.length = 0; capMats.length = 0;
   const walls = [[x0, y0, x1, y0], [x1, y0, x1, y1], [x0, y1, x1, y1], [x0, y0, x0, y1], ...(M.walls || [])];
   for (const [a, b, c, d] of walls) {
-    const len = Math.hypot(c - a, d - b), th = 4, wm = box(a === c ? th : len, wallH, a === c ? len : th, 0x7fb3d5, wallMat);
-    wm.position.set((a + c) / 2, wallH / 2, (b + d) / 2); root.add(wm);
-    const cap = box(a === c ? 6 : len, 4, a === c ? len : 6, 0x0f5c8c); cap.position.set((a + c) / 2, wallH, (b + d) / 2); root.add(cap);
+    const len = Math.hypot(c - a, d - b), th = 4, wm = box(a === c ? th : len, wallH, a === c ? len : th, TH[THEME].wall, wallMat);
+    wm.position.set((a + c) / 2, wallH / 2, (b + d) / 2); root.add(wm); wallMats.push(wm.material);
+    const cap = box(a === c ? 6 : len, 4, a === c ? len : 6, TH[THEME].cap); cap.position.set((a + c) / 2, wallH, (b + d) / 2); root.add(cap); capMats.push(cap.material);
   }
   for (const [ox, oy, ow, oh, t] of M.offices || []) {
     const o = box(ow, H * .45, oh, 0xdbe6f1); o.position.set(ox + ow / 2, H * .225, oy + oh / 2); root.add(o);
@@ -246,6 +249,13 @@ window.IOT3D = {
   view,
   setPins,
   setHeat, flyTo, ramp: rampAt,
+  theme(t) {
+    THEME = TH[t] ? t : "light"; const T = TH[THEME];
+    if (!scene) return;
+    scene.background.setHex(T.bg); scene.fog.color.setHex(T.bg);
+    ground?.material.color.setHex(T.ground); floor?.material.color.setHex(T.floor);
+    wallMats.forEach(m => { m.color.setHex(T.wall); m.opacity = T.wo; }); capMats.forEach(m => m.color.setHex(T.cap)); needs = true;
+  },
   spin(on) { controls.autoRotate = !!on; controls.autoRotateSpeed = .8; needs = true; return controls.autoRotate; },
   place(id) { placing = id; el.classList.toggle("placing", !!id); },
   onPlace: null
