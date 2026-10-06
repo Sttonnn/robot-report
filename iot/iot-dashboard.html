@@ -222,7 +222,7 @@ details summary{cursor:pointer;color:var(--acc);font-weight:600;margin-top:12px}
 <main class="wrap">
   <div id="msg"></div>
   <section class="mapcard"><div class="mapbar"><h2>🗺️ แผนที่คลัง 3D</h2><div class="tabs" id="mapTabs"></div>
-    <div class="tools"><button data-v="3d" class="on">มุม 3D</button><button data-v="top">มุมบน</button><button id="btnPlace">📍 วางหมุดเซนเซอร์</button></div></div>
+    <div class="tools"><button data-v="3d" class="on">มุม 3D</button><button data-v="top">มุมบน</button><button id="btnSpin">⟳ หมุนอัตโนมัติ</button><button id="btnPlace">📍 วางหมุดเซนเซอร์</button></div></div>
     <div id="map3d"><div id="pins"></div><div class="mhint" id="mhint"></div><div id="mside"></div>
       <div class="mlegend"><span><i style="background:#0f7fb0"></i>อุณหภูมิ</span><span><i style="background:#7a4fc9"></i>ไฟฟ้า</span><span><i style="background:#1f9d61"></i>สวิตช์/แอร์</span><span><i style="background:#c7362b"></i>ผิดเกณฑ์</span><span><i style="background:#8a96a3"></i>ออฟไลน์</span><span class="mtip" style="color:var(--mute);font-weight:500">ลากหมุน · ล้อเมาส์/สองนิ้วซูม · คลิกขวา/สามนิ้วเลื่อน</span></div></div></section>
   <div class="kpis" id="kpis"></div>
@@ -619,6 +619,7 @@ document.addEventListener("click", async (e) => {
   const t = e.target;
   const mt = t.closest("[data-map]"); if (mt) { S.map = mt.dataset.map; S.placeSel = ""; renderMap(); return; }
   const v = t.closest(".tools [data-v]"); if (v && window.IOT3D) { document.querySelectorAll(".tools [data-v]").forEach(b => b.classList.toggle("on", b === v)); IOT3D.view(v.dataset.v); return; }
+  const sp = t.closest("#btnSpin"); if (sp && window.IOT3D) { sp.classList.toggle("on", IOT3D.spin(!sp.classList.contains("on"))); return; }
   if (t.closest("#btnPlace") || t.closest("#unplacedBtn")) { S.placeMode = !S.placeMode || !!t.closest("#unplacedBtn"); S.placeSel = ""; renderMap(); return; }
   if (t.closest("#placeDone")) { S.placeMode = false; S.placeSel = ""; renderMap(); return; }
   const pk = t.closest("[data-pick]"); if (pk) { S.placeSel = S.placeSel === pk.dataset.pick ? "" : pk.dataset.pick; renderMap(); return; }

@@ -41,7 +41,7 @@ function resize() {
 }
 function loop() {
   raf = requestAnimationFrame(loop);
-  if (controls.update() || needs) { renderer.render(scene, camera); placePins(); needs = false; }
+  if (controls.update() || needs || controls.autoRotate) { renderer.render(scene, camera); placePins(); needs = false; }
 }
 
 /* ---------- สร้างคลัง ---------- */
@@ -202,6 +202,7 @@ window.IOT3D = {
   current: () => cur,
   view,
   setPins,
+  spin(on) { controls.autoRotate = !!on; controls.autoRotateSpeed = .8; needs = true; return controls.autoRotate; },
   place(id) { placing = id; el.classList.toggle("placing", !!id); },
   onPlace: null
 };
