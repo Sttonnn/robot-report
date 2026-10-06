@@ -19,9 +19,6 @@ log("## ตรวจการเชื่อม Tuya");
 log(`- TUYA_ACCESS_ID: ${ID ? "มี (" + ID.length + " ตัวอักษร)" : "ไม่มี"}`);
 log(`- TUYA_ACCESS_SECRET: ${SECRET ? "มี (" + SECRET.length + " ตัวอักษร)" : "ไม่มี"}`);
 log(`- TUYA_REGION: ${process.env.TUYA_REGION ? REGION : "ไม่มี (ใช้ sg)"} → ${HOST || "ไม่รู้จัก"}`);
-if (!ID || !SECRET) fail("secret ไม่ครบ");
-else if (!HOST) fail("TUYA_REGION ไม่ถูกต้อง (ควรเป็น sg)");
-else main().catch(e => fail("ผิดพลาด: " + e.message));
 
 const sha256 = (s) => crypto.createHash("sha256").update(s).digest("hex");
 async function call(method, path, token = "", body = "") {
@@ -66,3 +63,7 @@ async function main() {
   });
   finish(0);
 }
+
+if (!ID || !SECRET) fail("secret ไม่ครบ");
+else if (!HOST) fail("TUYA_REGION ไม่ถูกต้อง (ควรเป็น sg)");
+else main().catch(e => fail("ผิดพลาด: " + e.message));
