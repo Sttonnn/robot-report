@@ -64,13 +64,32 @@ section{margin-bottom:26px}
 .dev .meta{color:var(--mute);font-size:12px;display:flex;justify-content:space-between;gap:8px}
 .dev.isoff .big .v{color:var(--off)}
 .spark{display:block;width:100%;height:56px;margin-top:4px}
-.sw{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.sw{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:10px}
 .swi{background:var(--card);border-radius:16px;box-shadow:var(--sh);padding:12px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;border:1px solid transparent;font:inherit;color:inherit;text-align:left;width:100%}
 .swi:hover{border-color:#bfd3e4}
 .swi .nm{font-weight:700;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .swi .sub2{font-size:12px;color:var(--mute)}
 .pill{font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;white-space:nowrap}
 .pill.on{background:#e3f6ec;color:#11683f} .pill.offp{background:#f1f3f5;color:#5d6873} .pill.na{background:#f1f3f5;color:#8a96a3}
+.swi{cursor:default}
+.swi .main{flex:1;min-width:0;cursor:pointer}
+.ctl{display:inline-flex;gap:6px;flex-shrink:0}
+.ctl button{font:inherit;font-weight:700;font-size:12.5px;border:0;border-radius:999px;padding:6px 12px;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+.ctl .bOn{background:linear-gradient(135deg,#34c38f,#1f9d61);color:#fff}
+.ctl .bOff{background:#eef2f6;color:#33404d}
+.ctl button:disabled{opacity:.5;cursor:wait}
+.pinbox{display:grid;gap:12px}
+.pinbox input{font:inherit;font-size:20px;padding:10px 12px;border:1px solid #cfd8e1;border-radius:12px;text-align:center;letter-spacing:.3em;width:100%}
+.pinbox input::placeholder{letter-spacing:0;font-size:15px}
+.pinbox .err{color:var(--bad);font-weight:700;font-size:13px;min-height:1em}
+.pinbox .row{display:flex;gap:8px;justify-content:flex-end}
+.pinbox .row button{font:inherit;font-weight:800;border:0;border-radius:12px;padding:10px 18px;cursor:pointer}
+.go{background:linear-gradient(135deg,var(--h2),var(--h1));color:#fff} .cancel{background:#eef2f6}
+.log{margin-top:12px;background:var(--card);border-radius:16px;box-shadow:var(--sh);padding:12px 16px;font-size:13px}
+.log b{display:block;margin-bottom:6px}
+.log div{display:flex;gap:10px;padding:3px 0;border-top:1px solid var(--line)}
+.log div span:first-child{color:var(--mute);width:120px;flex-shrink:0}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#17212b;color:#fff;padding:10px 16px;border-radius:12px;font-weight:600;z-index:60;box-shadow:0 10px 30px rgba(0,0,0,.3);display:none}
 .note{background:#fff8e6;border:1px solid #f1d58c;color:#6b4d00;border-radius:16px;padding:14px 16px;margin-bottom:20px}
 .note b{display:block;margin-bottom:4px}
 .empty{color:var(--mute);background:var(--card);border-radius:16px;padding:16px;box-shadow:var(--sh)}
@@ -234,10 +253,12 @@ function render() {
     const x = I.get(d.id), ir = KIND(d) === "ir";
     const sOn = x.last.switch_on;
     const pct = !ir && x.rs.length ? Math.round(x.rs.filter(r => r.switch_on).length / x.rs.length * 100) : null;
-    const pill = ir ? '<span class="pill na">สั่งผ่านรีโมต</span>' : sOn == null ? '<span class="pill na">–</span>' : sOn ? '<span class="pill on">เปิด</span>' : '<span class="pill offp">ปิด</span>';
-    return `<button class="swi" data-id="${esc(d.id)}"><div style="flex:1;min-width:0"><div class="nm" title="${esc(d.name)}">${esc(d.name)}</div>
-      <div class="sub2">${stHtml(x.state)}${pct != null ? ` · เปิด ${pct}% ของช่วง` : ""}</div></div>${pill}</button>`; }).join("")}</div>` : "";
+    const pill = ir ? '' : sOn == null ? '<span class="pill na">–</span>' : sOn ? '<span class="pill on">เปิด</span>' : '<span class="pill offp">ปิด</span>';
+    const ctl = CTRL.has(d.category) ? `<span class="ctl">${ir || sOn !== true ? `<button class="bOn" data-ctl="${esc(d.id)}" data-on="1">เปิด</button>` : ""}${ir || sOn !== false ? `<button class="bOff" data-ctl="${esc(d.id)}" data-on="0">ปิด</button>` : ""}</span>` : "";
+    return `<div class="swi"><div class="main" data-id="${esc(d.id)}" role="button" tabindex="0"><div class="nm" title="${esc(d.name)}">${esc(d.name)}</div>
+      <div class="sub2">${stHtml(x.state)}${pct != null ? ` · เปิด ${pct}% ของช่วง` : ""}</div></div>${pill}${ctl}</div>`; }).join("")}</div><div id="cmdLog"></div>` : "";
 
+  loadLog();
   document.querySelectorAll("svg[data-spark]").forEach(el => { const rs = S.reads[el.dataset.spark] || []; line(el, rs, el.dataset.k, { spark: true }); });
 }
 
@@ -334,6 +355,57 @@ function demo() {
   });
   return { devs, rows };
 }
+
+/* ---------- สั่งเปิด/ปิด (ผ่าน Supabase Edge Function iot-control · ต้องใส่รหัสสั่งงาน วันละครั้ง) ---------- */
+const CTRL = new Set(["kg", "znjdq", "infrared_ac"]);   // ผู้ใช้เลือก 6 ต.ค.: พัดลม/สวิตช์ · Skylight · แอร์อินฟราเรด (ไม่รวมมิเตอร์ไฟ dlq)
+const FN = SB + "/functions/v1/iot-control";
+const PK = "pcg-iot-pin", TODAY = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Bangkok" });
+const pinGet = () => { try { const g = JSON.parse(localStorage.getItem(PK) || "null"); return g && g.day === TODAY ? g.pin : ""; } catch { return ""; } };
+const pinSet = (p) => { try { p ? localStorage.setItem(PK, JSON.stringify({ pin: p, day: TODAY })) : localStorage.removeItem(PK); } catch {} };
+function toast(t) { let el = $("#toast"); if (!el) { el = document.createElement("div"); el.id = "toast"; el.className = "toast"; document.body.appendChild(el); } el.textContent = t; el.style.display = "block"; clearTimeout(el._t); el._t = setTimeout(() => el.style.display = "none", 3500); }
+async function callFn(body) {
+  if (DEMO) return { ok: true, msg: body.check ? "" : (body.on ? "สั่งเปิดแล้ว (ตัวอย่าง)" : "สั่งปิดแล้ว (ตัวอย่าง)") };
+  try {
+    const r = await fetch(FN, { method: "POST", headers: { apikey: ANON, Authorization: "Bearer " + ANON, "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    const j = await r.json().catch(() => ({}));
+    if (r.status === 404) return { ok: false, msg: "ยังไม่ได้ติดตั้งฟังก์ชัน iot-control ใน Supabase", code: 404 };
+    return { ok: !!j.ok, msg: j.msg || ("ผิดพลาด " + r.status), code: r.status };
+  } catch (e) { return { ok: false, msg: "เชื่อมต่อไม่ได้: " + e.message }; }
+}
+function askCmd(id, on) {
+  const d = S.devs.find(x => x.id === id); if (!d) return;
+  const has = !!pinGet();
+  $("#box").innerHTML = `<form class="pinbox" id="pinForm"><div class="bh"><h3>${on ? "เปิด" : "ปิด"} · ${esc(d.name)}</h3></div>
+    <div style="color:var(--ink2)">ยืนยันสั่ง<b>${on ? "เปิด" : "ปิด"}</b>อุปกรณ์นี้${KIND(d) === "ir" ? " (แอร์สั่งผ่านรีโมตอินฟราเรด หน้าเว็บไม่รู้ว่าแอร์ติดอยู่หรือไม่)" : ""}</div>
+    ${has ? "" : '<input type="password" inputmode="numeric" autocomplete="off" placeholder="รหัสสั่งงาน" id="pinIn">'}
+    <div class="err" id="pinErr"></div>
+    <div class="row"><button type="button" class="cancel" id="pinNo">ยกเลิก</button><button type="submit" class="go" id="pinGo">ยืนยัน${on ? "เปิด" : "ปิด"}</button></div></form>`;
+  $("#dlg").classList.add("open"); ($("#pinIn") || $("#pinGo")).focus();
+  $("#pinNo").onclick = closeDev;
+  $("#pinForm").onsubmit = async (e) => {
+    e.preventDefault();
+    const pin = pinGet() || ($("#pinIn") ? $("#pinIn").value.trim() : "");
+    if (!pin) { $("#pinErr").textContent = "ใส่รหัสสั่งงานก่อน"; return; }
+    $("#pinGo").disabled = true; $("#pinGo").textContent = "กำลังส่งคำสั่ง…"; $("#pinErr").textContent = "";
+    const r = await callFn({ device_id: id, on, pin });
+    if (r.code === 401) { pinSet(""); askCmd(id, on); $("#pinErr").textContent = r.msg; return; }
+    if (!r.ok) { $("#pinGo").disabled = false; $("#pinGo").textContent = "ลองอีกครั้ง"; $("#pinErr").textContent = r.msg; return; }
+    pinSet(pin); closeDev(); toast("✓ " + d.name + " · " + r.msg);
+    // แสดงสถานะใหม่ทันที (ค่าจริงจะอัปเดตรอบดึงถัดไป)
+    if (KIND(d) !== "ir") { (S.reads[id] = S.reads[id] || []).push({ device_id: id, t: Date.now(), ts: new Date().toISOString(), online: true, switch_on: on }); render(); }
+    else loadLog();
+  };
+}
+async function loadLog() {
+  const el = $("#cmdLog"); if (!el || DEMO) return;
+  try {
+    const r = await fetch(SB + "/rest/v1/iot_commands?select=ts,device_name,action,ok&action=neq.check&order=ts.desc&limit=6", { headers: { apikey: ANON, Authorization: "Bearer " + ANON } });
+    if (!r.ok) return; const rows = await r.json(); if (!rows.length) return;
+    el.innerHTML = '<div class="log"><b>การสั่งงานล่าสุด</b>' + rows.map(x => `<div><span>${TH_DT(new Date(x.ts))}</span><span>${x.ok ? "✓" : "✕"} ${x.action === "on" ? "เปิด" : "ปิด"} · ${esc(x.device_name || "")}</span></div>`).join("") + "</div>";
+  } catch {}
+}
+document.addEventListener("click", (e) => { const c = e.target.closest("[data-ctl]"); if (c) { e.stopPropagation(); askCmd(c.dataset.ctl, c.dataset.on === "1"); } }, true);
+document.addEventListener("keydown", (e) => { if (e.key === "Enter" && e.target.matches && e.target.matches(".main[data-id]")) openDev(e.target.dataset.id); });
 load();
 </script>
 </body>
