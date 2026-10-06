@@ -39,8 +39,14 @@ function resize() {
   const w = el.clientWidth, h = el.clientHeight; if (!w || !h) return;
   renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); needs = true;
 }
+let fly = null;
 function loop() {
   raf = requestAnimationFrame(loop);
+  if (fly) { // เลื่อนกล้องไปยังเซนเซอร์แบบนุ่มๆ
+    const k = Math.min(1, (performance.now() - fly.t0) / 650), e = 1 - Math.pow(1 - k, 3);
+    controls.target.lerpVectors(fly.a0, fly.a1, e); camera.position.lerpVectors(fly.c0, fly.c1, e); needs = true;
+    if (k >= 1) fly = null;
+  }
   if (controls.update() || needs || controls.autoRotate) { renderer.render(scene, camera); placePins(); needs = false; }
 }
 
@@ -60,7 +66,7 @@ function textSprite(t, size, color = "#0b2a4a", bg = null) {
 function build(key) {
   const M = MAPS[key]; if (!M) return;
   if (root) { scene.remove(root); root.traverse(o => { o.geometry?.dispose(); o.material?.map?.dispose?.(); o.material?.dispose?.(); }); }
-  root = new THREE.Group(); scene.add(root); cur = key;
+  root = new THREE.Group(); scene.add(root); cur = key; heat = null;
   const [x0, y0, x1, y1] = M.bounds, W = x1 - x0, D = y1 - y0, cx = (x0 + x1) / 2, cz = (y0 + y1) / 2, H = M.rackH;
   // พื้นรอบอาคาร + พื้นอาคาร
   const ground = new THREE.Mesh(new THREE.PlaneGeometry(W * 3, D * 3), new THREE.MeshStandardMaterial({ color: 0xdfe7ef, roughness: 1 }));
@@ -139,7 +145,7 @@ function view(mode) {
   // ระยะกล้องให้เห็นทั้งคลังพอดีจอ (คิดทั้งกว้างและลึก ตามสัดส่วนจอ)
   const vf = THREE.MathUtils.degToRad(camera.fov) / 2, hf = Math.atan(Math.tan(vf) * camera.aspect);
   const top = mode === "top", dist = Math.max((W / 2) / Math.tan(hf), (D / 2) / Math.tan(vf) * (top ? 1 : 1.35)) * (top ? 1.08 : .98);
-  const dir = top ? new THREE.Vector3(0, 1, .001) : new THREE.Vector3(-.04, .62, .78).normalize();
+  const dir = top ? new THREE.Vector3(0, 1, .001) : camera.aspect < 1 ? new THREE.Vector3(-.03, .86, .5).normalize() : new THREE.Vector3(-.04, .62, .78).normalize();
   controls.target.set(cx, 0, cz + (top ? 0 : D * .04));
   camera.position.copy(controls.target).addScaledVector(dir, dist);
   controls.maxDistance = dist * 2.2; controls.minDistance = Math.max(W, D) * .06;
@@ -176,7 +182,7 @@ function setPins(list) {
     dot.rotation.x = -Math.PI / 2; dot.position.set(p.px, 1.5, p.py); dot.userData.pin = 1; root.add(dot);
     PINS.push({ el: d, x: p.px, z: p.py });
   }
-  needs = true;
+  placePins(); needs = true;
 }
 
 /* ---------- วางหมุด: คลิกบนพื้น ---------- */
@@ -195,6 +201,43 @@ function onUp(e) {
   window.IOT3D.onPlace?.(id, cur, Math.round(hit.x), Math.round(hit.z));
 }
 
+
+/* ---------- Heatmap อุณหภูมิบนพื้น (IDW · จางลงเมื่อไกลเซนเซอร์ · ไม่เดาข้ามจุดที่ไม่มีเซนเซอร์) ---------- */
+let heat = null;
+const RAMP = [[0, [43, 108, 176]], [.35, [20, 184, 166]], [.65, [250, 204, 21]], [1, [220, 38, 38]]];
+function rampAt(t) {
+  t = Math.max(0, Math.min(1, t));
+  for (let i = 1; i < RAMP.length; i++) if (t <= RAMP[i][0]) {
+    const [a, ca] = RAMP[i - 1], [b, cb] = RAMP[i], u = (t - a) / (b - a);
+    return ca.map((c, j) => Math.round(c + (cb[j] - c) * u));
+  }
+  return RAMP[RAMP.length - 1][1];
+}
+function setHeat(points, lo, hi) {
+  if (heat) { root?.remove(heat); heat.geometry.dispose(); heat.material.map.dispose(); heat.material.dispose(); heat = null; }
+  const M = MAPS[cur]; if (!M || !root || !points || points.length < 1) { needs = true; return; }
+  const [x0, y0, x1, y1] = M.bounds, W = x1 - x0, D = y1 - y0, sc = Math.max(W, D) / 420;
+  const cw = Math.round(W / sc), ch = Math.round(D / sc), c = document.createElement("canvas"); c.width = cw; c.height = ch;
+  const x = c.getContext("2d"), img = x.createImageData(cw, ch), reach = M.pxm * 45;
+  for (let j = 0; j < ch; j++) for (let i = 0; i < cw; i++) {
+    const px = x0 + (i + .5) * sc, py = y0 + (j + .5) * sc; let ws = 0, vs = 0, dmin = 1e9;
+    for (const p of points) { const d2 = (p.x - px) ** 2 + (p.z - py) ** 2 + 1; const w = 1 / d2; ws += w; vs += w * p.v; dmin = Math.min(dmin, Math.sqrt(d2)); }
+    const [r, g, b] = rampAt((vs / ws - lo) / ((hi - lo) || 1)), a = Math.max(0, 1 - dmin / reach) ** .8 * 150, o = (j * cw + i) * 4;
+    img.data[o] = r; img.data[o + 1] = g; img.data[o + 2] = b; img.data[o + 3] = a;
+  }
+  x.putImageData(img, 0, 0);
+  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace;
+  heat = new THREE.Mesh(new THREE.PlaneGeometry(W, D), new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false }));
+  // ชั้นสีลอยเหนือชั้นวาง มองเห็นจากด้านบน
+  heat.rotation.x = -Math.PI / 2; heat.position.set((x0 + x1) / 2, M.rackH + 3, (y0 + y1) / 2); heat.renderOrder = 1; root.add(heat); needs = true;
+}
+function flyTo(px, py) {
+  const M = MAPS[cur]; if (!M) return;
+  const dir = camera.position.clone().sub(controls.target).normalize(), dist = Math.max(M.bounds[2] - M.bounds[0], M.bounds[3] - M.bounds[1]) * .32;
+  const a1 = new THREE.Vector3(px, 0, py);
+  fly = { t0: performance.now(), a0: controls.target.clone(), a1, c0: camera.position.clone(), c1: a1.clone().addScaledVector(dir, dist) };
+}
+
 window.IOT3D = {
   maps: MAPS,
   ok: true,
@@ -202,6 +245,7 @@ window.IOT3D = {
   current: () => cur,
   view,
   setPins,
+  setHeat, flyTo, ramp: rampAt,
   spin(on) { controls.autoRotate = !!on; controls.autoRotateSpeed = .8; needs = true; return controls.autoRotate; },
   place(id) { placing = id; el.classList.toggle("placing", !!id); },
   onPlace: null

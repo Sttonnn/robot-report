@@ -154,7 +154,42 @@ h1{margin:14px 0 2px;font:800 30px/1.15 Archivo,"IBM Plex Sans Thai",sans-serif;
 .pr button{border:0;border-radius:8px;padding:4px 9px;font-weight:700;font-size:12px;cursor:pointer;background:#0f5c8c;color:#fff}
 .pr button.rm{background:#eef2f6;color:#4d5864}
 .nomap{position:absolute;inset:0;display:grid;place-items:center;color:var(--mute);text-align:center;padding:20px}
-#map3d.pm .mlegend{display:none}
+#map3d.pm .mlegend,#map3d.pm .hlegend{display:none}
+.mlist{position:absolute;left:12px;top:12px;width:268px;max-height:calc(100% - 80px);background:rgba(255,255,255,.95);backdrop-filter:blur(6px);border-radius:16px;box-shadow:0 10px 30px rgba(11,42,74,.16);z-index:2400;display:flex;flex-direction:column;overflow:hidden}
+.mlist.shut{width:auto}
+.mlh{display:flex;align-items:center;gap:6px;border:0;background:none;padding:10px 12px;cursor:pointer;text-align:left;font-size:13px;width:100%}
+.mlh b{white-space:nowrap}.mlh .b{white-space:nowrap;font-size:11px;font-weight:800;border-radius:999px;padding:2px 7px}.b.r{background:#fdecea;color:#9b2a20}.b.g{background:#eef1f4;color:#5d6873}
+.mlh .cv{margin-left:auto;color:var(--mute)}
+.mlb{overflow:auto;padding:0 6px 8px;border-top:1px solid var(--line)}
+.mli{display:flex;align-items:center;gap:8px;width:100%;border:0;background:none;border-radius:10px;padding:5px 8px;cursor:pointer;text-align:left}
+.mli:hover,.mli.sel{background:#e9f3fa}
+.mli i{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.mli .n{flex:1;min-width:0;font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mli .n small{display:block;font-weight:500;color:var(--mute);font-size:11.5px}
+.mli .v{font:700 12.5px Archivo,"IBM Plex Sans Thai",sans-serif;white-space:nowrap;color:var(--ink2)}
+.mli.al .v{color:var(--bad)} .mli.off{opacity:.6}
+.mcard{position:absolute;z-index:2600;width:250px;background:#fff;border-radius:16px;box-shadow:0 14px 40px rgba(11,42,74,.25);padding:12px 14px;display:none;pointer-events:auto}
+.mcard .ch{display:flex;align-items:center;gap:8px}.mcard .ch b{flex:1;min-width:0;font-size:14px}
+.mcard .cs{color:var(--mute);font-size:12px}
+.mcard .ca{background:#fdecea;color:#9b2a20;border-radius:8px;padding:4px 8px;font-weight:700;font-size:12px;margin-top:6px}
+.mcard .cv{font:800 24px Archivo,"IBM Plex Sans Thai",sans-serif;margin-top:6px}
+.mcard .csp{display:block;width:100%;height:46px;margin-top:4px}
+.mcard .cf{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px;font-size:12px;color:var(--mute)}
+.mcard .cf button{border:0;background:#0f5c8c;color:#fff;border-radius:8px;padding:5px 10px;font-weight:700;font-size:12px;cursor:pointer}
+.hlegend{position:absolute;right:12px;bottom:12px;z-index:2500;background:rgba(255,255,255,.93);border-radius:12px;padding:7px 12px;font-size:12px;display:flex;align-items:center;gap:8px;box-shadow:0 4px 14px rgba(0,0,0,.08)}
+.hlegend i{display:inline-block;width:120px;height:10px;border-radius:999px}
+.hlegend span{font-weight:700;font-family:Archivo,sans-serif}
+.mtime{display:flex;align-items:center;gap:10px;padding:10px 16px;border-top:1px solid var(--line);flex-wrap:wrap}
+.mtime button{border:0;border-radius:999px;background:#eef3f8;font-weight:800;padding:6px 12px;cursor:pointer}
+.mtime #tPlay{width:38px;height:34px;background:linear-gradient(135deg,var(--h2),var(--h1));color:#fff}
+.mtime input{flex:1;min-width:160px;accent-color:#0f5c8c}
+.mtime .tl{font-weight:700;font-size:13px;color:var(--ink2);min-width:120px}
+.mtime .tl.live{color:var(--ok)}
+.mapcard:fullscreen,.mapcard.fs{border-radius:0;margin:0;display:flex;flex-direction:column;background:#fff}
+.mapcard.fs{position:fixed;inset:0;z-index:90}
+.mapcard:fullscreen #map3d,.mapcard.fs #map3d{flex:1;height:auto}
+@media (max-width:640px){.mlist{width:auto;right:12px;max-height:45%}.mlist.shut{right:auto}.hlegend{bottom:auto;top:56px;right:12px}.hlegend i{width:70px}.mcard{width:220px}}
+
 @media (max-width:640px){#map3d{height:440px}.mlegend{font-size:11px;gap:8px;padding:6px 10px}.mtip{display:none!important}.ppanel{left:12px;width:auto;top:auto;height:44%}.tools{margin-left:0}}
 .note{background:#fff8e6;border:1px solid #f1d58c;color:#6b4d00;border-radius:16px;padding:12px 16px;margin-bottom:16px}
 .note b{display:block;margin-bottom:2px}
@@ -222,9 +257,9 @@ details summary{cursor:pointer;color:var(--acc);font-weight:600;margin-top:12px}
 <main class="wrap">
   <div id="msg"></div>
   <section class="mapcard"><div class="mapbar"><h2>🗺️ แผนที่คลัง 3D</h2><div class="tabs" id="mapTabs"></div>
-    <div class="tools"><button data-v="3d" class="on">มุม 3D</button><button data-v="top">มุมบน</button><button id="btnSpin">⟳ หมุนอัตโนมัติ</button><button id="btnPlace">📍 วางหมุดเซนเซอร์</button></div></div>
-    <div id="map3d"><div id="pins"></div><div class="mhint" id="mhint"></div><div id="mside"></div>
-      <div class="mlegend"><span><i style="background:#0f7fb0"></i>อุณหภูมิ</span><span><i style="background:#7a4fc9"></i>ไฟฟ้า</span><span><i style="background:#1f9d61"></i>สวิตช์/แอร์</span><span><i style="background:#c7362b"></i>ผิดเกณฑ์</span><span><i style="background:#8a96a3"></i>ออฟไลน์</span><span class="mtip" style="color:var(--mute);font-weight:500">ลากหมุน · ล้อเมาส์/สองนิ้วซูม · คลิกขวา/สามนิ้วเลื่อน</span></div></div></section>
+    <div class="tools"><button data-v="3d" class="on">มุม 3D</button><button data-v="top">มุมบน</button><button id="btnHeat" class="on">🌡 Heatmap</button><button id="btnSpin">⟳ หมุน</button><button id="btnFull" title="เต็มจอ">⛶ เต็มจอ</button><button id="btnPlace">📍 วางหมุด</button></div></div>
+    <div id="map3d"><div id="pins"></div><div class="mhint" id="mhint"></div><div id="mside"></div><div id="mlist"></div><div class="mcard" id="mcard"></div><div class="hlegend" id="hlegend"></div>
+      <div class="mlegend"><span><i style="background:#0f7fb0"></i>อุณหภูมิ</span><span><i style="background:#7a4fc9"></i>ไฟฟ้า</span><span><i style="background:#1f9d61"></i>สวิตช์/แอร์</span><span><i style="background:#c7362b"></i>ผิดเกณฑ์</span><span><i style="background:#8a96a3"></i>ออฟไลน์</span><span class="mtip" style="color:var(--mute);font-weight:500">ลากหมุน · ล้อเมาส์/สองนิ้วซูม · คลิกขวา/สามนิ้วเลื่อน</span></div></div><div class="mtime" id="mtime"></div></section>
   <div class="kpis" id="kpis"></div>
   <div id="alerts"></div>
   <div id="sites"></div>
@@ -240,7 +275,7 @@ const ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const H = { apikey: ANON, Authorization: "Bearer " + ANON };
 const DEMO = /[?&]demo=1/.test(location.search);
 const CONTROL_ON = false;       // ปุ่มเปิด/ปิด: เปิดใช้หลังติดตั้ง Edge Function iot-control (ผู้ใช้ขอให้ทำหน้าให้เรียบร้อยก่อน 6 ต.ค.)
-const S = { site: "", range: 24, devs: [], reads: {}, open: {}, showAllAl: false, map: "wha", placeMode: false, placeSel: "" };
+const S = { site: "", range: 24, devs: [], reads: {}, open: {}, showAllAl: false, map: "wha", placeMode: false, placeSel: "", heat: true, tAt: null, selPin: null, hoverId: null, listOpen: false };
 const STALE_MIN = 45;           // ไม่ได้ค่าใหม่เกิน 45 นาที = ข้อมูลค้าง
 const NOSITE = "ไม่ระบุคลัง";
 const $ = (s) => document.querySelector(s);
@@ -558,7 +593,7 @@ function closeDev() { $("#dlg").classList.remove("open"); $("#tip").style.displa
 /* ---------- เหตุการณ์ ---------- */
 document.addEventListener("click", (e) => {
   const s = e.target.closest("#segSite button"); if (s) { S.site = s.dataset.s; const k = mapOfSite(S.site); if (k) S.map = k; render(); return; }
-  const r = e.target.closest("#segRange button"); if (r) { S.range = +r.dataset.r; document.querySelectorAll("#segRange button").forEach(b => b.classList.toggle("on", b === r)); load(); return; }
+  const r = e.target.closest("#segRange button"); if (r) { S.range = +r.dataset.r; S.tAt = null; stopPlay(); document.querySelectorAll("#segRange button").forEach(b => b.classList.toggle("on", b === r)); load(); return; }
   const o = e.target.closest("[data-off]"); if (o) { S.open[o.dataset.off] = !S.open[o.dataset.off]; render(); return; }
   if (e.target.closest("#alMore")) { S.showAllAl = !S.showAllAl; render(); return; }
   if (e.target.closest("#btnSet")) { openSettings(); return; }
@@ -577,26 +612,61 @@ setInterval(() => { if (!document.hidden && !$("#dlg").classList.contains("open"
 /* ---------- แผนที่ 3D (maps/map3d.js) · หมุด = ตำแหน่งใน iot_device_meta (map, px, py) ---------- */
 const mapOfSite = (s) => /^WH0?(5|8|32)$/i.test(s || "") ? "wha" : /^WH0?29$/i.test(s || "") ? "wh29" : "";
 const mapOf = (d) => m(d).map || mapOfSite(siteOf(d));
+// ค่า ณ เวลาที่เลือกบนแถบเวลา (S.tAt = null = ตอนนี้)
+function infoAt(d) {
+  if (S.tAt == null) return info(d);
+  const rs = S.reads[d.id] || []; let last = null;
+  for (const r of rs) { if (r.t <= S.tAt) last = r; else break; }
+  const ok = last && S.tAt - last.t <= STALE_MIN * 60000 && last.online !== false;
+  const x = { rs, last: last || {}, t: last ? last.t : 0, state: ok ? "ok" : "off", alert: null }, mm = m(d), tc = x.last.temp_c, hu = x.last.humidity;
+  if (ok && KIND(d) === "temp") {
+    if (tc != null && numOr(mm.t_max) != null && tc > +mm.t_max) x.alert = { k: "hot", txt: `สูงกว่าเกณฑ์ ${f1(+mm.t_max)}°C` };
+    else if (tc != null && numOr(mm.t_min) != null && tc < +mm.t_min) x.alert = { k: "cold", txt: `ต่ำกว่าเกณฑ์ ${f1(+mm.t_min)}°C` };
+    else if (hu != null && numOr(mm.h_max) != null && hu > +mm.h_max) x.alert = { k: "humi", txt: `ความชื้นเกิน ${f1(+mm.h_max, 0)}%` };
+  }
+  return x;
+}
+function valTxt(d, x) {
+  const k = KIND(d);
+  if (x.state === "off") return "ออฟไลน์";
+  if (k === "temp") return `${f1(x.last.temp_c)}°C · ${f1(x.last.humidity, 0)}%`;
+  if (k === "pow") return `${f1((x.last.power_w || 0) / 1000, 2)} kW`;
+  if (k === "ir") return "แอร์ (รีโมต)";
+  return x.last.switch_on ? "เปิดอยู่" : x.last.switch_on === false ? "ปิดอยู่" : "–";
+}
 function pinHtml(d, x) {
   const k = KIND(d), n = `<span class="nm">${esc(nameOf(d))}</span>`;
-  if (x.state === "off") return `${esc(nameOf(d))}${n.replace(esc(nameOf(d)), "ออฟไลน์")}`;
+  if (x.state === "off") return `${esc(nameOf(d))}<span class="nm">ออฟไลน์</span>`;
   if (k === "temp") return `${f1(x.last.temp_c)}°<small>${f1(x.last.humidity, 0)}%</small>${n}`;
   if (k === "pow") return `${f1((x.last.power_w || 0) / 1000, 2)} kW${n}`;
   if (k === "ir") return `❄ แอร์${n}`;
   return `${x.last.switch_on ? "⏻ เปิด" : x.last.switch_on === false ? "⏻ ปิด" : "⏻"}${n}`;
 }
+const PCOL = { temp: "#0f7fb0", pow: "#7a4fc9", sw: "#1f9d61", ir: "#1f9d61" };
 function renderMap() {
   const keys = Object.keys(window.IOT_MAPS || {});
   $("#mapTabs").innerHTML = keys.map(k => `<button data-map="${k}" class="${S.map === k ? "on" : ""}">${esc(IOT_MAPS[k].name)}</button>`).join("");
+  renderTime();
   if (!window.IOT3D) { if (!window.__mapWait) { window.__mapWait = 1; addEventListener("iot3d-ready", renderMap); setTimeout(() => { if (!window.IOT3D) $("#mside").innerHTML = '<div class="nomap">โหลดแผนที่ 3D ไม่สำเร็จ (ต้องต่ออินเทอร์เน็ตเพื่อโหลด three.js)</div>'; }, 8000); } return; }
   IOT3D.show(S.map);
   IOT3D.onPlace = async (id, map, px, py) => { await saveMeta(id, { map, px, py }); S.placeSel = ""; toast("✓ วางหมุดแล้ว"); renderMap(); };
   const vis = S.devs.filter(d => !m(d).hidden);
   const here = vis.filter(d => mapOf(d) === S.map || (!mapOf(d) && S.placeMode));
   const placed = here.filter(d => m(d).map === S.map && m(d).px != null);
-  IOT3D.setPins(placed.map(d => { const x = info(d), k = KIND(d);
-    return { id: d.id, px: +m(d).px, py: +m(d).py, html: pinHtml(d, x), title: nameOf(d), color: { temp: 0x0f7fb0, pow: 0x7a4fc9 }[k] || 0x1f9d61,
-      cls: [k, x.state === "off" ? "off" : "", x.alert && x.alert.k !== "humi" ? x.alert.k : "", S.placeSel === d.id ? "sel" : ""].join(" ") }; }));
+  const X = new Map(placed.map(d => [d.id, infoAt(d)]));
+  IOT3D.setPins(placed.map(d => { const x = X.get(d.id), k = KIND(d);
+    return { id: d.id, px: +m(d).px, py: +m(d).py, html: pinHtml(d, x), title: "", color: parseInt(PCOL[k].slice(1), 16),
+      cls: [k, x.state === "off" ? "off" : "", x.alert && x.alert.k !== "humi" ? x.alert.k : "", (S.placeSel || S.selPin) === d.id ? "sel" : ""].join(" ") }; }));
+  // Heatmap อุณหภูมิ
+  const hp = S.heat ? placed.filter(d => KIND(d) === "temp" && X.get(d.id).state === "ok" && X.get(d.id).last.temp_c != null).map(d => ({ x: +m(d).px, z: +m(d).py, v: +X.get(d.id).last.temp_c })) : [];
+  let lo = 0, hi = 0;
+  if (hp.length) { lo = Math.floor(Math.min(...hp.map(p => p.v))) - 1; hi = Math.ceil(Math.max(...hp.map(p => p.v))) + 1; if (hi - lo < 4) { const c = (hi + lo) / 2; lo = c - 2; hi = c + 2; } }
+  IOT3D.setHeat(hp, lo, hi);
+  const gr = [0, .35, .65, 1].map(t => `rgb(${IOT3D.ramp(t).join(",")}) ${t * 100}%`).join(",");
+  $("#hlegend").innerHTML = hp.length ? `<b>อุณหภูมิ</b><span>${lo}°</span><i style="background:linear-gradient(90deg,${gr})"></i><span>${hi}°</span>` : "";
+  $("#hlegend").style.display = hp.length ? "" : "none";
+  $("#btnHeat").classList.toggle("on", S.heat);
+  // รายการเซนเซอร์ข้างแผนที่
   const un = here.filter(d => !(m(d).map === S.map && m(d).px != null));
   const hint = $("#mhint");
   if (S.placeMode) {
@@ -607,25 +677,87 @@ function renderMap() {
     $("#mside").innerHTML = `<div class="ppanel"><div class="ph">📍 วางหมุด · ${esc(IOT_MAPS[S.map].short)}<button id="placeDone">เสร็จ</button></div><div class="pl">
       ${un.length ? `<div style="font-size:12px;color:var(--mute);padding:4px 6px">ยังไม่วาง ${un.length}</div>${un.sort((a, b) => nameOf(a).localeCompare(nameOf(b), "th", { numeric: true })).map(row).join("")}` : ""}
       ${placed.length ? `<div style="font-size:12px;color:var(--mute);padding:8px 6px 4px">วางแล้ว ${placed.length}</div>${placed.map(row).join("")}` : ""}</div></div>`;
+    $("#mlist").innerHTML = "";
   } else {
     hint.className = "mhint";
     $("#mside").innerHTML = un.length ? `<button class="unplaced" id="unplacedBtn">📍 ยังไม่วางหมุด ${un.length} เครื่อง · กดเพื่อวาง</button>` : "";
+    const ord = { hot: 0, cold: 0, humi: 1 };
+    const rows = placed.slice().sort((a, b) => { const xa = X.get(a.id), xb = X.get(b.id);
+      return ((xa.alert ? ord[xa.alert.k] : 2) - (xb.alert ? ord[xb.alert.k] : 2)) || ((xa.state === "off") - (xb.state === "off")) || KIND(a).localeCompare(KIND(b)) || nameOf(a).localeCompare(nameOf(b), "th", { numeric: true }); });
+    const nAl = rows.filter(d => X.get(d.id).alert).length, nOff = rows.filter(d => X.get(d.id).state === "off").length;
+    $("#mlist").innerHTML = placed.length ? `<div class="mlist ${S.listOpen ? "" : "shut"}"><button class="mlh" id="listTg"><b>เซนเซอร์ในคลังนี้ ${placed.length}</b>${nAl ? `<span class="b r">ผิดเกณฑ์ ${nAl}</span>` : ""}${nOff ? `<span class="b g">ออฟไลน์ ${nOff}</span>` : ""}<span class="cv">${S.listOpen ? "▾" : "▸"}</span></button>
+      ${S.listOpen ? `<div class="mlb">${rows.map(d => { const x = X.get(d.id), k = KIND(d);
+        return `<button class="mli ${S.selPin === d.id ? "sel" : ""} ${x.alert && x.alert.k !== "humi" ? "al" : ""} ${x.state === "off" ? "off" : ""}" data-fly="${esc(d.id)}"><i style="background:${x.alert && x.alert.k !== "humi" ? "var(--bad)" : x.state === "off" ? "var(--off)" : PCOL[k]}"></i><span class="n">${esc(nameOf(d))}<small>${esc(siteOf(d))}${m(d).loc ? " · " + esc(m(d).loc) : ""}</small></span><span class="v">${esc(valTxt(d, x))}</span></button>`; }).join("")}</div>` : ""}</div>` : "";
   }
   IOT3D.place(S.placeMode ? S.placeSel : null);
   $("#map3d").classList.toggle("pm", S.placeMode);
   $("#btnPlace").classList.toggle("on", S.placeMode);
+  if (S.hoverId) showCard(S.hoverId);
+}
+/* ---------- การ์ดลอยเมื่อชี้/เลือกหมุด ---------- */
+function showCard(id) {
+  const d = S.devs.find(x => x.id === id), pin = document.querySelector(`.pin[data-id="${CSS.escape(id)}"]`), c = $("#mcard");
+  if (!d || !pin || S.placeMode) { c.style.display = "none"; return; }
+  const x = infoAt(d), k = KIND(d), key = k === "temp" ? "temp_c" : k === "pow" ? "power_w" : null;
+  c.innerHTML = `<div class="ch"><b>${esc(nameOf(d))}</b>${stHtml(x.state)}</div><div class="cs">${esc(siteOf(d))}${m(d).loc ? " · " + esc(m(d).loc) : ""} · ${TYPE_TH[k]}</div>
+    ${x.alert ? `<div class="ca">⚠ ${esc(x.alert.txt)}</div>` : ""}
+    <div class="cv">${esc(valTxt(d, x))}</div>${key ? `<svg class="csp" data-k="${key}"></svg><div class="cs">${RLAB()}${(r => r ? ` · ${f1(r[0], key === "power_w" ? 0 : 1)}–${f1(r[1], key === "power_w" ? 0 : 1)}` : "")(rng(x.rs, key))}</div>` : ""}
+    <div class="cf"><span>${x.t ? (S.tAt == null ? "อัปเดต " + ago(x.t) : "ค่า ณ " + TH_DT(new Date(x.t))) : ""}</span><button data-open="${esc(d.id)}">ดูรายละเอียด →</button></div>`;
+  c.style.display = "block";
+  const r = pin.getBoundingClientRect(), mr = $("#map3d").getBoundingClientRect();
+  let left = r.left - mr.left + 18, top = r.top - mr.top - 30;
+  if (left + c.offsetWidth > mr.width - 8) left = r.left - mr.left - c.offsetWidth - 18;
+  top = Math.max(8, Math.min(top, mr.height - c.offsetHeight - 8));
+  c.style.left = Math.max(8, left) + "px"; c.style.top = top + "px";
+  const sv = c.querySelector(".csp"); if (sv) line(sv, x.rs, sv.dataset.k, { spark: true, th: key === "temp_c" ? [numOr(m(d).t_min), numOr(m(d).t_max)] : null });
+}
+$("#pins").addEventListener("pointerover", (e) => { const p = e.target.closest(".pin"); if (p && !S.selPin) { S.hoverId = p.dataset.id; showCard(S.hoverId); } });
+$("#pins").addEventListener("pointerout", (e) => { const p = e.target.closest(".pin"); if (p && !S.selPin && !(e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest(".pin") === p)) { S.hoverId = null; setTimeout(() => { if (!S.hoverId && !S.selPin) $("#mcard").style.display = "none"; }, 120); } });
+$("#map3d").addEventListener("pointerdown", (e) => { if (!e.target.closest(".pin,#mcard,.mlist,.ppanel,.mtime") && S.selPin) { S.selPin = null; S.hoverId = null; $("#mcard").style.display = "none"; renderMap(); } });
+/* ---------- แถบเวลา: ย้อนดูค่าใน 24 ชม./7 วัน ---------- */
+let playT = 0;
+function renderTime() {
+  const now = Date.now(), t0 = now - S.range * 3600e3, step = 15 * 60000, n = Math.round((now - t0) / step);
+  const v = S.tAt == null ? n : Math.round((S.tAt - t0) / step);
+  $("#mtime").innerHTML = `<button id="tPlay" title="เล่นย้อนหลัง">${playT ? "❚❚" : "▶"}</button>
+    <input type="range" id="tRange" min="0" max="${n}" value="${Math.max(0, Math.min(n, v))}" aria-label="เลือกเวลา">
+    <span class="tl ${S.tAt == null ? "live" : ""}">${S.tAt == null ? "● สด · ตอนนี้" : TH_DT(new Date(S.tAt))}</span>${S.tAt != null ? '<button id="tNow">กลับมาตอนนี้</button>' : ""}`;
+}
+function setT(v) {
+  const now = Date.now(), t0 = now - S.range * 3600e3, step = 15 * 60000, n = Math.round((now - t0) / step);
+  S.tAt = v >= n ? null : t0 + v * step; renderMap();
+}
+document.addEventListener("input", (e) => { if (e.target.id === "tRange") { stopPlay(); setT(+e.target.value); } });
+function stopPlay() { if (playT) { clearInterval(playT); playT = 0; } }
+function startPlay() {
+  const now = Date.now(), t0 = now - S.range * 3600e3, step = 15 * 60000, n = Math.round((now - t0) / step);
+  let v = S.tAt == null ? 0 : Math.round((S.tAt - t0) / step);
+  const inc = S.range === 24 ? 2 : 8;
+  playT = setInterval(() => { v += inc; if (v >= n) { stopPlay(); setT(n); return; } setT(v); }, 260);
+  renderTime();
 }
 document.addEventListener("click", async (e) => {
   const t = e.target;
-  const mt = t.closest("[data-map]"); if (mt) { S.map = mt.dataset.map; S.placeSel = ""; renderMap(); return; }
+  const mt = t.closest("[data-map]"); if (mt) { S.map = mt.dataset.map; S.placeSel = ""; S.selPin = null; $("#mcard").style.display = "none"; renderMap(); return; }
   const v = t.closest(".tools [data-v]"); if (v && window.IOT3D) { document.querySelectorAll(".tools [data-v]").forEach(b => b.classList.toggle("on", b === v)); IOT3D.view(v.dataset.v); return; }
   const sp = t.closest("#btnSpin"); if (sp && window.IOT3D) { sp.classList.toggle("on", IOT3D.spin(!sp.classList.contains("on"))); return; }
-  if (t.closest("#btnPlace") || t.closest("#unplacedBtn")) { S.placeMode = !S.placeMode || !!t.closest("#unplacedBtn"); S.placeSel = ""; renderMap(); return; }
+  if (t.closest("#btnHeat")) { S.heat = !S.heat; renderMap(); return; }
+  if (t.closest("#btnFull")) { const c = document.querySelector(".mapcard"); if (document.fullscreenElement) document.exitFullscreen(); else c.requestFullscreen?.().catch(() => c.classList.toggle("fs")); return; }
+  if (t.closest("#listTg")) { S.listOpen = !S.listOpen; renderMap(); return; }
+  if (t.closest("#tPlay")) { if (playT) { stopPlay(); renderTime(); } else startPlay(); return; }
+  if (t.closest("#tNow")) { stopPlay(); S.tAt = null; renderMap(); return; }
+  const fl = t.closest("[data-fly]"); if (fl && window.IOT3D) { const d = S.devs.find(x => x.id === fl.dataset.fly); S.selPin = d.id; S.hoverId = d.id; IOT3D.flyTo(+m(d).px, +m(d).py); renderMap(); setTimeout(() => showCard(d.id), 700); return; }
+  const op = t.closest("[data-open]"); if (op) { e.stopPropagation(); openDev(op.dataset.open); return; }
+  if (t.closest("#btnPlace") || t.closest("#unplacedBtn")) { S.placeMode = !S.placeMode || !!t.closest("#unplacedBtn"); S.placeSel = ""; S.selPin = null; $("#mcard").style.display = "none"; renderMap(); return; }
   if (t.closest("#placeDone")) { S.placeMode = false; S.placeSel = ""; renderMap(); return; }
   const pk = t.closest("[data-pick]"); if (pk) { S.placeSel = S.placeSel === pk.dataset.pick ? "" : pk.dataset.pick; renderMap(); return; }
   const up = t.closest("[data-unpin]"); if (up) { await saveMeta(up.dataset.unpin, { map: null, px: null, py: null }); renderMap(); return; }
-  const pin = t.closest(".pin"); if (pin) { e.stopPropagation(); if (!S.placeMode) openDev(pin.dataset.id); }
+  const pin = t.closest(".pin"); if (pin) { e.stopPropagation(); if (S.placeMode) return;
+    const d = S.devs.find(x => x.id === pin.dataset.id);
+    if (S.selPin === pin.dataset.id) { openDev(pin.dataset.id); return; }  // กดซ้ำ = เปิดรายละเอียด
+    S.selPin = d.id; S.hoverId = d.id; IOT3D.flyTo(+m(d).px, +m(d).py); renderMap(); setTimeout(() => showCard(d.id), 700); }
 }, true);
+document.addEventListener("fullscreenchange", () => setTimeout(() => window.IOT3D && IOT3D.show(S.map), 50));
 
 /* ---------- สั่งเปิด/ปิด (ปิดไว้ก่อน CONTROL_ON = false · ผ่าน Supabase Edge Function iot-control) ---------- */
 const CTRL = new Set(["kg", "znjdq", "infrared_ac"]);   // ผู้ใช้เลือก 6 ต.ค.: พัดลม/สวิตช์ · Skylight · แอร์อินฟราเรด (ไม่รวมมิเตอร์ไฟ dlq)
