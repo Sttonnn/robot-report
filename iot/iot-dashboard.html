@@ -6,6 +6,9 @@
 <title>IOT Dashboard · PCG</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap">
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<script src="maps/maps.js"></script>
+<script type="module" src="maps/map3d.js"></script>
 <style>
 /* IOT Dashboard (6 ต.ค. 2569) · Tuya → GitHub Actions ทุก 15 นาที → Supabase iot_devices / iot_readings
    จัดหน้าแยกตามคลัง (ผู้ใช้เลือก 6 ต.ค.) · ตั้งชื่อ/คลัง/ตำแหน่ง/เกณฑ์อุณหภูมิบนเว็บ → iot_device_meta
@@ -108,6 +111,51 @@ h1{margin:14px 0 2px;font:800 30px/1.15 Archivo,"IBM Plex Sans Thai",sans-serif;
 .offlist{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .offc{background:#f1f3f5;border-radius:999px;padding:4px 10px;font-size:12.5px;color:#4d5864;cursor:pointer;border:0}
 .offc:hover{background:#e3e7eb}
+/* แผนที่ 3D */
+.mapcard{background:var(--card);border-radius:24px;box-shadow:var(--sh);overflow:hidden;margin-bottom:18px}
+.mapbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--line)}
+.mapbar h2{margin:0;font-size:17px;display:flex;align-items:center;gap:8px}
+.tabs{display:inline-flex;background:#eef3f8;border-radius:999px;padding:3px}
+.tabs button{border:0;background:none;border-radius:999px;padding:6px 14px;font-weight:700;font-size:13px;cursor:pointer;color:var(--ink2)}
+.tabs button.on{background:linear-gradient(135deg,var(--h2),var(--h1));color:#fff;box-shadow:0 3px 10px rgba(15,92,140,.3)}
+.tools{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap}
+.tools button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:6px 10px;font-weight:600;font-size:12.5px;cursor:pointer}
+.tools button.on{background:#0f5c8c;color:#fff;border-color:#0f5c8c}
+#map3d{position:relative;height:560px;background:#e9f0f7;touch-action:none}
+#map3d canvas{display:block;width:100%;height:100%}
+#map3d.placing canvas{cursor:crosshair}
+#pins{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.pin{position:absolute;left:0;top:0;border:0;background:none;padding:0;cursor:pointer;pointer-events:auto;will-change:transform}
+.pin .pb{position:absolute;bottom:6px;left:0;transform:translateX(-50%);white-space:nowrap;background:#fff;border-radius:10px;padding:4px 9px;font:800 13px/1.2 Archivo,"IBM Plex Sans Thai",sans-serif;color:var(--ink);box-shadow:0 4px 14px rgba(11,42,74,.25);border:2px solid var(--pc,#0f7fb0)}
+.pin .pb small{font-weight:600;color:var(--mute);font-size:11px;margin-left:4px}
+.pin i{position:absolute;left:-5px;top:-6px;width:10px;height:10px;border-radius:50%;background:var(--pc,#0f7fb0);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.pin.temp{--pc:#0f7fb0} .pin.pow{--pc:#7a4fc9} .pin.sw,.pin.ir{--pc:#1f9d61}
+.pin.off{--pc:#8a96a3} .pin.off .pb{color:#8a96a3;background:#f4f6f8}
+.pin.hot{--pc:#c7362b} .pin.hot .pb{background:#c7362b;color:#fff;animation:pulse 1.4s infinite} .pin.hot .pb small{color:#ffd9d4}
+.pin.cold{--pc:#2a62c9} .pin.cold .pb{background:#2a62c9;color:#fff}
+.pin:hover .pb,.pin.sel .pb{transform:translateX(-50%) scale(1.12)}
+.pin .pb .nm{display:none;font:600 11px "IBM Plex Sans Thai",sans-serif;color:inherit;opacity:.8}
+.pin:hover .pb .nm,.pin.sel .pb .nm{display:block}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(199,54,43,.55)}50%{box-shadow:0 0 0 10px rgba(199,54,43,0)}}
+.mlegend{z-index:2500;position:absolute;left:12px;bottom:12px;background:rgba(255,255,255,.92);border-radius:12px;padding:8px 12px;font-size:12px;display:flex;gap:12px;flex-wrap:wrap;box-shadow:0 4px 14px rgba(0,0,0,.08);max-width:calc(100% - 24px)}
+.mlegend span{display:inline-flex;align-items:center;gap:5px;color:var(--ink2);font-weight:600}
+.mlegend i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.mhint{z-index:3000;position:absolute;left:50%;top:12px;transform:translateX(-50%);background:#0b2a4a;color:#fff;border-radius:999px;padding:7px 14px;font-weight:700;font-size:13px;box-shadow:0 6px 18px rgba(0,0,0,.25);display:none;white-space:nowrap}
+.mhint.on{display:block}
+.unplaced{z-index:2500;position:absolute;right:12px;top:12px;background:rgba(255,255,255,.95);border-radius:12px;padding:7px 12px;font-size:12.5px;font-weight:700;color:#8a5600;box-shadow:0 4px 14px rgba(0,0,0,.08);border:0;cursor:pointer}
+.ppanel{z-index:3000;position:absolute;right:12px;top:12px;bottom:12px;width:290px;background:rgba(255,255,255,.97);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.18);display:flex;flex-direction:column;overflow:hidden}
+.ppanel .ph{padding:12px 14px;border-bottom:1px solid var(--line);font-weight:800;display:flex;align-items:center;gap:8px}
+.ppanel .ph button{margin-left:auto;border:0;background:#eef2f6;border-radius:8px;padding:4px 10px;font-weight:700;cursor:pointer}
+.ppanel .pl{overflow:auto;padding:6px 8px}
+.pr{display:flex;align-items:center;gap:8px;padding:7px 6px;border-radius:10px}
+.pr.sel{background:#e6f2fa}
+.pr .n{flex:1;min-width:0;font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pr .n small{display:block;color:var(--mute);font-weight:500;font-size:11.5px}
+.pr button{border:0;border-radius:8px;padding:4px 9px;font-weight:700;font-size:12px;cursor:pointer;background:#0f5c8c;color:#fff}
+.pr button.rm{background:#eef2f6;color:#4d5864}
+.nomap{position:absolute;inset:0;display:grid;place-items:center;color:var(--mute);text-align:center;padding:20px}
+#map3d.pm .mlegend{display:none}
+@media (max-width:640px){#map3d{height:440px}.mlegend{font-size:11px;gap:8px;padding:6px 10px}.mtip{display:none!important}.ppanel{left:12px;width:auto;top:auto;height:44%}.tools{margin-left:0}}
 .note{background:#fff8e6;border:1px solid #f1d58c;color:#6b4d00;border-radius:16px;padding:12px 16px;margin-bottom:16px}
 .note b{display:block;margin-bottom:2px}
 .empty{color:var(--mute);padding:6px 0}
@@ -173,6 +221,10 @@ details summary{cursor:pointer;color:var(--acc);font-weight:600;margin-top:12px}
 
 <main class="wrap">
   <div id="msg"></div>
+  <section class="mapcard"><div class="mapbar"><h2>🗺️ แผนที่คลัง 3D</h2><div class="tabs" id="mapTabs"></div>
+    <div class="tools"><button data-v="3d" class="on">มุม 3D</button><button data-v="top">มุมบน</button><button id="btnPlace">📍 วางหมุดเซนเซอร์</button></div></div>
+    <div id="map3d"><div id="pins"></div><div class="mhint" id="mhint"></div><div id="mside"></div>
+      <div class="mlegend"><span><i style="background:#0f7fb0"></i>อุณหภูมิ</span><span><i style="background:#7a4fc9"></i>ไฟฟ้า</span><span><i style="background:#1f9d61"></i>สวิตช์/แอร์</span><span><i style="background:#c7362b"></i>ผิดเกณฑ์</span><span><i style="background:#8a96a3"></i>ออฟไลน์</span><span class="mtip" style="color:var(--mute);font-weight:500">ลากหมุน · ล้อเมาส์/สองนิ้วซูม · คลิกขวา/สามนิ้วเลื่อน</span></div></div></section>
   <div class="kpis" id="kpis"></div>
   <div id="alerts"></div>
   <div id="sites"></div>
@@ -188,7 +240,7 @@ const ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const H = { apikey: ANON, Authorization: "Bearer " + ANON };
 const DEMO = /[?&]demo=1/.test(location.search);
 const CONTROL_ON = false;       // ปุ่มเปิด/ปิด: เปิดใช้หลังติดตั้ง Edge Function iot-control (ผู้ใช้ขอให้ทำหน้าให้เรียบร้อยก่อน 6 ต.ค.)
-const S = { site: "", range: 24, devs: [], reads: {}, open: {}, showAllAl: false };
+const S = { site: "", range: 24, devs: [], reads: {}, open: {}, showAllAl: false, map: "wha", placeMode: false, placeSel: "" };
 const STALE_MIN = 45;           // ไม่ได้ค่าใหม่เกิน 45 นาที = ข้อมูลค้าง
 const NOSITE = "ไม่ระบุคลัง";
 const $ = (s) => document.querySelector(s);
@@ -366,6 +418,7 @@ function render() {
 
   document.querySelectorAll("svg[data-spark]").forEach(el => { const d = S.devs.find(x => x.id === el.dataset.spark); line(el, S.reads[el.dataset.spark] || [], el.dataset.k, { spark: true, th: d && el.dataset.k === "temp_c" ? [numOr(m(d).t_min), numOr(m(d).t_max)] : null }); });
   if (CONTROL_ON) loadLog();
+  renderMap();
 }
 const sub = (d) => [m(d).loc, nameOf(d) !== d.name ? d.name : ""].filter(Boolean).join(" · ");
 function tempCard(d, x) {
@@ -504,7 +557,7 @@ function closeDev() { $("#dlg").classList.remove("open"); $("#tip").style.displa
 
 /* ---------- เหตุการณ์ ---------- */
 document.addEventListener("click", (e) => {
-  const s = e.target.closest("#segSite button"); if (s) { S.site = s.dataset.s; render(); return; }
+  const s = e.target.closest("#segSite button"); if (s) { S.site = s.dataset.s; const k = mapOfSite(S.site); if (k) S.map = k; render(); return; }
   const r = e.target.closest("#segRange button"); if (r) { S.range = +r.dataset.r; document.querySelectorAll("#segRange button").forEach(b => b.classList.toggle("on", b === r)); load(); return; }
   const o = e.target.closest("[data-off]"); if (o) { S.open[o.dataset.off] = !S.open[o.dataset.off]; render(); return; }
   if (e.target.closest("#alMore")) { S.showAllAl = !S.showAllAl; render(); return; }
@@ -519,6 +572,59 @@ document.addEventListener("keydown", (e) => {
 });
 let rz; addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => { if (!$("#dlg").classList.contains("open")) render(); }, 150); });
 setInterval(() => { if (!document.hidden && !$("#dlg").classList.contains("open")) load(); }, 5 * 60000);
+
+
+/* ---------- แผนที่ 3D (maps/map3d.js) · หมุด = ตำแหน่งใน iot_device_meta (map, px, py) ---------- */
+const mapOfSite = (s) => /^WH0?(5|8|32)$/i.test(s || "") ? "wha" : /^WH0?29$/i.test(s || "") ? "wh29" : "";
+const mapOf = (d) => m(d).map || mapOfSite(siteOf(d));
+function pinHtml(d, x) {
+  const k = KIND(d), n = `<span class="nm">${esc(nameOf(d))}</span>`;
+  if (x.state === "off") return `${esc(nameOf(d))}${n.replace(esc(nameOf(d)), "ออฟไลน์")}`;
+  if (k === "temp") return `${f1(x.last.temp_c)}°<small>${f1(x.last.humidity, 0)}%</small>${n}`;
+  if (k === "pow") return `${f1((x.last.power_w || 0) / 1000, 2)} kW${n}`;
+  if (k === "ir") return `❄ แอร์${n}`;
+  return `${x.last.switch_on ? "⏻ เปิด" : x.last.switch_on === false ? "⏻ ปิด" : "⏻"}${n}`;
+}
+function renderMap() {
+  const keys = Object.keys(window.IOT_MAPS || {});
+  $("#mapTabs").innerHTML = keys.map(k => `<button data-map="${k}" class="${S.map === k ? "on" : ""}">${esc(IOT_MAPS[k].name)}</button>`).join("");
+  if (!window.IOT3D) { if (!window.__mapWait) { window.__mapWait = 1; addEventListener("iot3d-ready", renderMap); setTimeout(() => { if (!window.IOT3D) $("#mside").innerHTML = '<div class="nomap">โหลดแผนที่ 3D ไม่สำเร็จ (ต้องต่ออินเทอร์เน็ตเพื่อโหลด three.js)</div>'; }, 8000); } return; }
+  IOT3D.show(S.map);
+  IOT3D.onPlace = async (id, map, px, py) => { await saveMeta(id, { map, px, py }); S.placeSel = ""; toast("✓ วางหมุดแล้ว"); renderMap(); };
+  const vis = S.devs.filter(d => !m(d).hidden);
+  const here = vis.filter(d => mapOf(d) === S.map || (!mapOf(d) && S.placeMode));
+  const placed = here.filter(d => m(d).map === S.map && m(d).px != null);
+  IOT3D.setPins(placed.map(d => { const x = info(d), k = KIND(d);
+    return { id: d.id, px: +m(d).px, py: +m(d).py, html: pinHtml(d, x), title: nameOf(d), color: { temp: 0x0f7fb0, pow: 0x7a4fc9 }[k] || 0x1f9d61,
+      cls: [k, x.state === "off" ? "off" : "", x.alert && x.alert.k !== "humi" ? x.alert.k : "", S.placeSel === d.id ? "sel" : ""].join(" ") }; }));
+  const un = here.filter(d => !(m(d).map === S.map && m(d).px != null));
+  const hint = $("#mhint");
+  if (S.placeMode) {
+    hint.className = "mhint on"; hint.textContent = S.placeSel ? "คลิกบนพื้นคลังตรงตำแหน่งของ " + nameOf(S.devs.find(d => d.id === S.placeSel)) : "เลือกอุปกรณ์จากรายการด้านขวา แล้วคลิกบนแผนที่";
+    const row = d => { const p = m(d).map === S.map && m(d).px != null;
+      return `<div class="pr ${S.placeSel === d.id ? "sel" : ""}"><div class="n">${esc(nameOf(d))}<small>${TYPE_TH[KIND(d)]} · ${esc(siteOf(d))}${p ? " · วางแล้ว" : ""}</small></div>
+        <button data-pick="${esc(d.id)}">${S.placeSel === d.id ? "รอคลิก…" : p ? "ย้าย" : "วาง"}</button>${p ? `<button class="rm" data-unpin="${esc(d.id)}">เอาออก</button>` : ""}</div>`; };
+    $("#mside").innerHTML = `<div class="ppanel"><div class="ph">📍 วางหมุด · ${esc(IOT_MAPS[S.map].short)}<button id="placeDone">เสร็จ</button></div><div class="pl">
+      ${un.length ? `<div style="font-size:12px;color:var(--mute);padding:4px 6px">ยังไม่วาง ${un.length}</div>${un.sort((a, b) => nameOf(a).localeCompare(nameOf(b), "th", { numeric: true })).map(row).join("")}` : ""}
+      ${placed.length ? `<div style="font-size:12px;color:var(--mute);padding:8px 6px 4px">วางแล้ว ${placed.length}</div>${placed.map(row).join("")}` : ""}</div></div>`;
+  } else {
+    hint.className = "mhint";
+    $("#mside").innerHTML = un.length ? `<button class="unplaced" id="unplacedBtn">📍 ยังไม่วางหมุด ${un.length} เครื่อง · กดเพื่อวาง</button>` : "";
+  }
+  IOT3D.place(S.placeMode ? S.placeSel : null);
+  $("#map3d").classList.toggle("pm", S.placeMode);
+  $("#btnPlace").classList.toggle("on", S.placeMode);
+}
+document.addEventListener("click", async (e) => {
+  const t = e.target;
+  const mt = t.closest("[data-map]"); if (mt) { S.map = mt.dataset.map; S.placeSel = ""; renderMap(); return; }
+  const v = t.closest(".tools [data-v]"); if (v && window.IOT3D) { document.querySelectorAll(".tools [data-v]").forEach(b => b.classList.toggle("on", b === v)); IOT3D.view(v.dataset.v); return; }
+  if (t.closest("#btnPlace") || t.closest("#unplacedBtn")) { S.placeMode = !S.placeMode || !!t.closest("#unplacedBtn"); S.placeSel = ""; renderMap(); return; }
+  if (t.closest("#placeDone")) { S.placeMode = false; S.placeSel = ""; renderMap(); return; }
+  const pk = t.closest("[data-pick]"); if (pk) { S.placeSel = S.placeSel === pk.dataset.pick ? "" : pk.dataset.pick; renderMap(); return; }
+  const up = t.closest("[data-unpin]"); if (up) { await saveMeta(up.dataset.unpin, { map: null, px: null, py: null }); renderMap(); return; }
+  const pin = t.closest(".pin"); if (pin) { e.stopPropagation(); if (!S.placeMode) openDev(pin.dataset.id); }
+}, true);
 
 /* ---------- สั่งเปิด/ปิด (ปิดไว้ก่อน CONTROL_ON = false · ผ่าน Supabase Edge Function iot-control) ---------- */
 const CTRL = new Set(["kg", "znjdq", "infrared_ac"]);   // ผู้ใช้เลือก 6 ต.ค.: พัดลม/สวิตช์ · Skylight · แอร์อินฟราเรด (ไม่รวมมิเตอร์ไฟ dlq)
@@ -563,8 +669,10 @@ document.addEventListener("click", (e) => { const c = e.target.closest("[data-ct
 
 /* ---------- ข้อมูลตัวอย่าง (?demo=1) ---------- */
 function demoMeta() {
-  return { demo5: { id: "demo5", label: "ห้องเย็น 2", loc: "ห้องเย็น WH29", t_max: 28, t_min: 18 }, demo4: { id: "demo4", label: "ห้องเย็น 1", loc: "ห้องเย็น WH29", t_max: 28 },
-    demo2: { id: "demo2", label: "คลัง 8 โซน DRVBC", t_max: 30 }, demo11: { id: "demo11", site: "WH5", label: "แอร์ทีม Admin", loc: "ออฟฟิศ" }, demo10: { id: "demo10", site: "WH8", label: "Skylight AA–AH" } };
+  return { demo5: { id: "demo5", label: "ห้องเย็น 2", loc: "ห้องเย็น WH29", t_max: 28, t_min: 18, map: "wh29", px: 1300, py: 700 }, demo4: { id: "demo4", label: "ห้องเย็น 1", loc: "ห้องเย็น WH29", t_max: 28, map: "wh29", px: 600, py: 620 },
+    demo2: { id: "demo2", label: "คลัง 8 โซน DRVBC", t_max: 30, map: "wha", px: 520, py: 640 }, demo11: { id: "demo11", site: "WH5", label: "แอร์ทีม Admin", loc: "ออฟฟิศ", map: "wha", px: 2370, py: 1120 }, demo10: { id: "demo10", site: "WH8", label: "Skylight AA–AH", map: "wha", px: 700, py: 420 },
+    demo0: { id: "demo0", map: "wha", px: 1320, py: 520 }, demo1: { id: "demo1", map: "wha", px: 1900, py: 900 }, demo3: { id: "demo3", map: "wha", px: 300, py: 950 }, demo6: { id: "demo6", map: "wha", px: 2300, py: 400 },
+    demo7: { id: "demo7", map: "wha", px: 760, py: 1100 }, demo9: { id: "demo9", map: "wha", px: 1700, py: 1080 }, demo8: { id: "demo8", map: "wha", px: 420, py: 1100 } };
 }
 function demo() {
   const L = [["WH5-5AN", "qxj", "WH5", 29.8, 74], ["WH5-5BF", "qxj", "WH5", 29.8, 73], ["WH8-DRVBC", "qxj", "WH8", 30.2, 73], ["WH8-5BU", "qxj", "WH8", 29.7, 75], ["WH29-cool room1", "qxj", "WH29", 35, 50, 0], ["WH29-cool room2", "qxj", "WH29", 26, 60],
