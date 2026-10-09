@@ -206,7 +206,7 @@ function siteDetail(M, H) {
     if (o.shop !== false) { // ร้าน 7-Eleven (WH5)
       const sh = box(w * .3, P * 2.8, h * .45, 0xf4f6f8); sh.position.set(x + w * .82, P * 1.4, y + h * .25); root.add(sh);
       const sg = box(w * .3, P * .5, P * .1, 0x1a8f3c); sg.position.set(x + w * .82, P * 2.6, y + h * .48); root.add(sg); }
-    for (let i = 0; i < 3; i++) { const tb = box(P * 2.2, P * .75, P * .8, 0xf4f6f8); tb.position.set(x + w * .2 + i * P * 3, P * .4, y + h * .55); root.add(tb); }
+    const nt = Math.max(1, Math.min(3, Math.floor(w * (o.shop === false ? 1 : .6) / (P * 3)))); for (let i = 0; i < nt; i++) { const tb = box(P * 2.2, P * .75, P * .8, 0xf4f6f8); tb.position.set(x + (i + .5) * w * (o.shop === false ? 1 : .6) / nt, P * .4, y + h * .55); root.add(tb); }
     for (let x2 = x; x2 < x + w; x2 += P * 1) { const cb = box(P * 1, P * .3, P * .4, (Math.floor((x2 - x) / P) % 2) ? 0xd9341e : 0xf6f6f6); cb.position.set(x2 + P * .5, P * .15, y + h); root.add(cb); }
     if (o.t) { const t = textSprite(o.t, P * 1.4, "#3c4a68", "rgba(255,255,255,.9)"); t.position.set(x + w / 2, Hc + P * .3, y + h / 2); root.add(t); } }
   for (const o of M.carport || []) { const [x, y, w, h] = o.r, Hc = P * 3.4;
