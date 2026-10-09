@@ -1,0 +1,16 @@
+name: PM Supabase check
+on:
+  push:
+    branches: [claude/wonderful-ride-myzde3]
+    paths: [.github/workflows/pm-check.yml]
+  workflow_dispatch:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          K="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1nbnNob3ZuaWJjbWlwdG94ZGZlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkzNzI1NDIsImV4cCI6MjEwNDk0ODU0Mn0.UoPu-i6ODMEgyuqoO6oKHf0JIqFKpWkSpBkOKrpITwQ"
+          for t in pm_work_orders pm_fail_followup pm_upload_log; do
+            echo "== $t"
+            curl -s -w "\nHTTP %{http_code}\n" "https://mgnshovnibcmiptoxdfe.supabase.co/rest/v1/$t?select=id,updated_at&order=updated_at.desc&limit=2" -H "apikey: $K" -H "Authorization: Bearer $K" -H "Prefer: count=exact" -D - | grep -iE "^content-range|HTTP|id" | head -6
+          done
