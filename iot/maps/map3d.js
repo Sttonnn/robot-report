@@ -384,7 +384,7 @@ function build(key) {
   view(VMODE); /* 9 ต.ค. ผู้ใช้สั่ง: ค่าเริ่ม = มุมบน (เปลี่ยนแผนที่แล้วใช้มุมเดิมที่เลือก) */
   needs = true;
 }
-let VMODE = "top";
+let VMODE = "front"; // 9 ต.ค. ผู้ใช้สั่ง: ค่าเริ่ม = มุมหน้า
 function view(mode) {
   VMODE = mode || VMODE;
   const M = MAPS[cur]; if (!M) return;
