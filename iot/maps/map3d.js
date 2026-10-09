@@ -160,6 +160,21 @@ function siteDetail(M, H) {
     const bk = new THREE.InstancedMesh(new THREE.BoxGeometry(P * .47, P * .18, P * .47), new THREE.MeshStandardMaterial({ color: 0x1b1d21 }), gs.length);
     gs.forEach(([x, z], i) => { m4.makeTranslation(x, P * .55, z); bk.setMatrixAt(i, m4); }); root.add(bk); }
   for (const w of M.stops || []) { const [x, y0, y1, step] = w; for (let y = y0; y < y1; y += step * P) { const m = box(P * .25, P * .12, P * 1.6, 0x1b1d21); m.position.set(x, P * .06, y); root.add(m); const s = box(P * .26, P * .13, P * .35, 0xf5c400); s.position.set(x, P * .065, y); root.add(s); } }
+  /* 9 ต.ค. ตามรูปจริง: พัดลมยักษ์ (HVLS) Ø ~7.3 ม. แขวนใต้หลังคา ~12.5 ม. (เหนือชั้นวาง) · 6 ใบพัดเงิน · ก้านแขวน */
+  for (const f of M.fans || []) { const g = new THREE.Group(), r = P * (f.d || 7.3) / 2, y = P * (f.h || 12.5), cm = { metalness: .6, roughness: .35 };
+    const rod = box(P * .15, P * 1.6, P * .15, 0x9aa3ad, cm); rod.position.y = P * .8; g.add(rod);
+    const hub = new THREE.Mesh(new THREE.CylinderGeometry(P * .45, P * .45, P * .5, 16), new THREE.MeshStandardMaterial({ color: 0x3a3f46, ...cm })); g.add(hub);
+    for (let k = 0; k < 6; k++) { const bl = box(r, P * .06, P * .32, 0xc4cbd3, cm); bl.position.set(r / 2 + P * .3, 0, 0); const a = new THREE.Group(); a.rotation.y = k * Math.PI / 3 + (f.a || 0); a.add(bl); g.add(a); }
+    g.position.set(f.x, y, f.y); root.add(g); }
+  /* อุปกรณ์หน้า Flow Rack ด้านใน: ทางม้าลาย · รถลากพาเลทเหลือง · เครื่อง Pallet Magazine */
+  for (const o of M.props || []) {
+    if (o.k === "cross") { for (let i = 0; i < 4; i++) flat(o.x, o.y + i * o.h / 4, o.w, o.h / 8, 0xf4f4f4, .75); continue; }
+    const g = new THREE.Group(), add = (w, h, d, col, px, py, pz) => { const m = box(w * P, h * P, d * P, col); m.position.set(px * P, py * P, pz * P); g.add(m); };
+    if (o.k === "jack") { add(.18, .08, 1.15, 0xf2d000, -.28, .06, .55); add(.18, .08, 1.15, 0xf2d000, .28, .06, .55); add(.7, .35, .3, 0xf2d000, 0, .2, -.1); add(.06, 1.1, .06, 0x1b1d21, 0, .8, -.25); add(.5, .06, .06, 0x1b1d21, 0, 1.35, -.25); }
+    if (o.k === "magazine") { add(2.2, 2.6, 1.8, 0x1f6fd0, 0, 1.3, 0); add(1.6, .12, 1.4, 0xf2c200, 0, 2.66, 0); add(1.2, 1.4, .3, 0xd9341e, -1.6, .7, .6);
+      for (let k = 0; k < 8; k++) add(1.2, .13, 1.0, 0x1f4fa8, 0, .1 + k * .16, 1.6);
+      const t = textSprite("Pallet Magazine", P * 1.1, "#1b1d21", "rgba(242,194,0,.95)"); t.position.set(0, P * 2.8, 0); g.add(t); }
+    g.position.set(o.x, 0, o.y); g.rotation.y = o.r || 0; g.traverse(m => { if (m.isMesh) m.castShadow = true; }); root.add(g); }
   for (const g of M.gates || []) { const t = textSprite(g.t, P * 2.4, "#ffffff", "rgba(15,92,140,.92)"); t.position.set(g.x, 1, g.y); root.add(t); }
 }
 function textSprite(t, size, color = "#0b2a4a", bg = null) {
@@ -186,7 +201,7 @@ function build(key) {
   for (const z of M.zones || []) {
     const [zx, zy, zw, zh] = z.r, p = new THREE.Mesh(new THREE.PlaneGeometry(zw, zh), new THREE.MeshStandardMaterial({ color: z.c, roughness: 1 }));
     p.rotation.x = -Math.PI / 2; p.position.set(zx + zw / 2, .6, zy + zh / 2); p.receiveShadow = true; root.add(p);
-    if (z.t) { const s = textSprite(z.t, Math.min(28, zh * .35) * (M.ts || 1), M.zc || "#b58500"); s.position.set(zx + zw / 2, M.ts ? H * 1.02 : 1.2, zy + zh / 2); root.add(s); }
+    if (z.t) { const s = textSprite(z.t, Math.min(28, zh * .35) * (M.ts || 1) * (z.s || 1), M.zc || "#b58500"); s.position.set(zx + zw / 2, M.ts ? H * 1.02 : 1.2, zy + zh / 2); root.add(s); }
   }
   // ผนังโปร่ง + ขอบบน
   const wallH = H * 1.35, wallMat = { color: TH[THEME].wall, transparent: true, opacity: TH[THEME].wo, depthWrite: false };
@@ -204,20 +219,27 @@ function build(key) {
     const s = textSprite(t, 22); s.position.set(ox + ow / 2, H * .45 + 1, oy + oh / 2); root.add(s);
   }
   // ชั้นวาง: เสา (กรมท่า) · คาน (ส้ม) · พาเลท + กล่องสินค้า
-  const ups = [], beams = [], pals = [], goods = [], solid = [];
+  const ups = [], beams = [], pals = [], goods = [], solid = [], yel = [], blk = [], blu = [], roll = [];
   const R = rand(key.length * 7919 + M.boxes.length);
   const bay = M.pxm * 2.8, lv = 4;
   for (const [bx, by, bw, bh, t] of M.boxes) {
-    if (t === "flowrack") { // 9 ต.ค. Inbound รับเข้า: Flow Rack ลูกกลิ้งเอียง 3 ชั้น สูง ~2.4 ม. (โครงฟ้า รางลูกกลิ้งเทา ลังเรียงบนราง)
-      const P = M.pxm, along = bh >= bw, L = along ? bh : bw, Wd = along ? bw : bh, top = P * 2.4, lvls = [.5, 1.2, 1.9];
-      const Pt = (u, v) => along ? [bx + v, by + u] : [bx + u, by + v];
-      for (const u of [0, L / 2, L]) for (const v of [.6, Wd - .6]) { const [px, pz] = Pt(u, v); ups.push([px, top / 2, pz, 1.4, top, 1.4]); }
-      for (const lv of lvls) { const tilt = P * .25;
-        for (const v of [Wd * .25, Wd * .5, Wd * .75]) { const [px, pz] = Pt(L / 2, v), y = P * lv + tilt / 2;
-          beams.push(along ? [px, y, pz, 1.2, 1.4, L] : [px, y, pz, L, 1.4, 1.2]); }
-        const n = Math.max(1, Math.floor(L / (P * .65)));
-        for (let i = 0; i < n; i++) { if (R() < .25) continue; const u = (i + .5) * L / n, [px, pz] = Pt(u, Wd / 2), y = P * lv + P * .25 * (1 - u / L) + P * .18;
-          goods.push(along ? [px, y, pz, Wd * .8, P * .35, L / n * .85] : [px, y, pz, L / n * .85, P * .35, Wd * .8]); } }
+    if (t === "flowrack") { /* 9 ต.ค. ตามรูปจริง: Flow Rack ทะลุผนัง Dock (เติมพาเลทจากฝั่ง Dock → ไหลมาออกด้านใน) · 1 ชุด = 2 ช่องทาง
+         ชั้นล่าง = รางลูกกลิ้งเอียงมีพาเลทสินค้า · ชั้นบน (คานส้ม ~3.3 ม.) = กองพาเลทเปล่าสีน้ำเงิน · เสาฟ้าสูง ~6 ม. · การ์ดเหลืองปลายเสา · แผ่นเหล็กดำหน้าทางออก */
+      const P = M.pxm, along = bh >= bw, L = along ? bh : bw, Wd = along ? bw : bh, top = P * 6, deck = P * 3.3;
+      const Pt = (u, v) => along ? [bx + v, by + u] : [bx + u, by + v], bx3 = (u, v, y, du, h, dv) => { const [px, pz] = Pt(u, v); return along ? [px, y, pz, dv, h, du] : [px, y, pz, du, h, dv]; };
+      const nf = Math.max(2, Math.round(L / (P * 3))) ;
+      for (let i = 0; i <= nf; i++) for (const v of [.5, Wd / 2, Wd - .5]) { const u = i * L / nf; ups.push(bx3(u, v, top / 2, 1.1, top, 1.1)); if (i === 0) yel.push(bx3(u - .3, v, P * .5, 1.5, P * 1, 1.5)); }
+      for (const v of [.5, Wd / 2, Wd - .5]) for (const y of [deck, top - 1]) beams.push(bx3(L / 2, v, y, L, 1.3, 1.1));
+      for (let i = 0; i <= nf; i++) { const u = i * L / nf; beams.push(bx3(u, Wd / 2, deck, 1.1, 1.3, Wd)); }
+      for (let i = 0; i < nf; i++) for (const k of [.3, .7]) ups.push(bx3((i + .5) * L / nf, Wd / 2, top * k, L / nf * 1.15, .5, .5));   // ค้ำทแยง (ประมาณ)
+      const lane = Wd / 2, n = Math.max(2, Math.floor(L / (P * 1.35)));
+      for (const lv of [0, 1]) { const vc = lane * (lv + .5);
+        roll.push(bx3(L / 2, vc, P * .35, L, .6, lane * .85));                                                       // รางลูกกลิ้ง
+        blk.push(bx3(-P * 1.2, vc, .25, P * 2.4, .5, lane * .9));                                                    // แผ่นเหล็กดำหน้าทางออก
+        for (let i = 0; i < n; i++) { if (R() < .3) continue; const u = (i + .5) * L / n, y = P * .45 + P * .15 * u / L;
+          pals.push(bx3(u, vc, y + P * .07, P * 1.15, P * .14, lane * .8)); const gh = P * (1 + R() * .35); goods.push(bx3(u, vc, y + P * .14 + gh / 2, P * 1.1, gh, lane * .76)); }
+        for (let i = 0; i < n; i++) { if (R() < .35) continue; const u = (i + .5) * L / n, k = 3 + Math.floor(R() * 6);   // กองพาเลทเปล่าบนชั้นบน
+          blu.push(bx3(u, vc, deck + .7 + k * P * .075, P * 1.15, k * P * .15, lane * .8)); } }
       continue;
     }
     if (t === "pyramid") { // 9 ต.ค. ผู้ใช้ขอ: กองพาเลทบนพื้นแบบพีระมิด (กลางกองสูงสุด ขอบเตี้ย) · แบ่งกองละ 6×6 ช่อง มีทางเดินคั่น
@@ -281,6 +303,7 @@ function build(key) {
     mesh.castShadow = mesh.receiveShadow = true; root.add(mesh);
   };
   inst(ups, COL.navy, { metal: .3 }); inst(beams, COL.beam, { metal: .2 }); inst(pals, COL.wood); inst(goods, 0xffffff, { vary: COL.box });
+  inst(yel, 0xf5c400); inst(blk, 0x1b1d21); inst(blu, 0x1f4fa8); inst(roll, 0x8d98a5, { metal: .5 });
   for (const [bx, by, bw, bh, t] of solid) { // ชั้นวางสีฟ้า (shelf) / Flow rack สีเหลือง
     if (t === "desk" || t === "fix") { // สำนักงาน: โต๊ะ (ไม้) · สุขภัณฑ์/อุปกรณ์ (ขาว)
       const h = M.pxm * (t === "desk" ? .75 : .85), o = box(bw, h, bh, t === "desk" ? 0xd9b98c : 0xf4f7fb, { roughness: .7 }); o.position.set(bx + bw / 2, h / 2, by + bh / 2); root.add(o); continue; }
