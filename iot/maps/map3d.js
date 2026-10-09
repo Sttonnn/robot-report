@@ -7,7 +7,8 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 const MAPS = window.IOT_MAPS || {};
 const el = document.getElementById("map3d");
 const pinLayer = document.getElementById("pins");
-const COL = { navy: 0x1f4e79, beam: 0xf28c28, wood: 0xb98a55, box: [0xd8c19a, 0xcfae7c, 0xe3d2b0, 0xbfa070], shelf: 0x16a3c9, flow: 0xe8b80c, floor: 0xf6f9fc, slab: 0xffffff };
+/* 9 ต.ค. ผู้ใช้ขอสีสดขึ้น: เสาฟ้าสด · คานส้มสด · สินค้าหลายสี (ลังน้ำตาลอ่อน + ฟิล์มสี) */
+const COL = { navy: 0x1670e0, beam: 0xff6a00, wood: 0xd9a066, box: [0xf6cf8a, 0xffb74d, 0x4fc3f7, 0x66bb6a, 0xfff176, 0xef5350, 0xf6cf8a, 0xffffff, 0xab47bc, 0xffcc80], shelf: 0x16a3c9, flow: 0xe8b80c, floor: 0xf6f9fc, slab: 0xffffff };
 
 let renderer, scene, camera, controls, root, floor, ground, cur = null, raf = 0, placing = null, needs = true, THEME = "light";
 const TH = { light: { bg: 0xe9f0f7, ground: 0xdfe7ef, floor: 0xf6f9fc, wall: 0x7fb3d5, cap: 0x0f5c8c, wo: .14 }, dark: { bg: 0x0a1320, ground: 0x0e1b2b, floor: 0x16283d, wall: 0x38bdf8, cap: 0x38bdf8, wo: .1 } };
@@ -19,6 +20,7 @@ function init() {
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.15; // แสงแบบ Digital Twin
   el.prepend(renderer.domElement);
   scene = new THREE.Scene();
   scene.background = new THREE.Color(TH[THEME].bg);
@@ -40,6 +42,7 @@ function init() {
   sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0005;
   scene.add(sun, sun.target); scene.userData.sun = sun;
   new ResizeObserver(resize).observe(el);
+  if ("IntersectionObserver" in window) new IntersectionObserver(es => { onScreen = es[0].isIntersecting; }).observe(el);
   renderer.domElement.addEventListener("pointerdown", onDown);
   renderer.domElement.addEventListener("pointerup", onUp);
   loop();
@@ -48,7 +51,8 @@ function resize() {
   const w = el.clientWidth, h = el.clientHeight; if (!w || !h) return;
   renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); needs = true;
 }
-let fly = null;
+let fly = null, MOVERS = [], lastMove = 0;
+let onScreen = true; /* แผนที่เลื่อนพ้นจอ = หยุดรถวิ่ง (ประหยัดเครื่อง) */
 function loop() {
   raf = requestAnimationFrame(loop);
   if (fly) { // เลื่อนกล้องไปยังเซนเซอร์แบบนุ่มๆ
@@ -56,12 +60,30 @@ function loop() {
     controls.target.lerpVectors(fly.a0, fly.a1, e); camera.position.lerpVectors(fly.c0, fly.c1, e); needs = true;
     if (k >= 1) fly = null;
   }
+  /* รถโฟล์คลิฟท์วิ่งไป-กลับตามเส้นทาง (Digital Twin) · ~30 fps · หยุดเมื่อแท็บไม่แสดง */
+  const now = performance.now();
+  if (MOVERS.length && onScreen && !document.hidden && now - lastMove > 50) { lastMove = now;
+    for (const m of MOVERS) { const L = Math.hypot(m.bx - m.ax, m.bz - m.az) || 1, u = ((now / 1000 * m.v / L) + m.o) % 2, k = u < 1 ? u : 2 - u, e = k * k * (3 - 2 * k);
+      m.g.position.set(m.ax + (m.bx - m.ax) * e, 0, m.az + (m.bz - m.az) * e); m.g.rotation.y = Math.atan2(m.bx - m.ax, m.bz - m.az) + (u < 1 ? Math.PI : 0); }
+    needs = true; }
   if (controls.update() || needs || controls.autoRotate) { renderer.render(scene, camera); placePins(); needs = false; }
 }
 
 /* ---------- สร้างคลัง ---------- */
 const box = (w, h, d, c, o = {}) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshStandardMaterial({ color: c, roughness: .8, metalness: .05, ...o })); m.castShadow = m.receiveShadow = !o.transparent; return m; };
 function rand(seed) { let s = seed % 2147483647; if (s <= 0) s += 2147483646; return () => (s = s * 16807 % 2147483647) / 2147483647; }
+/* รถโฟล์คลิฟท์ (Counterbalance) · ตัวรถเหลือง · เสายก · งา · หลังคากันของตก · ล้อ */
+function forklift(x, z, r, c = 0xffb300, P) {
+  const g = new THREE.Group(), add = (w, h, d, col, px, py, pz) => { const m = box(w * P, h * P, d * P, col); m.position.set(px * P, py * P, pz * P); g.add(m); };
+  add(1.15, .9, 2.1, c, 0, .75, 0); add(1.1, .7, .55, 0x2b2f36, 0, 1.0, .95);                      // ตัวรถ + น้ำหนักถ่วง
+  add(.12, 2.3, .12, 0x2b2f36, -.4, 1.15, -1.1); add(.12, 2.3, .12, 0x2b2f36, .4, 1.15, -1.1);     // เสายก
+  add(.12, .06, 1.1, 0x9aa3ad, -.3, .25, -1.7); add(.12, .06, 1.1, 0x9aa3ad, .3, .25, -1.7);        // งา
+  add(1.05, .06, 1.2, 0x2b2f36, 0, 2.2, .05);                                                     // หลังคากันของตก
+  for (const sx of [-.48, .48]) for (const sz of [-.1, .2]) add(.06, 1, .06, 0x2b2f36, sx, 1.7, sz * 3);
+  add(.45, .35, .4, 0x1d2a3a, 0, 1.35, .2);                                                       // เบาะคนขับ
+  for (const sx of [-.55, .55]) for (const sz of [-.65, .7]) { const w = new THREE.Mesh(new THREE.CylinderGeometry(.28 * P, .28 * P, .25 * P, 12), new THREE.MeshStandardMaterial({ color: 0x15171a })); w.rotation.z = Math.PI / 2; w.position.set(sx * P, .28 * P, sz * P); g.add(w); }
+  g.position.set(x, 0, z); g.rotation.y = r; g.traverse(o => { if (o.isMesh) o.castShadow = true; }); root.add(g); return g;
+}
 /* รอบอาคาร: ลานจอด/ถนน · ประตู Dock + เบอร์ + Dock leveler · รถเทรลเลอร์จอดบาง Dock · หลังคา Canopy · ป้ายประตูทางเข้า */
 function siteDetail(M, H) {
   const P = M.pxm, [x0, y0, x1, y1] = M.bounds, flat = (x, y, w, h, c, yy = .4, o = {}) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshStandardMaterial({ color: c, roughness: 1, ...o })); m.rotation.x = -Math.PI / 2; m.position.set(x + w / 2, yy, y + h / 2); m.receiveShadow = true; root.add(m); return m; };
@@ -91,6 +113,11 @@ function siteDetail(M, H) {
   for (const c of M.canopies || []) { const m = box(c[2], P * .4, c[3], 0xc8d2dc, { transparent: true, opacity: .55 }); m.position.set(c[0] + c[2] / 2, P * 6.5, c[1] + c[3] / 2); root.add(m);
     for (const [px, pz] of [[c[0] + 4, c[1] + c[3] - 4], [c[0] + c[2] - 4, c[1] + c[3] - 4]]) { const po = box(P * .4, P * 6.5, P * .4, 0x7d8896); po.position.set(px, P * 3.25, pz); root.add(po); }
     if (c[4]) { const t = textSprite(c[4], P * 1.8, "#3c4a68"); t.position.set(c[0] + c[2] / 2, P * 6.8, c[1] + c[3] / 2); root.add(t); } }
+  MOVERS = [];
+  for (const f of M.forklifts || []) { const g = forklift(f.x, f.y, f.r || 0, f.c, P); if (f.to) MOVERS.push({ g, ax: f.x, az: f.y, bx: f.to[0], bz: f.to[1], v: P * (f.v || 2.2), o: Math.random() * 2 }); }
+  /* เส้นพื้น: เส้นเหลืองแบ่งโซน / ทางเดินเขียว (`lines` = [x1,y1,x2,y2,สี,หนา]) */
+  for (const l of M.lines || []) { const [a, b, c, d, col = 0xf2c200, w = 1.6] = l, len = Math.hypot(c - a, d - b), m = new THREE.Mesh(new THREE.PlaneGeometry(len, w), new THREE.MeshBasicMaterial({ color: col }));
+    m.rotation.x = -Math.PI / 2; m.rotation.z = -Math.atan2(d - b, c - a); m.position.set((a + c) / 2, .7, (b + d) / 2); root.add(m); }
   for (const g of M.gates || []) { const t = textSprite(g.t, P * 2.4, "#ffffff", "rgba(15,92,140,.92)"); t.position.set(g.x, 1, g.y); root.add(t); }
 }
 function textSprite(t, size, color = "#0b2a4a", bg = null) {
@@ -139,6 +166,15 @@ function build(key) {
   const R = rand(key.length * 7919 + M.boxes.length);
   const bay = M.pxm * 2.8, lv = 4;
   for (const [bx, by, bw, bh, t] of M.boxes) {
+    if (t === "pyramid") { // 9 ต.ค. ผู้ใช้ขอ: กองพาเลทบนพื้นแบบพีระมิด (กลางกองสูงสุด ขอบเตี้ย) · แบ่งกองละ 6×6 ช่อง มีทางเดินคั่น
+      const P = M.pxm, cw = P * 1.15, ch = P * 1.35, gap = P * 2.2, blk = 6;
+      const nx = Math.floor((bw + gap) / (cw * blk + gap)) || 1, nz = Math.floor((bh + gap) / (ch * blk + gap)) || 1;
+      for (let a = 0; a < nx; a++) for (let b = 0; b < nz; b++) for (let i = 0; i < blk; i++) for (let j = 0; j < blk; j++) {
+        const lv = Math.min(4, 1 + Math.min(i, blk - 1 - i, j, blk - 1 - j)), px = bx + a * (cw * blk + gap) + (i + .5) * cw, pz = by + b * (ch * blk + gap) + (j + .5) * ch;
+        for (let k = 0; k < lv; k++) { const y = k * P * 1.35; pals.push([px, y + P * .07, pz, cw * .9, P * .14, ch * .9]); goods.push([px, y + P * .14 + P * .6, pz, cw * .86, P * 1.2, ch * .86]); }
+      }
+      continue;
+    }
     if (t === "pallet") { // พื้นที่วางพาเลทบนพื้น
       const n = Math.max(1, Math.floor(bw / (M.pxm * 1.3))), m = Math.max(1, Math.floor(bh / (M.pxm * 1.3)));
       for (let i = 0; i < n; i++) for (let j = 0; j < m; j++) { if (R() < .25) continue;
