@@ -238,16 +238,19 @@ function build(key) {
   sun.position.set(cx - span * .35, span * .9, cz + span * .55); sun.target.position.set(cx, 0, cz);
   Object.assign(sun.shadow.camera, { left: -span * .7, right: span * .7, top: span * .7, bottom: -span * .7, near: 10, far: span * 3 }); sun.shadow.camera.updateProjectionMatrix();
   scene.fog.near = span * 1.6; scene.fog.far = span * 4;
-  view("3d");
+  view(VMODE); /* 9 ต.ค. ผู้ใช้สั่ง: ค่าเริ่ม = มุมบน (เปลี่ยนแผนที่แล้วใช้มุมเดิมที่เลือก) */
   needs = true;
 }
+let VMODE = "top";
 function view(mode) {
+  VMODE = mode || VMODE;
   const M = MAPS[cur]; if (!M) return;
   const [x0, y0, x1, y1] = M.view || M.bounds, W = x1 - x0, D = y1 - y0, cx = (x0 + x1) / 2, cz = (y0 + y1) / 2;
   // ระยะกล้องให้เห็นทั้งคลังพอดีจอ (คิดทั้งกว้างและลึก ตามสัดส่วนจอ)
   const vf = THREE.MathUtils.degToRad(camera.fov) / 2, hf = Math.atan(Math.tan(vf) * camera.aspect);
-  const top = mode === "top", dist = Math.max((W / 2) / Math.tan(hf) * (top ? 1 : 1.5), (D / 2) / Math.tan(vf) * (top ? 1 : 1.35)) * (top ? 1.08 : .98);
-  const dir = top ? new THREE.Vector3(0, 1, .001) : camera.aspect < 1 ? new THREE.Vector3(-.03, .86, .5).normalize() : new THREE.Vector3(-.04, .62, .78).normalize();
+  /* มุมหน้า (front) = มองจากฝั่ง Dock ระดับต่ำ */
+  const top = VMODE === "top", front = VMODE === "front", dist = Math.max((W / 2) / Math.tan(hf) * (top ? 1 : 1.5), (D / 2) / Math.tan(vf) * (top ? 1 : 1.35)) * (top ? 1.22 : front ? .82 : .98);
+  const dir = top ? new THREE.Vector3(0, 1, .001) : front ? new THREE.Vector3(0, .4, .92).normalize() : camera.aspect < 1 ? new THREE.Vector3(-.03, .86, .5).normalize() : new THREE.Vector3(-.04, .62, .78).normalize();
   controls.target.set(cx, 0, cz + (top ? 0 : D * .04));
   camera.position.copy(controls.target).addScaledVector(dir, dist);
   controls.maxDistance = dist * 2.2; controls.minDistance = Math.max(W, D) * .06;
