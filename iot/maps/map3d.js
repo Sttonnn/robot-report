@@ -8,7 +8,7 @@ const MAPS = window.IOT_MAPS || {};
 const el = document.getElementById("map3d");
 const pinLayer = document.getElementById("pins");
 /* 9 ต.ค. ผู้ใช้ขอสีสดขึ้น: เสาฟ้าสด · คานส้มสด · สินค้าหลายสี (ลังน้ำตาลอ่อน + ฟิล์มสี) */
-const COL = { navy: 0x1670e0, beam: 0xff6a00, wood: 0xd9a066, box: [0xf6cf8a, 0xffb74d, 0x4fc3f7, 0x66bb6a, 0xfff176, 0xef5350, 0xf6cf8a, 0xffffff, 0xab47bc, 0xffcc80], shelf: 0x16a3c9, flow: 0xe8b80c, floor: 0xf6f9fc, slab: 0xffffff };
+const COL = { navy: 0x1670e0, beam: 0xff6a00, wood: 0xd9a066, box: [0xd9ac72, 0xe8c48e, 0xeef2f6, 0xd9ac72, 0xf3c623, 0xe8c48e, 0xdfe6ee, 0xc99a5b, 0xf3c623, 0x4a86d9, 0xd9ac72, 0xe0533d], /* 9 ต.ค. ปรับตามรูปจริง: ลังน้ำตาล · ฟิล์มใส · กระสอบเหลือง · บางส่วนสีอื่น */ shelf: 0x16a3c9, flow: 0xe8b80c, floor: 0xf6f9fc, slab: 0xffffff };
 
 let renderer, scene, camera, controls, root, floor, ground, cur = null, raf = 0, placing = null, needs = true, THEME = "light";
 const TH = { light: { bg: 0xe9f0f7, ground: 0xdfe7ef, floor: 0xf6f9fc, wall: 0x7fb3d5, cap: 0x0f5c8c, wo: .14 }, dark: { bg: 0x0a1320, ground: 0x0e1b2b, floor: 0x16283d, wall: 0x38bdf8, cap: 0x38bdf8, wo: .1 } };
@@ -72,6 +72,38 @@ function loop() {
 /* ---------- สร้างคลัง ---------- */
 const box = (w, h, d, c, o = {}) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshStandardMaterial({ color: c, roughness: .8, metalness: .05, ...o })); m.castShadow = m.receiveShadow = !o.transparent; return m; };
 function rand(seed) { let s = seed % 2147483647; if (s <= 0) s += 2147483646; return () => (s = s * 16807 % 2147483647) / 2147483647; }
+/* Mezzanine เหล็กฟ้า 2 ชั้น (ตามรูปจริง): เสา · พื้นชั้นบน · ราวกันตก + ตะแกรง · ลังบนชั้นบน · บันไดลิงกรงส้ม · โต๊ะแพ็กด้านล่าง */
+function mezzanine(z, P) {
+  const [x, y, w, h] = z.r, H = P * (z.h || 3.6), blue = 0x1f63d6, R = rand(911);
+  for (let xx = x; xx <= x + w + .1; xx += w / Math.max(1, Math.round(w / (P * 4)))) for (let yy = y; yy <= y + h + .1; yy += h / Math.max(1, Math.round(h / (P * 6)))) { const c = box(P * .3, H, P * .3, blue); c.position.set(xx, H / 2, yy); root.add(c); }
+  const deck = box(w, P * .25, h, 0x9aa6b4); deck.position.set(x + w / 2, H, y + h / 2); root.add(deck);
+  for (const [a, b, c, d] of [[x, y, x + w, y], [x, y + h, x + w, y + h], [x, y, x, y + h], [x + w, y, x + w, y + h]]) {
+    const L = Math.hypot(c - a, d - b), along = a === c, bm = box(along ? P * .3 : L, P * .35, along ? L : P * .3, blue); bm.position.set((a + c) / 2, H - P * .1, (b + d) / 2); root.add(bm);
+    const rl = box(along ? P * .12 : L, P * .1, along ? L : P * .12, blue); rl.position.set((a + c) / 2, H + P * 1.1, (b + d) / 2); root.add(rl);
+    const mesh = box(along ? P * .05 : L, P * 1, along ? L : P * .05, 0x6f9fe8, { transparent: true, opacity: .35 }); mesh.position.set((a + c) / 2, H + P * .6, (b + d) / 2); root.add(mesh); }
+  const n = Math.floor(w / (P * 1.3)), m = Math.floor(h / (P * 1.3));
+  for (let i = 0; i < n; i++) for (let j = 0; j < m; j++) { if (R() < .3) continue; const hh = P * (.6 + R() * 1.4), b = box(P * 1.15, hh, P * 1.15, R() < .8 ? 0xd9ac72 : 0xe8c48e); b.position.set(x + (i + .5) * w / n, H + P * .13 + hh / 2, y + (j + .5) * h / m); root.add(b); }
+  const lx = x - P * .5, ly = y + P * .8;                                                     // บันไดลิงกรงส้ม
+  for (const dx of [-P * .3, P * .3]) { const r = box(P * .08, H + P * 1.2, P * .08, 0xf08a1c); r.position.set(lx + dx, (H + P * 1.2) / 2, ly); root.add(r); }
+  for (let yy = P * 2; yy < H + P * 1.2; yy += P * .6) { const ring = box(P * .8, P * .06, P * .8, 0xf08a1c, { transparent: true, opacity: .6 }); ring.position.set(lx, yy, ly + P * .3); root.add(ring); }
+  for (let k = 0; k < Math.floor(h / (P * 5)); k++) { const t = box(P * 1.8, P * .9, P * .9, 0xf2f4f7); t.position.set(x + w * .3, P * .45, y + P * 3 + k * P * 5); root.add(t);
+    const bx = box(P * 1, P * .8, P * 1, 0xd9ac72); bx.position.set(x + w * .72, P * .4, y + P * 3.5 + k * P * 5); root.add(bx); }
+  if (z.t) { const s = textSprite(z.t, P * 1.6, "#1f63d6", "rgba(255,255,255,.9)"); s.position.set(x + w / 2, H + P * 2.4, y + h / 2); root.add(s); }
+}
+/* ห้องประชุม/สำนักงาน 2 ชั้น (ตามรูปจริง): ผนังเขียวเทา · หน้าต่างกรอบดำ · ประตูกระจก · บันไดเหล็กดำด้านข้าง · ราวบนหลังคา */
+function meetingRoom(b, P) {
+  const [x, y, w, h] = b.r, H = P * (b.h || 7), col = b.c || 0x9fb5a6, face = b.face || "w";
+  const body = box(w, H, h, col, { roughness: .9 }); body.position.set(x + w / 2, H / 2, y + h / 2); root.add(body);
+  const fx = face === "w" ? x - P * .05 : x + w + P * .05, nW = Math.max(2, Math.floor(h / (P * 5)));
+  for (let i = 0; i < nW; i++) { const zc = y + (i + .6) * h / (nW + .4);
+    for (const [y0, hh] of [[P * 1.2, P * 1.4], [P * 4.2, P * 1.7]]) { const fr = box(P * .12, hh + P * .15, P * 2.2, 0x15181c); fr.position.set(fx, y0 + hh / 2, zc); root.add(fr);
+      const gl = box(P * .14, hh, P * 2, 0x2b3f55, { metalness: .5, roughness: .2 }); gl.position.set(fx, y0 + hh / 2, zc); root.add(gl); } }
+  const door = box(P * .14, P * 2.4, P * 1.8, 0x7fa8c4, { transparent: true, opacity: .75 }); door.position.set(fx, P * 1.2, y + h - P * 2.5); root.add(door);
+  const df = box(P * .16, P * 2.6, P * 2, 0x15181c); df.position.set(fx + (face === "w" ? -P * .02 : P * .02), P * 1.3, y + h - P * 2.5); root.add(df);
+  for (let k = 0; k < 14; k++) { const st = box(P * 1.1, P * .12, P * .35, 0x1b1d21); st.position.set(fx + (face === "w" ? -P * .7 : P * .7), (k + 1) * H / 14, y + h + P * .3 + k * P * .32); root.add(st); }
+  const rail = box(P * .08, P * 1, h, 0x1b1d21); rail.position.set(fx, H + P * .5, y + h / 2); root.add(rail);
+  if (b.t) { const s = textSprite(b.t, P * 1.6, "#2d3e33", "rgba(255,255,255,.9)"); s.position.set(x + w / 2, H + P * .3, y + h / 2); root.add(s); }
+}
 /* รถโฟล์คลิฟท์ (Counterbalance) · ตัวรถเหลือง · เสายก · งา · หลังคากันของตก · ล้อ */
 function forklift(x, z, r, c = 0xffb300, P) {
   const g = new THREE.Group(), add = (w, h, d, col, px, py, pz) => { const m = box(w * P, h * P, d * P, col); m.position.set(px * P, py * P, pz * P); g.add(m); };
@@ -118,6 +150,16 @@ function siteDetail(M, H) {
   /* เส้นพื้น: เส้นเหลืองแบ่งโซน / ทางเดินเขียว (`lines` = [x1,y1,x2,y2,สี,หนา]) */
   for (const l of M.lines || []) { const [a, b, c, d, col = 0xf2c200, w = 1.6] = l, len = Math.hypot(c - a, d - b), m = new THREE.Mesh(new THREE.PlaneGeometry(len, w), new THREE.MeshBasicMaterial({ color: col }));
     m.rotation.x = -Math.PI / 2; m.rotation.z = -Math.atan2(d - b, c - a); m.position.set((a + c) / 2, .7, (b + d) / 2); root.add(m); }
+  /* 9 ต.ค. ตามรูปจริง: Mezzanine เหล็กฟ้า · ห้องประชุม 2 ชั้นสีเขียวเทา · การ์ดเสาชั้นวางเหลืองดำ · ยางกั้นล้อ */
+  for (const z of M.mezz || []) mezzanine(z, P);
+  for (const b of M.bldg || []) meetingRoom(b, P);
+  if (M.rackGuards) { const gs = [];
+    for (const [bx, by, bw, bh, t] of M.boxes) if (t === "rack") for (const yy of [by, by + bh]) for (const xx of [bx, bx + bw]) gs.push([xx, yy]);
+    const ym = new THREE.InstancedMesh(new THREE.BoxGeometry(P * .45, P * .9, P * .45), new THREE.MeshStandardMaterial({ color: 0xf5c400 }), gs.length), m4 = new THREE.Matrix4();
+    gs.forEach(([x, z], i) => { m4.makeTranslation(x, P * .45, z); ym.setMatrixAt(i, m4); }); root.add(ym);
+    const bk = new THREE.InstancedMesh(new THREE.BoxGeometry(P * .47, P * .18, P * .47), new THREE.MeshStandardMaterial({ color: 0x1b1d21 }), gs.length);
+    gs.forEach(([x, z], i) => { m4.makeTranslation(x, P * .55, z); bk.setMatrixAt(i, m4); }); root.add(bk); }
+  for (const w of M.stops || []) { const [x, y0, y1, step] = w; for (let y = y0; y < y1; y += step * P) { const m = box(P * .25, P * .12, P * 1.6, 0x1b1d21); m.position.set(x, P * .06, y); root.add(m); const s = box(P * .26, P * .13, P * .35, 0xf5c400); s.position.set(x, P * .065, y); root.add(s); } }
   for (const g of M.gates || []) { const t = textSprite(g.t, P * 2.4, "#ffffff", "rgba(15,92,140,.92)"); t.position.set(g.x, 1, g.y); root.add(t); }
 }
 function textSprite(t, size, color = "#0b2a4a", bg = null) {
