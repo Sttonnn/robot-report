@@ -26,8 +26,15 @@ function init() {
   camera = new THREE.PerspectiveCamera(38, 1, 5, 20000);
   controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true; controls.dampingFactor = .08;
-  controls.maxPolarAngle = Math.PI * .47; controls.screenSpacePanning = false;
-  controls.addEventListener("change", () => needs = true);
+  /* 9 ต.ค. ผู้ใช้ว่าหมุนแล้วงง → ควบคุมแบบแผนที่: ลากซ้าย/นิ้วเดียว = เลื่อน · ลากขวา/สองนิ้ว = หมุน (จำกัดมุม) · ล้อ/บีบ = ซูม
+     มุมก้ม 20–70° · หมุนรอบได้ ±40° จากมุมเริ่มต้น · จุดกลางไม่หลุดออกนอกคลัง */
+  controls.mouseButtons = { LEFT: THREE.MOUSE.PAN, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.ROTATE };
+  controls.touches = { ONE: THREE.TOUCH.PAN, TWO: THREE.TOUCH.DOLLY_ROTATE };
+  controls.minPolarAngle = Math.PI * .02; controls.maxPolarAngle = Math.PI * .39; controls.screenSpacePanning = false;
+  controls.rotateSpeed = .5; controls.panSpeed = .9; controls.zoomSpeed = .9;
+  controls.addEventListener("change", () => { needs = true; const B = (MAPS[cur] || {}).bounds; if (!B) return;
+    const t = controls.target, cx = Math.min(Math.max(t.x, B[0]), B[2]), cz = Math.min(Math.max(t.z, B[1]), B[3]);
+    if (cx !== t.x || cz !== t.z) { const dx = cx - t.x, dz = cz - t.z; t.x = cx; t.z = cz; camera.position.x += dx; camera.position.z += dz; } });
   scene.add(new THREE.HemisphereLight(0xffffff, 0xb8c6d4, 1.25));
   const sun = new THREE.DirectionalLight(0xffffff, 1.6);
   sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0005;
@@ -107,6 +114,7 @@ function build(key) {
       continue;
     }
     if (t === "shelf" || t === "flow" || t === "desk" || t === "fix") { solid.push([bx, by, bw, bh, t]); continue; }
+    if (M.rack) { rackSpec(bx, by, bw, bh); continue; }
     const along = bh >= bw, L = along ? bh : bw, WdAll = along ? bw : bh, nb = Math.max(1, Math.round(L / bay)), step = L / nb;
     // บล็อกกว้าง (หลายแถว) → แบ่งเป็นแถวชั้นวางย่อยกว้าง ~2.6 ม. เว้นช่องเดิน
     const nr = Math.max(1, Math.round(WdAll / (M.pxm * 2.6))), pitch = WdAll / nr, Wd = nr > 1 ? pitch * .82 : WdAll;
@@ -120,6 +128,26 @@ function build(key) {
       const [px, pz] = P((i + .5) * step, Wd / 2), y = H * k / lv, gh = H / lv * (.55 + R() * .3);
       const pw = along ? Wd * .84 : step * .84, pd = along ? step * .84 : Wd * .84;
       pals.push([px, y + 1.2, pz, pw, 2.4, pd]); goods.push([px, y + 2.4 + gh / 2, pz, pw * .92, gh, pd * .92]); }
+    }
+  }
+  /* 9 ต.ค. ชั้นวางตามแบบ Typical Rack (ผู้ใช้ส่ง): สูง 11.3 ม. · คาน 7 ชั้น (1.545 … 10.095 ม.) + วางพื้น = 8 ชั้น
+     ช่องละ 2.7 ม. วาง 2 พาเลท (1.0×1.2×1.2 ม.) · ชั้นวางหลังชนหลัง ลึก 0.9+0.3+0.9 ม. → แต่ละฝั่งวางพาเลทลึก 1 ตัว */
+  function rackSpec(bx, by, bw, bh) {
+    const S = M.rack, P = M.pxm, along = bh >= bw, L = along ? bh : bw, WdAll = along ? bw : bh;
+    const nb = Math.max(1, Math.round(L / (P * S.bay))), step = L / nb, top = P * S.h;
+    const unit = P * (S.depth || 2.1), nr = Math.max(1, Math.round(WdAll / (unit * 1.25))), pitch = WdAll / nr, Wd = Math.min(unit, pitch * .9);
+    const side = P * (S.side || .9), lv = [0, ...S.beams].map(v => v * P);
+    for (let r = 0; r < nr; r++) {
+      const off = r * pitch + (pitch - Wd) / 2, Pt = (u, v) => along ? [bx + off + v, by + u] : [bx + u, by + off + v];
+      for (let i = 0; i <= nb; i++) for (const v of [.6, side, Wd - side, Wd - .6]) { const [px, pz] = Pt(i * step, v); ups.push([px, top / 2, pz, 1.6, top, 1.6]); }
+      for (const y of lv.slice(1)) for (const v of [.6, side, Wd - side, Wd - .6]) { const [px, pz] = Pt(L / 2, v); beams.push(along ? [px, y - 1, pz, 1.4, 2, L] : [px, y - 1, pz, L, 2, 1.4]); }
+      for (let i = 0; i < nb; i++) for (let k = 0; k < lv.length; k++) for (const v of [side / 2, Wd - side / 2]) for (let q = 0; q < S.per; q++) {
+        if (R() < .2) continue;
+        const u = i * step + step * (q + .5) / S.per, [px, pz] = Pt(u, v), y = lv[k] + (k ? 0 : .2), gh = P * 1.2 * (.55 + R() * .4);
+        const pw = Math.min(P * 1.0, step / S.per * .86), pd = Math.min(P * 1.2, side * .95);
+        const [w1, d1] = along ? [pd, pw] : [pw, pd];
+        pals.push([px, y + .8, pz, w1, 1.6, d1]); goods.push([px, y + 1.6 + gh / 2, pz, w1 * .94, gh, d1 * .94]);
+      }
     }
   }
   const inst = (list, color, opts = {}) => {
@@ -154,6 +182,8 @@ function view(mode) {
   controls.target.set(cx, 0, cz + (top ? 0 : D * .04));
   camera.position.copy(controls.target).addScaledVector(dir, dist);
   controls.maxDistance = dist * 2.2; controls.minDistance = Math.max(W, D) * .06;
+  /* จำกัดหมุนรอบ ±40° จากมุมเริ่ม (มุมบน = ไม่จำกัด เพราะมองตรงลง) */
+  const az = Math.atan2(dir.x, dir.z); controls.minAzimuthAngle = top ? -Infinity : az - .7; controls.maxAzimuthAngle = top ? Infinity : az + .7;
   camera.lookAt(controls.target); controls.update(); needs = true;
 }
 
