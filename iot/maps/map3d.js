@@ -208,6 +208,18 @@ function build(key) {
   const R = rand(key.length * 7919 + M.boxes.length);
   const bay = M.pxm * 2.8, lv = 4;
   for (const [bx, by, bw, bh, t] of M.boxes) {
+    if (t === "flowrack") { // 9 ต.ค. Inbound รับเข้า: Flow Rack ลูกกลิ้งเอียง 3 ชั้น สูง ~2.4 ม. (โครงฟ้า รางลูกกลิ้งเทา ลังเรียงบนราง)
+      const P = M.pxm, along = bh >= bw, L = along ? bh : bw, Wd = along ? bw : bh, top = P * 2.4, lvls = [.5, 1.2, 1.9];
+      const Pt = (u, v) => along ? [bx + v, by + u] : [bx + u, by + v];
+      for (const u of [0, L / 2, L]) for (const v of [.6, Wd - .6]) { const [px, pz] = Pt(u, v); ups.push([px, top / 2, pz, 1.4, top, 1.4]); }
+      for (const lv of lvls) { const tilt = P * .25;
+        for (const v of [Wd * .25, Wd * .5, Wd * .75]) { const [px, pz] = Pt(L / 2, v), y = P * lv + tilt / 2;
+          beams.push(along ? [px, y, pz, 1.2, 1.4, L] : [px, y, pz, L, 1.4, 1.2]); }
+        const n = Math.max(1, Math.floor(L / (P * .65)));
+        for (let i = 0; i < n; i++) { if (R() < .25) continue; const u = (i + .5) * L / n, [px, pz] = Pt(u, Wd / 2), y = P * lv + P * .25 * (1 - u / L) + P * .18;
+          goods.push(along ? [px, y, pz, Wd * .8, P * .35, L / n * .85] : [px, y, pz, L / n * .85, P * .35, Wd * .8]); } }
+      continue;
+    }
     if (t === "pyramid") { // 9 ต.ค. ผู้ใช้ขอ: กองพาเลทบนพื้นแบบพีระมิด (กลางกองสูงสุด ขอบเตี้ย) · แบ่งกองละ 6×6 ช่อง มีทางเดินคั่น
       const P = M.pxm, cw = P * 1.15, ch = P * 1.35, gap = P * 2.2, blk = 6;
       const nx = Math.floor((bw + gap) / (cw * blk + gap)) || 1, nz = Math.floor((bh + gap) / (ch * blk + gap)) || 1;
