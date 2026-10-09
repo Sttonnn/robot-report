@@ -10,7 +10,7 @@ jobs:
     steps:
       - run: |
           K="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1nbnNob3ZuaWJjbWlwdG94ZGZlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkzNzI1NDIsImV4cCI6MjEwNDk0ODU0Mn0.UoPu-i6ODMEgyuqoO6oKHf0JIqFKpWkSpBkOKrpITwQ"
-          for t in pm_work_orders pm_fail_followup pm_upload_log; do
+          for t in mhe_vehicles shift_edits pm_work_orders pm_fail_followup pm_upload_log; do
             echo "== $t"
-            curl -s -w "\nHTTP %{http_code}\n" "https://mgnshovnibcmiptoxdfe.supabase.co/rest/v1/$t?select=id,updated_at&order=updated_at.desc&limit=2" -H "apikey: $K" -H "Authorization: Bearer $K" -H "Prefer: count=exact" -D - | grep -iE "^content-range|HTTP|id" | head -6
+            curl -s -w "\nHTTP %{http_code}\n" "https://mgnshovnibcmiptoxdfe.supabase.co/rest/v1/$t?select=*&limit=1" -H "apikey: $K" -H "Authorization: Bearer $K" -H "Prefer: count=exact" -D - | grep -viE "set-cookie|^date|^cf-|^server|^vary|^strict|^x-|^alt|^content-type|^access|^sb-" | cut -c1-200 | head -8
           done
