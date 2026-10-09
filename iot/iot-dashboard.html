@@ -355,7 +355,7 @@ function setUI(u) {
   window.__ui = u;
 }
 const CONTROL_ON = false;       // ปุ่มเปิด/ปิด: เปิดใช้หลังติดตั้ง Edge Function iot-control (ผู้ใช้ขอให้ทำหน้าให้เรียบร้อยก่อน 6 ต.ค.)
-const S = { site: "", range: 24, devs: [], reads: {}, open: {}, showAllAl: false, map: "wha", placeMode: false, placeSel: "", heat: true, tAt: null, selPin: null, hoverId: null, listOpen: false };
+const S = { site: "", range: 24, devs: [], reads: {}, open: {}, showAllAl: false, map: "wh5", placeMode: false, placeSel: "", heat: true, tAt: null, selPin: null, hoverId: null, listOpen: false };
 const STALE_MIN = 45;           // ไม่ได้ค่าใหม่เกิน 45 นาที = ข้อมูลค้าง
 const NOSITE = "ไม่ระบุคลัง";
 const $ = (s) => document.querySelector(s);
@@ -376,7 +376,7 @@ const ICON = {
 let META = {}, META_DB = true;
 const LSM = "pcg-iot-meta";
 const lsMeta = () => { try { return JSON.parse(localStorage.getItem(LSM) || "{}"); } catch { return {}; } };
-const m = (d) => META[d.id] || {};
+const m = (d) => { const x = META[d.id] || {}; if (x.map === "wha") x.map = (+x.px || 0) < 903 ? "wh32" : "wh5"; return x; }; /* หมุดเดิมบนผังรวม WHA → แยกตามฝั่งผนัง */
 const nameOf = (d) => m(d).label || d.name;
 const siteOf = (d) => m(d).site || d.site || NOSITE;
 const numOr = (v) => v === "" || v == null || isNaN(+v) ? null : +v;
@@ -691,7 +691,8 @@ setInterval(() => { if (!document.hidden && !$("#dlg").classList.contains("open"
 
 
 /* ---------- แผนที่ 3D (maps/map3d.js) · หมุด = ตำแหน่งใน iot_device_meta (map, px, py) ---------- */
-const mapOfSite = (s) => /^WH0?(5|8|32)$/i.test(s || "") ? "wha" : /^WH0?29$/i.test(s || "") ? "wh29" : "";
+/* 9 ต.ค. ผู้ใช้สั่ง: แยกแผนที่ WH5 (Domestic) กับ WH32 (Export) · WH8 = WH32 */
+const mapOfSite = (s) => /^WH0?5$/i.test(s || "") ? "wh5" : /^WH0?(8|32)$/i.test(s || "") ? "wh32" : /^WH0?29$/i.test(s || "") ? "wh29" : "";
 const mapOf = (d) => m(d).map || mapOfSite(siteOf(d));
 // ค่า ณ เวลาที่เลือกบนแถบเวลา (S.tAt = null = ตอนนี้)
 function infoAt(d) {
