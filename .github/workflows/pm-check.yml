@@ -1,4 +1,4 @@
-name: PM Supabase check
+name: PM Supabase check  # run 0620
 on:
   push:
     branches: [claude/wonderful-ride-myzde3]
