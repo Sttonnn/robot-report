@@ -693,7 +693,8 @@ setInterval(() => { if (!document.hidden && !$("#dlg").classList.contains("open"
 /* ---------- แผนที่ 3D (maps/map3d.js) · หมุด = ตำแหน่งใน iot_device_meta (map, px, py) ---------- */
 /* 9 ต.ค. ผู้ใช้สั่ง: แยกแผนที่ WH5 (Domestic) กับ WH32 (Export) · WH8 = WH32 */
 const mapOfSite = (s) => /^WH0?5$/i.test(s || "") ? "wh5" : /^WH0?(8|32)$/i.test(s || "") ? "wh32" : /^WH0?29$/i.test(s || "") ? "wh29" : "";
-const mapOf = (d) => m(d).map || mapOfSite(siteOf(d));
+/* เครื่องในสำนักงาน WH5 (ชื่อมี OFFICE/ออฟฟิศ/สำนักงาน) → แผนที่สำนักงาน */
+const mapOf = (d) => m(d).map || (/^WH0?5$/i.test(siteOf(d) || "") && /office|ออฟฟิศ|สำนักงาน/i.test((m(d).label || "") + " " + (d.name || "")) ? "wh5off" : mapOfSite(siteOf(d)));
 // ค่า ณ เวลาที่เลือกบนแถบเวลา (S.tAt = null = ตอนนี้)
 function infoAt(d) {
   if (S.tAt == null) return info(d);

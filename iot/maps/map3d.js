@@ -79,16 +79,16 @@ function build(key) {
   for (const z of M.zones || []) {
     const [zx, zy, zw, zh] = z.r, p = new THREE.Mesh(new THREE.PlaneGeometry(zw, zh), new THREE.MeshStandardMaterial({ color: z.c, roughness: 1 }));
     p.rotation.x = -Math.PI / 2; p.position.set(zx + zw / 2, .6, zy + zh / 2); p.receiveShadow = true; root.add(p);
-    if (z.t) { const s = textSprite(z.t, Math.min(28, zh * .35), "#b58500"); s.position.set(zx + zw / 2, 1.2, zy + zh / 2); root.add(s); }
+    if (z.t) { const s = textSprite(z.t, Math.min(28, zh * .35) * (M.ts || 1), M.zc || "#b58500"); s.position.set(zx + zw / 2, M.ts ? H * 1.02 : 1.2, zy + zh / 2); root.add(s); }
   }
   // ผนังโปร่ง + ขอบบน
   const wallH = H * 1.35, wallMat = { color: TH[THEME].wall, transparent: true, opacity: TH[THEME].wo, depthWrite: false };
   wallMats.length = 0; capMats.length = 0;
   const walls = [[x0, y0, x1, y0], [x1, y0, x1, y1], [x0, y1, x1, y1], [x0, y0, x0, y1], ...(M.walls || [])];
   for (const [a, b, c, d] of walls) {
-    const len = Math.hypot(c - a, d - b), th = 4, wm = box(a === c ? th : len, wallH, a === c ? len : th, TH[THEME].wall, wallMat);
+    const len = Math.hypot(c - a, d - b), th = 4 * (M.ts ? .4 : 1), wm = box(a === c ? th : len, wallH, a === c ? len : th, TH[THEME].wall, wallMat);
     wm.position.set((a + c) / 2, wallH / 2, (b + d) / 2); root.add(wm); wallMats.push(wm.material);
-    const cap = box(a === c ? 6 : len, 4, a === c ? len : 6, TH[THEME].cap); cap.position.set((a + c) / 2, wallH, (b + d) / 2); root.add(cap); capMats.push(cap.material);
+    const ct = M.ts ? 2 : 6, cap = box(a === c ? ct : len, M.ts ? 1.2 : 4, a === c ? len : ct, TH[THEME].cap); cap.position.set((a + c) / 2, wallH, (b + d) / 2); root.add(cap); capMats.push(cap.material);
   }
   for (const [ox, oy, ow, oh, t] of M.offices || []) {
     const o = box(ow, H * .45, oh, 0xdbe6f1); o.position.set(ox + ow / 2, H * .225, oy + oh / 2); root.add(o);
@@ -106,7 +106,7 @@ function build(key) {
         goods.push([px, hh / 2, pz, bw / n * .82, hh, bh / m * .82]); }
       continue;
     }
-    if (t === "shelf" || t === "flow") { solid.push([bx, by, bw, bh, t]); continue; }
+    if (t === "shelf" || t === "flow" || t === "desk" || t === "fix") { solid.push([bx, by, bw, bh, t]); continue; }
     const along = bh >= bw, L = along ? bh : bw, WdAll = along ? bw : bh, nb = Math.max(1, Math.round(L / bay)), step = L / nb;
     // บล็อกกว้าง (หลายแถว) → แบ่งเป็นแถวชั้นวางย่อยกว้าง ~2.6 ม. เว้นช่องเดิน
     const nr = Math.max(1, Math.round(WdAll / (M.pxm * 2.6))), pitch = WdAll / nr, Wd = nr > 1 ? pitch * .82 : WdAll;
@@ -131,9 +131,11 @@ function build(key) {
   };
   inst(ups, COL.navy, { metal: .3 }); inst(beams, COL.beam, { metal: .2 }); inst(pals, COL.wood); inst(goods, 0xffffff, { vary: COL.box });
   for (const [bx, by, bw, bh, t] of solid) { // ชั้นวางสีฟ้า (shelf) / Flow rack สีเหลือง
+    if (t === "desk" || t === "fix") { // สำนักงาน: โต๊ะ (ไม้) · สุขภัณฑ์/อุปกรณ์ (ขาว)
+      const h = M.pxm * (t === "desk" ? .75 : .85), o = box(bw, h, bh, t === "desk" ? 0xd9b98c : 0xf4f7fb, { roughness: .7 }); o.position.set(bx + bw / 2, h / 2, by + bh / 2); root.add(o); continue; }
     const s = box(bw * .9, H * .8, bh, t === "flow" ? COL.flow : COL.shelf, { roughness: .6 }); s.position.set(bx + bw / 2, H * .4, by + bh / 2); root.add(s);
   }
-  for (const l of M.labels || []) { const s = textSprite(l.t, 50, "#0f5c8c", "rgba(255,255,255,.85)"); s.position.set(l.x, 1.5, l.y); root.add(s); }
+  for (const l of M.labels || []) { const s = textSprite(l.t, 50 * (M.ls || 1), "#0f5c8c", "rgba(255,255,255,.85)"); s.position.set(l.x, 1.5, l.y); root.add(s); }
   // แสง + กล้อง
   const sun = scene.userData.sun, span = Math.max(W, D);
   sun.position.set(cx - span * .35, span * .9, cz + span * .55); sun.target.position.set(cx, 0, cz);
