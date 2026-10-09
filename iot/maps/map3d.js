@@ -62,6 +62,37 @@ function loop() {
 /* ---------- สร้างคลัง ---------- */
 const box = (w, h, d, c, o = {}) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshStandardMaterial({ color: c, roughness: .8, metalness: .05, ...o })); m.castShadow = m.receiveShadow = !o.transparent; return m; };
 function rand(seed) { let s = seed % 2147483647; if (s <= 0) s += 2147483646; return () => (s = s * 16807 % 2147483647) / 2147483647; }
+/* รอบอาคาร: ลานจอด/ถนน · ประตู Dock + เบอร์ + Dock leveler · รถเทรลเลอร์จอดบาง Dock · หลังคา Canopy · ป้ายประตูทางเข้า */
+function siteDetail(M, H) {
+  const P = M.pxm, [x0, y0, x1, y1] = M.bounds, flat = (x, y, w, h, c, yy = .4, o = {}) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshStandardMaterial({ color: c, roughness: 1, ...o })); m.rotation.x = -Math.PI / 2; m.position.set(x + w / 2, yy, y + h / 2); m.receiveShadow = true; root.add(m); return m; };
+  // ขอบพื้นอาคาร (คอนกรีตยกเล็กน้อย ไม่ใช่กรอบ)
+  const edge = box(x1 - x0 + 3, 3, y1 - y0 + 3, 0xcfd6de); edge.position.set((x0 + x1) / 2, -1.2, (y0 + y1) / 2); root.add(edge);
+  for (const a of M.aprons || []) flat(a[0], a[1], a[2], a[3], a[4] || 0xd9dee4, .2);
+  for (const r of M.roads || []) { flat(r[0], r[1], r[2], r[3], 0x4a5361, .3);
+    for (let x = r[0] + 10; x < r[0] + r[2] - 20; x += 40) flat(x, r[1] + r[3] / 2 - 1, 20, 2, 0xf4f4f4, .5); }
+  const DW = P * 3.2, DH = P * 4.4, R = rand(77 + (M.docks || []).length);
+  for (const d of M.docks || []) {
+    const x = d.x, y = d.y ?? y1;
+    const sh = box(DW + P * .6, DH + P * .4, P * .5, 0x2b313a); sh.position.set(x, (DH + P * .4) / 2, y + P * .25); root.add(sh);   // ซีลกันฝน
+    const dr = box(DW, DH, P * .3, 0x9aa7b6, { metalness: .3 }); dr.position.set(x, DH / 2, y + P * .45); root.add(dr);            // ประตูม้วน
+    const lv = box(DW * .9, P * .15, P * 2.4, 0x6f7883); lv.position.set(x, P * .1, y - P * 1.2); root.add(lv);                   // Dock leveler
+    flat(x - DW / 2, y + P * 1, DW, P * .25, 0xf2c200, .45);                                                                       // เส้นเหลือง
+    const n = textSprite(String(d.n), P * 1.6, "#0b2a4a", "rgba(255,255,255,.9)"); n.position.set(x, .8, y + P * 3); root.add(n);
+    if (d.truck ?? R() < .45) {                                                                                                   // รถเทรลเลอร์
+      const L = P * 12, Wt = P * 2.5, Ht = P * 3.9, g = new THREE.Group(), col = [0xf3f5f8, 0x2f6fb5, 0xd9541e][Math.floor(R() * 3)];
+      const tr = box(Wt, Ht, L, col); tr.position.set(0, Ht / 2 + P * 1.1, L / 2 + P * .7); g.add(tr);
+      const ch = box(Wt * .9, P * .5, L * .9, 0x3a3f46); ch.position.set(0, P * .8, L / 2 + P * .7); g.add(ch);
+      const cab = box(Wt, P * 3, P * 2.6, 0xe9edf2); cab.position.set(0, P * 1.9, L + P * 2.3); g.add(cab);
+      const ws = box(Wt * .92, P * 1, P * .1, 0x1d2a3a); ws.position.set(0, P * 2.6, L + P * 3.62); g.add(ws);
+      for (const z of [L * .2, L * .3, L + P * 1.6, L + P * 3.1]) for (const sx of [-1, 1]) { const w = new THREE.Mesh(new THREE.CylinderGeometry(P * .5, P * .5, P * .35, 14), new THREE.MeshStandardMaterial({ color: 0x1b1d21 })); w.rotation.z = Math.PI / 2; w.position.set(sx * Wt * .45, P * .5, z); g.add(w); }
+      g.position.set(x, 0, y + P * .3); g.traverse(o => { if (o.isMesh) o.castShadow = o.receiveShadow = true; }); root.add(g);
+    }
+  }
+  for (const c of M.canopies || []) { const m = box(c[2], P * .4, c[3], 0xc8d2dc, { transparent: true, opacity: .55 }); m.position.set(c[0] + c[2] / 2, P * 6.5, c[1] + c[3] / 2); root.add(m);
+    for (const [px, pz] of [[c[0] + 4, c[1] + c[3] - 4], [c[0] + c[2] - 4, c[1] + c[3] - 4]]) { const po = box(P * .4, P * 6.5, P * .4, 0x7d8896); po.position.set(px, P * 3.25, pz); root.add(po); }
+    if (c[4]) { const t = textSprite(c[4], P * 1.8, "#3c4a68"); t.position.set(c[0] + c[2] / 2, P * 6.8, c[1] + c[3] / 2); root.add(t); } }
+  for (const g of M.gates || []) { const t = textSprite(g.t, P * 2.4, "#ffffff", "rgba(15,92,140,.92)"); t.position.set(g.x, 1, g.y); root.add(t); }
+}
 function textSprite(t, size, color = "#0b2a4a", bg = null) {
   const c = document.createElement("canvas"), x = c.getContext("2d"), f = `800 ${size}px Archivo, 'IBM Plex Sans Thai', sans-serif`;
   x.font = f; const w = Math.ceil(x.measureText(t).width) + size; c.width = w; c.height = size * 1.6;
@@ -91,7 +122,9 @@ function build(key) {
   // ผนังโปร่ง + ขอบบน
   const wallH = H * 1.35, wallMat = { color: TH[THEME].wall, transparent: true, opacity: TH[THEME].wo, depthWrite: false };
   wallMats.length = 0; capMats.length = 0;
-  const walls = [[x0, y0, x1, y0], [x1, y0, x1, y1], [x0, y1, x1, y1], [x0, y0, x0, y1], ...(M.walls || [])];
+  /* 9 ต.ค. ผู้ใช้สั่ง: WH5/WH32 เอากรอบผนังฟ้าออก (`noWalls`) แล้วเพิ่มรายละเอียดรอบอาคารแทน (`site()`) */
+  const walls = M.noWalls ? (M.walls || []) : [[x0, y0, x1, y0], [x1, y0, x1, y1], [x0, y1, x1, y1], [x0, y0, x0, y1], ...(M.walls || [])];
+  if (M.noWalls) siteDetail(M, H);
   for (const [a, b, c, d] of walls) {
     const len = Math.hypot(c - a, d - b), th = 4 * (M.ts ? .4 : 1), wm = box(a === c ? th : len, wallH, a === c ? len : th, TH[THEME].wall, wallMat);
     wm.position.set((a + c) / 2, wallH / 2, (b + d) / 2); root.add(wm); wallMats.push(wm.material);
@@ -174,7 +207,7 @@ function build(key) {
 }
 function view(mode) {
   const M = MAPS[cur]; if (!M) return;
-  const [x0, y0, x1, y1] = M.bounds, W = x1 - x0, D = y1 - y0, cx = (x0 + x1) / 2, cz = (y0 + y1) / 2;
+  const [x0, y0, x1, y1] = M.view || M.bounds, W = x1 - x0, D = y1 - y0, cx = (x0 + x1) / 2, cz = (y0 + y1) / 2;
   // ระยะกล้องให้เห็นทั้งคลังพอดีจอ (คิดทั้งกว้างและลึก ตามสัดส่วนจอ)
   const vf = THREE.MathUtils.degToRad(camera.fov) / 2, hf = Math.atan(Math.tan(vf) * camera.aspect);
   const top = mode === "top", dist = Math.max((W / 2) / Math.tan(hf) * (top ? 1 : 1.5), (D / 2) / Math.tan(vf) * (top ? 1 : 1.35)) * (top ? 1.08 : .98);
