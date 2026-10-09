@@ -201,7 +201,7 @@ function siteDetail(M, H) {
     const wm = new THREE.LineBasicMaterial({ color: 0x2b2f36 }); for (let i = 1; i < tops.length; i++) for (const dx of [-P, 0, P]) { const g = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(tops[i - 1][0] + dx, P * 10.4, tops[i - 1][1]), new THREE.Vector3(tops[i][0] + dx, P * 10.4, tops[i][1])]); root.add(new THREE.Line(g, wm)); } }
   for (const o of M.ofb || []) officeBldg(o, P);
   for (const o of M.canteen || []) { const [x, y, w, h] = o.r, Hc = P * 3.6;
-    const rf = box(w, P * .3, h, 0xb3bcc6, { metalness: .4 }); rf.position.set(x + w / 2, Hc, y + h / 2); root.add(rf);
+    const rf = box(w, P * .3, h, o.rc ?? 0xb3bcc6, { metalness: o.rc ? .1 : .4 }); rf.position.set(x + w / 2, Hc, y + h / 2); root.add(rf);
     const bk = box(w, Hc, P * .3, 0x9aa3ad); bk.position.set(x + w / 2, Hc / 2, y + P * .2); root.add(bk);
     if (o.shop !== false) { // ร้าน 7-Eleven (WH5)
       const sh = box(w * .3, P * 2.8, h * .45, 0xf4f6f8); sh.position.set(x + w * .82, P * 1.4, y + h * .25); root.add(sh);
