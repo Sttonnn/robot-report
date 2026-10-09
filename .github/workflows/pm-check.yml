@@ -1,4 +1,4 @@
-name: PM Supabase check  # run 064222
+name: PM Supabase check  # iot
 on:
   push:
     branches: [claude/wonderful-ride-myzde3]
@@ -10,7 +10,7 @@ jobs:
     steps:
       - run: |
           K="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1nbnNob3ZuaWJjbWlwdG94ZGZlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkzNzI1NDIsImV4cCI6MjEwNDk0ODU0Mn0.UoPu-i6ODMEgyuqoO6oKHf0JIqFKpWkSpBkOKrpITwQ"
-          for t in mhe_vehicles shift_edits pm_work_orders pm_fail_followup pm_upload_log; do
+          for t in "iot_device_meta?select=*&limit=50" "iot_readings?select=device_id,ts,temp_c,power_w&order=ts.desc&limit=2" "iot_devices?select=name,online,site,updated_at&order=name&limit=50"; do
             echo "== $t"
-            curl -s -w "\nHTTP %{http_code}\n" "https://mgnshovnibcmiptoxdfe.supabase.co/rest/v1/$t?select=*&limit=1" -H "apikey: $K" -H "Authorization: Bearer $K" -H "Prefer: count=exact" -D - | grep -viE "set-cookie|^date|^cf-|^server|^vary|^strict|^x-|^alt|^content-type|^access|^sb-" | cut -c1-200 | head -8
+            curl -s -w "\nHTTP %{http_code}\n" "https://mgnshovnibcmiptoxdfe.supabase.co/rest/v1/$t" -H "apikey: $K" -H "Authorization: Bearer $K" -H "Prefer: count=exact" | head -c 6000; echo
           done
