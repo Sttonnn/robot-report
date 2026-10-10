@@ -1,4 +1,4 @@
-name: PM Supabase check  # iot
+name: PM Supabase check  # postpone
 on:
   push:
     branches: [claude/wonderful-ride-myzde3]
@@ -10,7 +10,11 @@ jobs:
     steps:
       - run: |
           K="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1nbnNob3ZuaWJjbWlwdG94ZGZlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkzNzI1NDIsImV4cCI6MjEwNDk0ODU0Mn0.UoPu-i6ODMEgyuqoO6oKHf0JIqFKpWkSpBkOKrpITwQ"
-          for t in "iot_device_meta?select=*&limit=50" "iot_readings?select=device_id,ts,temp_c,power_w&order=ts.desc&limit=2" "iot_devices?select=name,online,site,updated_at&order=name&limit=50"; do
-            echo "== $t"
-            curl -s -w "\nHTTP %{http_code}\n" "https://mgnshovnibcmiptoxdfe.supabase.co/rest/v1/$t" -H "apikey: $K" -H "Authorization: Bearer $K" -H "Prefer: count=exact" | head -c 6000; echo
-          done
+          U="https://mgnshovnibcmiptoxdfe.supabase.co/rest/v1"
+          curl -s "$U/pm_work_orders?select=rec&limit=5000" -H "apikey: $K" -H "Authorization: Bearer $K" -H "Range: 0-4999" > all.json
+          echo "== rows: $(jq length all.json)"
+          echo "== statuses"; jq -r '.[].rec.s' all.json | sort | uniq -c
+          echo "== keys"; jq -r '.[0].rec|keys|join(",")' all.json
+          echo "== postponed sample"; jq -c '[.[].rec|select(.s|test("เลื่อน"))][:15][]' all.json
+          echo "== postponed count by branch"; jq -r '.[].rec|select(.s|test("เลื่อน"))|.b' all.json | sort | uniq -c
+          echo "== upload log"; curl -s "$U/pm_upload_log?select=rec&order=updated_at.desc&limit=3" -H "apikey: $K" -H "Authorization: Bearer $K" | head -c 1500
