@@ -245,7 +245,29 @@ function siteDetail(M, H) {
       for (let k = 0; k < 8; k++) add(1.2, .13, 1.0, 0x1f4fa8, 0, .1 + k * .16, 1.6);
       const t = textSprite("Pallet Magazine", P * 1.1, "#1b1d21", "rgba(242,194,0,.95)"); t.position.set(0, P * 2.8, 0); g.add(t); }
     g.position.set(o.x, 0, o.y); g.rotation.y = o.r || 0; g.traverse(m => { if (m.isMesh) m.castShadow = true; }); root.add(g); }
+  for (const o of M.iso || []) isoRoom(o, P);
   for (const g of M.gates || []) { const t = textSprite(g.t, P * 2.4, "#ffffff", "rgba(15,92,140,.92)"); t.position.set(g.x, 1, g.y); root.add(t); }
+}
+/* 10 ต.ค. ผู้ใช้ชี้ WH29: ห้องควบคุมอุณหภูมิ ผนัง ISO WALL (แผ่นฉนวนสีขาว มีรอยต่อแผ่น) · หลังคาแผ่นเดียวกัน · ขอบฐานน้ำเงิน
+   ประตูม่านริ้ว PVC ด้าน o.door ("e"/"w"/"n"/"s") · คอยล์ร้อนบนหลังคา · ป้ายชื่อ */
+function isoRoom(o, P) {
+  const [x, y, w, d] = o.r, h = P * (o.h || 6), g = new THREE.Group(), pm = { roughness: .5 }, t = P * .15;
+  for (const [cx, cz, ww, dd] of [[x + w / 2, y, w, t], [x + w / 2, y + d, w, t], [x, y + d / 2, t, d], [x + w, y + d / 2, t, d]]) {
+    const m = box(ww, h, dd, 0xf3f6f9, pm); m.position.set(cx, h / 2, cz); g.add(m);
+    const kb = box(ww + .6, P * .25, dd + .6, 0x1f5fb8); kb.position.set(cx, P * .125, cz); g.add(kb); }
+  const seam = (cx, cz, alongX, len) => { const m = box(alongX ? .5 : len, h * .96, alongX ? len : .5, 0xc9d2dc); m.position.set(cx, h / 2, cz); g.add(m); };
+  for (let u = P * 1.2; u < w; u += P * 1.2) { seam(x + u, y - t / 2 - .2, true, .4); seam(x + u, y + d + t / 2 + .2, true, .4); }
+  for (let v = P * 1.2; v < d; v += P * 1.2) { seam(x - t / 2 - .2, y + v, false, .4); seam(x + w + t / 2 + .2, y + v, false, .4); }
+  const roof = box(w + P * .3, P * .2, d + P * .3, 0xe6ebf0, pm); roof.position.set(x + w / 2, h + P * .1, y + d / 2); g.add(roof);
+  const dw = P * 2.4, dh = P * 3, side = o.door || "e", vert = side === "e" || side === "w";
+  const dx = side === "e" ? x + w + t : side === "w" ? x - t : x + w / 2, dz = side === "s" ? y + d + t : side === "n" ? y - t : y + d / 2;
+  const fr = box(vert ? .8 : dw + P * .3, dh + P * .2, vert ? dw + P * .3 : .8, 0x8d98a5, { metalness: .5 }); fr.position.set(dx, (dh + P * .2) / 2, dz); g.add(fr);
+  for (let k = 0; k < 8; k++) { const off = -dw / 2 + (k + .5) * dw / 8, m = new THREE.Mesh(new THREE.BoxGeometry(vert ? .3 : dw / 8 * .92, dh, vert ? dw / 8 * .92 : .3), new THREE.MeshStandardMaterial({ color: 0xbfe3f0, transparent: true, opacity: .6 }));
+    m.position.set(dx + (vert ? (side === "e" ? .6 : -.6) : off), dh / 2, dz + (vert ? off : (side === "s" ? .6 : -.6))); g.add(m); }
+  for (let k = 0; k < Math.max(1, Math.floor(d / (P * 6))); k++) { const cu = box(P * 1.6, P * 1.1, P * 2.6, 0xdfe4ea, { metalness: .3 }); cu.position.set(x + w / 2, h + P * .75, y + P * 3 + k * P * 6); g.add(cu);
+    const fan = new THREE.Mesh(new THREE.CylinderGeometry(P * .55, P * .55, .3, 18), new THREE.MeshStandardMaterial({ color: 0x2b3038 })); fan.position.set(x + w / 2, h + P * 1.32, y + P * 3 + k * P * 6); g.add(fan); }
+  g.traverse(m => { if (m.isMesh) m.castShadow = m.receiveShadow = true; }); root.add(g);
+  if (o.t) { const s = textSprite(o.t, P * 1.1, "#0b2a4a", "rgba(255,255,255,.92)"); s.position.set(x + w / 2, h + P * 2.2, y + d / 2); s.rotation.z = vert ? Math.PI / 2 : 0; root.add(s); }
 }
 function textSprite(t, size, color = "#0b2a4a", bg = null) {
   const c = document.createElement("canvas"), x = c.getContext("2d"), f = `800 ${size}px Archivo, 'IBM Plex Sans Thai', sans-serif`;
@@ -319,6 +341,18 @@ function build(key) {
         const lv = Math.min(4, 1 + Math.min(i, blk - 1 - i, j, blk - 1 - j)), px = bx + a * (cw * blk + gap) + (i + .5) * cw, pz = by + b * (ch * blk + gap) + (j + .5) * ch;
         for (let k = 0; k < lv; k++) { const y = k * P * 1.35; pals.push([px, y + P * .07, pz, cw * .9, P * .14, ch * .9]); goods.push([px, y + P * .14 + P * .6, pz, cw * .86, P * 1.2, ch * .86]); }
       }
+      continue;
+    }
+    if (t === "stack2") { /* 10 ต.ค. ผู้ใช้ชี้ WH29: พื้นที่เก็บกองบนพื้น 2 ชั้น (Block stacking) · พาเลท 1.2×1.0 ม. วางชิดกันเป็นแถว
+         กองละ 2 ชั้น (บางช่องชั้นเดียว/ว่าง) · เส้นเหลืองรอบบล็อก */
+      const P = M.pxm, cw = P * 1.25, cd = P * 1.1, nx = Math.max(1, Math.floor(bw / cw)), nz = Math.max(1, Math.floor(bh / cd)), sx = bw / nx, sz = bh / nz;
+      for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) { const r = R(); if (r < .1) continue;
+        const px = bx + (i + .5) * sx, pz = by + (j + .5) * sz, lv = r < .25 ? 1 : 2;
+        for (let k = 0; k < lv; k++) { const y = k * P * 1.45, gh = P * (1.05 + R() * .2);
+          pals.push([px, y + P * .07, pz, sx * .92, P * .14, sz * .92]); goods.push([px, y + P * .14 + gh / 2, pz, sx * .88, gh, sz * .88]); } }
+      for (const [a, b, c, d] of [[bx, by, bx + bw, by], [bx, by + bh, bx + bw, by + bh], [bx, by, bx, by + bh], [bx + bw, by, bx + bw, by + bh]]) {
+        const m = new THREE.Mesh(new THREE.PlaneGeometry(Math.max(c - a, 1.4), Math.max(d - b, 1.4)), new THREE.MeshBasicMaterial({ color: 0xf2c200 }));
+        m.rotation.x = -Math.PI / 2; m.position.set((a + c) / 2, .7, (b + d) / 2); root.add(m); }
       continue;
     }
     if (t === "pallet") { // พื้นที่วางพาเลทบนพื้น
