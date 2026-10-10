@@ -311,7 +311,7 @@ function build(key) {
     const s = textSprite(t, 22); s.position.set(ox + ow / 2, H * .45 + 1, oy + oh / 2); root.add(s);
   }
   // ชั้นวาง: เสา (กรมท่า) · คาน (ส้ม) · พาเลท + กล่องสินค้า
-  const ups = [], beams = [], pals = [], goods = [], solid = [], yel = [], blk = [], blu = [], roll = [];
+  const ups = [], beams = [], pals = [], goods = [], sgoods = [], solid = [], yel = [], blk = [], blu = [], roll = [];
   const R = rand(key.length * 7919 + M.boxes.length);
   const bay = M.pxm * 2.8, lv = 4;
   for (const [bx, by, bw, bh, t] of M.boxes) {
@@ -349,7 +349,7 @@ function build(key) {
       for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) { const r = R(); if (r < .1) continue;
         const px = bx + (i + .5) * sx, pz = by + (j + .5) * sz, lv = r < .25 ? 1 : 2;
         for (let k = 0; k < lv; k++) { const y = k * P * 1.45, gh = P * (1.05 + R() * .2);
-          pals.push([px, y + P * .07, pz, sx * .92, P * .14, sz * .92]); goods.push([px, y + P * .14 + gh / 2, pz, sx * .88, gh, sz * .88]); } }
+          pals.push([px, y + P * .07, pz, sx * .92, P * .14, sz * .92]); sgoods.push([px, y + P * .14 + gh / 2, pz, sx * .88, gh, sz * .88]); } }
       for (const [a, b, c, d] of [[bx, by, bx + bw, by], [bx, by + bh, bx + bw, by + bh], [bx, by, bx, by + bh], [bx + bw, by, bx + bw, by + bh]]) {
         const m = new THREE.Mesh(new THREE.PlaneGeometry(Math.max(c - a, 1.4), Math.max(d - b, 1.4)), new THREE.MeshBasicMaterial({ color: 0xf2c200 }));
         m.rotation.x = -Math.PI / 2; m.position.set((a + c) / 2, .7, (b + d) / 2); root.add(m); }
@@ -407,6 +407,7 @@ function build(key) {
     mesh.castShadow = mesh.receiveShadow = true; root.add(mesh);
   };
   inst(ups, COL.navy, { metal: .3 }); inst(beams, COL.beam, { metal: .2 }); inst(pals, COL.wood); inst(goods, 0xffffff, { vary: COL.box });
+  inst(sgoods, 0xffffff, { vary: [0xb9bec4, 0xa7adb4, 0xc8ccd1, 0x9aa1a9, 0xb0b5bb, 0xd2d5d9] }); /* 10 ต.ค. ผู้ใช้สั่ง: กอง 2 ชั้นเป็นโทนเทา */
   inst(yel, 0xf5c400); inst(blk, 0x1b1d21); inst(blu, 0x1f4fa8); inst(roll, 0x8d98a5, { metal: .5 });
   for (const [bx, by, bw, bh, t] of solid) { // ชั้นวางสีฟ้า (shelf) / Flow rack สีเหลือง
     if (t === "desk" || t === "fix") { // สำนักงาน: โต๊ะ (ไม้) · สุขภัณฑ์/อุปกรณ์ (ขาว)
