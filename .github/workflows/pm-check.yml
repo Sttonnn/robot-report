@@ -10,13 +10,12 @@ jobs:
     steps:
       - run: |
           K="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1nbnNob3ZuaWJjbWlwdG94ZGZlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkzNzI1NDIsImV4cCI6MjEwNDk0ODU0Mn0.UoPu-i6ODMEgyuqoO6oKHf0JIqFKpWkSpBkOKrpITwQ"
-          U="https://mgnshovnibcmiptoxdfe.supabase.co/rest/v1"; H=(-H "apikey: $K" -H "Authorization: Bearer $K")
-          curl -s "$U/" "${H[@]}" > api.json
-          T=$(jq -r '.definitions|keys[]' api.json)
-          echo "== tables exposed to anon: $(echo $T)"
-          for t in $T; do
-            c=$(curl -s -o /dev/null -D - "$U/$t?select=*&limit=1" "${H[@]}" -H "Prefer: count=exact" | grep -i content-range | tr -d '\r' | awk '{print $2}')
-            ins=$(curl -s -X POST "$U/$t" "${H[@]}" -H "Content-Type: application/json" -H "Prefer: return=minimal" -d '{}' | jq -r '.code // "OK?"')
-            echo "$t | rows(range)=$c | insert-probe=$ins"
+          U="https://mgnshovnibcmiptoxdfe.supabase.co/rest/v1"
+          for t in robot_loads robot_entries robot_days warehouses mhe_vehicles shift_edits pm_work_orders pm_fail_followup pm_upload_log iot_devices iot_readings iot_device_meta iot_commands machine_checks machine_daily_audit; do
+            r=$(curl -s -o /dev/null -w "%{http_code}" -D h.txt "$U/$t?select=*&limit=1" -H "apikey: $K" -H "Authorization: Bearer $K" -H "Prefer: count=exact")
+            echo "$t | http=$r | $(grep -i content-range h.txt | tr -d '\r')"
           done
-          echo "== rpc functions"; jq -r '.paths|keys[]' api.json | grep rpc || true
+          echo "== mhe FILE rows (ไฟล์แนบ)"; curl -s "$U/mhe_vehicles?select=id&id=like.FILE:*" -H "apikey: $K" -H "Authorization: Bearer $K" | jq length
+          echo "== storage buckets (anon)"; curl -s "https://mgnshovnibcmiptoxdfe.supabase.co/storage/v1/bucket" -H "apikey: $K" -H "Authorization: Bearer $K" | head -c 300; echo
+          echo "== auth signup enabled?"; curl -s "https://mgnshovnibcmiptoxdfe.supabase.co/auth/v1/settings" -H "apikey: $K" | jq -c '{disable_signup, mailer_autoconfirm, external: (.external|with_entries(select(.value==true))|keys)}'
+          echo "== edge function iot-control"; curl -s -o /dev/null -w "%{http_code}\n" -X OPTIONS "https://mgnshovnibcmiptoxdfe.supabase.co/functions/v1/iot-control"
