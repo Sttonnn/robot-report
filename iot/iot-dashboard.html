@@ -386,7 +386,10 @@ const ICON = {
 let META = {}, META_DB = true;
 const LSM = "pcg-iot-meta";
 const lsMeta = () => { try { return JSON.parse(localStorage.getItem(LSM) || "{}"); } catch { return {}; } };
-const m = (d) => { const x = META[d.id] || {}; if (x.map === "wha") x.map = (+x.px || 0) < 903 ? "wh32" : "wh5"; return x; }; /* หมุดเดิมบนผังรวม WHA → แยกตามฝั่งผนัง */
+const m = (d) => { const x = META[d.id] || {}; if (x.map === "wha") x.map = (+x.px || 0) < 903 ? "wh32" : "wh5";
+  if (x.map === "wh5off") { x.map = "wh5"; x.px = x.py = null; }   /* 10 ต.ค. ผู้ใช้สั่งตัดแผนที่สำนักงาน WH5 → หมุดเดิมต้องวางใหม่บน WH5 */
+  if (x.map === "wh29") { x.map = "wh29r"; if (x.px != null) { x.px = 1820 - x.px; x.py = 1460 - x.py; } }   /* 10 ต.ค. ผัง WH29 หมุน 180° ให้ Dock อยู่ด้านหน้า (key ใหม่ wh29r) */
+  return x; }; /* หมุดเดิมบนผังรวม WHA → แยกตามฝั่งผนัง */
 const nameOf = (d) => m(d).label || d.name;
 const siteOf = (d) => m(d).site || d.site || NOSITE;
 const numOr = (v) => v === "" || v == null || isNaN(+v) ? null : +v;
@@ -698,9 +701,9 @@ setInterval(() => { if (!document.hidden && !$("#dlg").classList.contains("open"
 
 /* ---------- แผนที่ 3D (maps/map3d.js) · หมุด = ตำแหน่งใน iot_device_meta (map, px, py) ---------- */
 /* 9 ต.ค. ผู้ใช้สั่ง: แยกแผนที่ WH5 (Domestic) กับ WH32 (Export) · WH8 = WH32 */
-const mapOfSite = (s) => /^WH0?5$/i.test(s || "") ? "wh5" : /^WH0?(8|32)$/i.test(s || "") ? "wh32" : /^WH0?29$/i.test(s || "") ? "wh29" : "";
+const mapOfSite = (s) => /^WH0?5$/i.test(s || "") ? "wh5" : /^WH0?(8|32)$/i.test(s || "") ? "wh32" : /^WH0?29$/i.test(s || "") ? "wh29r" : "";
 /* เครื่องในสำนักงาน WH5 (ชื่อมี OFFICE/ออฟฟิศ/สำนักงาน) → แผนที่สำนักงาน */
-const mapOf = (d) => m(d).map || (/^WH0?5$/i.test(siteOf(d) || "") && /office|ออฟฟิศ|สำนักงาน/i.test((m(d).label || "") + " " + (d.name || "")) ? "wh5off" : mapOfSite(siteOf(d)));
+const mapOf = (d) => m(d).map || mapOfSite(siteOf(d));
 // ค่า ณ เวลาที่เลือกบนแถบเวลา (S.tAt = null = ตอนนี้)
 function infoAt(d) {
   if (S.tAt == null) return info(d);
