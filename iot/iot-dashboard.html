@@ -62,6 +62,56 @@ h1{margin:14px 0 2px;font:800 30px/1.15 Archivo,"IBM Plex Sans Thai",sans-serif;
 .al .v{font:800 16px Archivo,sans-serif;white-space:nowrap}
 .ic.hot{background:#fde8e6;color:var(--bad)} .ic.cold{background:#e4eefc;color:#2a62c9} .ic.offl{background:#eef1f4;color:#5d6873} .ic.humi{background:#ecebfb;color:#4f46c8}
 .more{background:none;border:0;color:var(--acc);font-weight:700;cursor:pointer;padding:6px 0 0}
+/* 11 ต.ค. ผู้ใช้ขอ: หน้าแบบ Control Tower (อิง ISA-101 High-Performance HMI + Supply-chain/NOC control tower)
+   หลัก: ① ดูภาพรวมสุขภาพ 4 หมวดใน 5 วินาที ② ข้อยกเว้นมาก่อน (แจ้งเตือนเรียงตามความรุนแรง) ③ สีใช้บอกสถานะเท่านั้น พื้นเป็นโทนกลาง
+   ④ ลำดับชั้น: ภาพรวม (แถบหมวด) → พื้นที่ (แผนที่) → อุปกรณ์ (การ์ด) → รายละเอียด (กดการ์ด) */
+.ctw{margin-bottom:22px}
+.cth{display:flex;align-items:center;gap:6px 10px;margin:0 0 12px;flex-wrap:wrap}
+.cth h2{margin:0;font:800 20px/1.2 Archivo,"IBM Plex Sans Thai",sans-serif;color:var(--h1)}
+.cth .sub3{color:var(--mute);font-size:13px}
+.cth .health{margin-left:auto;white-space:nowrap;display:flex;align-items:center;gap:8px;font-weight:700;font-size:13.5px;padding:6px 14px;border-radius:999px;background:var(--card);box-shadow:var(--sh)}
+.cth .health i{width:10px;height:10px;border-radius:50%;background:var(--c)}
+.cts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:16px}
+.ct{position:relative;text-align:left;background:var(--card);border:2px solid transparent;border-radius:20px;box-shadow:var(--sh);padding:14px 16px 12px;cursor:pointer;font:inherit;color:inherit;overflow:hidden}
+.ct:before{content:"";position:absolute;inset:0 auto 0 0;width:5px;background:var(--c)}
+.ct.on{border-color:var(--c)}
+.ct .top{display:flex;align-items:center;gap:8px;font-weight:700;font-size:13.5px;color:var(--ink2)}
+.ct .top .ic2{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;color:#fff;background:var(--g)}
+.ct .top .ic2 svg{width:15px;height:15px}
+.ct .top .pill2{margin-left:auto;font-size:11.5px;padding:2px 9px;border-radius:999px;background:color-mix(in srgb,var(--c) 14%,transparent);color:var(--c);font-weight:800}
+.ct .v{font:800 30px/1.1 Archivo,sans-serif;margin-top:8px;font-variant-numeric:tabular-nums}
+.ct .v small{font-size:14px;color:var(--ink2);margin-left:3px;font-weight:700}
+.ct .s{color:var(--mute);font-size:12.5px;margin-top:2px;min-height:18px}
+.ct .bar{display:flex;height:6px;border-radius:4px;overflow:hidden;background:var(--grid);margin-top:8px}
+.ct .bar i{display:block;height:100%}
+.ctb{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start}
+.ctp{background:var(--card);border-radius:22px;box-shadow:var(--sh);padding:6px 18px 18px;margin-bottom:16px}
+.ctp > h3{display:flex;align-items:center;gap:8px;margin:12px 0 10px;font-size:15px;color:var(--ink)}
+.ctp > h3 .dot{width:24px;height:24px;border-radius:8px;display:grid;place-items:center;color:#fff}
+.ctp > h3 .dot svg{width:14px;height:14px}
+.ctp > h3 .n{color:var(--mute);font-weight:600;font-size:13px}
+.feed{position:sticky;top:12px;background:var(--card);border-radius:22px;box-shadow:var(--sh);padding:14px 16px;max-height:calc(100vh - 24px);overflow:auto}
+.feed h3{margin:0 0 4px;font-size:15px;display:flex;align-items:center;gap:8px}
+.feed h3 .cnt{margin-left:auto;font-size:12px;background:var(--bad);color:#fff;border-radius:999px;padding:1px 9px}
+.feed .sum{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 10px}
+.feed .sum span{font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;background:var(--grid);color:var(--ink2)}
+.ev{display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:10px 2px;cursor:pointer;font:inherit;color:inherit}
+.ev:hover{background:var(--grid)}
+.ev .sv{flex:none;width:8px;align-self:stretch;border-radius:4px;background:var(--c)}
+.ev .bd{flex:1;min-width:0}
+.ev .t1{font-weight:700;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ev .t2{color:var(--mute);font-size:12px}
+.ev .vv{font:800 15px Archivo,sans-serif;white-space:nowrap;color:var(--c)}
+.feed .okmsg{display:flex;gap:10px;align-items:center;background:#e9f7ef;color:#16663f;border-radius:14px;padding:12px;font-weight:700;font-size:13.5px;margin-top:6px}
+.feed .note2{color:var(--mute);font-size:12px;margin-top:10px;line-height:1.5}
+.htab{width:100%;border-collapse:collapse;font-size:13px}
+.htab th{text-align:left;color:var(--mute);font-weight:600;font-size:12px;padding:6px 8px;border-bottom:1px solid var(--line)}
+.htab td{padding:8px;border-bottom:1px solid var(--line)}
+.htab tr[data-id]{cursor:pointer} .htab tr[data-id]:hover td{background:var(--grid)}
+@media (max-width:1100px){.cts{grid-template-columns:repeat(2,minmax(0,1fr))}.ctb{grid-template-columns:1fr}.feed{position:static;max-height:none;order:-1;margin-bottom:16px}}
+@media (max-width:520px){.cts{gap:10px}.ct{padding:12px}.ct .v{font-size:24px}}
+body.ui-a .ct,body.ui-a .ctp,body.ui-a .feed,body.ui-a .cth .health{background:var(--card)} body.ui-a .cth h2{color:#7dd3fc}
+body.ui-a .feed .okmsg{background:#0f2a1d;color:#6ee7b7}
 /* บล็อกคลัง */
 .site{background:var(--card);border-radius:24px;box-shadow:var(--sh);margin-bottom:22px;overflow:hidden}
 .shd{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:16px 20px;background:linear-gradient(120deg,#f4f8fc,#e9f3fa);border-bottom:1px solid var(--line)}
@@ -365,7 +415,7 @@ function setUI(u) {
   window.__ui = u;
 }
 const CONTROL_ON = false;       // ปุ่มเปิด/ปิด: เปิดใช้หลังติดตั้ง Edge Function iot-control (ผู้ใช้ขอให้ทำหน้าให้เรียบร้อยก่อน 6 ต.ค.)
-const S = { site: "", range: 24, devs: [], reads: {}, open: {}, showAllAl: false, map: "wh5", placeMode: false, placeSel: "", heat: true, tAt: null, selPin: null, hoverId: null, listOpen: false };
+const S = { site: "", range: 24, devs: [], reads: {}, open: {}, showAllAl: false, map: "wh5", placeMode: false, placeSel: "", heat: true, tAt: null, selPin: null, hoverId: null, listOpen: false, cat: "" };
 const STALE_MIN = 45;           // ไม่ได้ค่าใหม่เกิน 45 นาที = ข้อมูลค้าง
 const NOSITE = "ไม่ระบุคลัง";
 const $ = (s) => document.querySelector(s);
@@ -379,7 +429,8 @@ const TYPE_TH = { temp: "เซนเซอร์อุณหภูมิ", pow:
 const ICON = {
   temp: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M14 14.8V4a2 2 0 1 0-4 0v10.8a4 4 0 1 0 4 0z"/></svg>',
   pow: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>',
-  sw: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 3v8"/><path d="M6.4 6.6a8 8 0 1 0 11.2 0"/></svg>'
+  sw: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 3v8"/><path d="M6.4 6.6a8 8 0 1 0 11.2 0"/></svg>',
+  net: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M2 9a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0"/><circle cx="12" cy="19.5" r="1.2" fill="currentColor"/></svg>'
 };
 
 /* ---------- ตั้งค่าอุปกรณ์ (ชื่อ คลัง ตำแหน่ง เกณฑ์) · Supabase iot_device_meta หรือ localStorage ---------- */
@@ -511,38 +562,64 @@ function render() {
     (S.showAllAl && offs.length ? '<span class="sep"></span>' + offs.map(d => chip("#8a96a3", `⏻ ${esc(nameOf(d))} · ${ago(I.get(d.id).t)}`, "off", `data-id="${esc(d.id)}" type="button"`)).join("") : "") +
     (noMap.length ? '<span class="sep"></span>' + chip("#c9a227", `ยังไม่ระบุคลัง <b>${noMap.length}</b> · กด ⚙ ตั้งคลัง`, "", 'data-set="1" type="button"') : "");
 
-  // บล็อกคลัง
-  const order = { ok: 0, stale: 1, off: 2 };
-  const byName = (a, b) => nameOf(a).localeCompare(nameOf(b), "th", { numeric: true });
-  $("#sites").innerHTML = sites.filter(st => devs.some(d => siteOf(d) === st)).map(site => {
-    const ds = devs.filter(d => siteOf(d) === site);
-    const live = ds.filter(d => I.get(d.id).state === "ok"), dead = ds.filter(d => I.get(d.id).state !== "ok");
-    const tL = live.filter(d => KIND(d) === "temp" && I.get(d.id).last.temp_c != null).map(d => I.get(d.id).last.temp_c);
-    const pw = live.filter(d => KIND(d) === "pow").reduce((s, d) => s + (I.get(d.id).last.power_w || 0), 0);
-    const nAl = ds.filter(d => I.get(d.id).alert).length;
-    const grp = (k, t, a1, a2, list, fn, cls = "grid") => list.length ? `<div class="grp"><h4><span class="dot" style="background:linear-gradient(135deg,${a1},${a2})">${ICON[k]}</span>${t}</h4><div class="${cls}">${list.map(fn).join("")}</div></div>` : "";
-    const sortLive = (a, b) => (I.get(b.id).alert ? 1 : 0) - (I.get(a.id).alert ? 1 : 0) || byName(a, b);
-    const temps = live.filter(d => KIND(d) === "temp").sort(sortLive), pows = live.filter(d => KIND(d) === "pow").sort(byName), sws = live.filter(d => KIND(d) === "sw" || KIND(d) === "ir").sort(byName);
-    const openOff = S.open[site];
-    return `<section class="site"><div class="shd"><div class="nm"><i></i>${esc(site)}</div><div class="stats">
-        <span class="stat">ออนไลน์ <b>${live.length}/${ds.length}</b></span>
-        ${tL.length ? `<span class="stat">อุณหภูมิ <b>${f1(Math.min(...tL))}–${f1(Math.max(...tL))}</b> °C</span>` : ""}
-        ${ds.some(d => KIND(d) === "pow") ? `<span class="stat">ไฟ <b>${f1(pw / 1000, 2)}</b> kW</span>` : ""}
-        ${nAl ? `<span class="stat bad">ผิดเกณฑ์ <b>${nAl}</b></span>` : ""}</div></div>
-      <div class="sbody">
-        ${grp("temp", "อุณหภูมิ / ความชื้น", "#12a5c2", "#0f5c8c", temps, d => tempCard(d, I.get(d.id)))}
-        ${grp("pow", "ไฟฟ้า", "#9b6be0", "#5b2fa6", pows, d => powCard(d, I.get(d.id)))}
-        ${grp("sw", "สวิตช์ / แอร์", "#34c38f", "#1f7a55", sws, d => swRow(d, I.get(d.id)), "sw")}
-        ${!live.length ? '<div class="empty">ไม่มีอุปกรณ์ออนไลน์ในคลังนี้</div>' : ""}
-        ${dead.length ? `<div class="offrow"><button class="tg" data-off="${esc(site)}">${openOff ? "▾" : "▸"} ออฟไลน์ / ข้อมูลค้าง ${dead.length} เครื่อง</button>
-          ${openOff ? `<div class="grid" style="margin-top:10px">${dead.sort(byName).map(d => KIND(d) === "temp" ? tempCard(d, I.get(d.id)) : KIND(d) === "pow" ? powCard(d, I.get(d.id)) : deadCard(d, I.get(d.id))).join("")}</div>`
-            : `<div class="offlist">${dead.sort(byName).map(d => `<button class="offc" data-id="${esc(d.id)}">${esc(nameOf(d))} · ${ago(I.get(d.id).t)}</button>`).join("")}</div>`}</div>` : ""}
-      </div></section>`;
-  }).join("");
-
+  // 11 ต.ค. Control Tower: แถบสุขภาพ 4 หมวด → แผงอุปกรณ์ตามหมวด + แผงแจ้งเตือน (ข้อยกเว้นมาก่อน)
+  $("#sites").innerHTML = towerHtml(devs, I);
   document.querySelectorAll("svg[data-spark]").forEach(el => { const d = S.devs.find(x => x.id === el.dataset.spark); line(el, S.reads[el.dataset.spark] || [], el.dataset.k, { spark: true, th: d && el.dataset.k === "temp_c" ? [numOr(m(d).t_min), numOr(m(d).t_max)] : null }); });
   if (CONTROL_ON) loadLog();
   renderMap();
+}
+/* ---------- Control Tower (11 ต.ค.) ---------- */
+const CAT = { env: "สภาพแวดล้อม", pow: "พลังงาน", eq: "อุปกรณ์ / เครื่องจักร", net: "การเชื่อมต่อ IoT" };
+const catOf = (d) => KIND(d) === "temp" ? "env" : KIND(d) === "pow" ? "pow" : "eq";
+const SEV = { bad: ["var(--bad)", "ผิดปกติ"], warn: ["var(--warn)", "ต้องดู"], ok: ["var(--ok)", "ปกติ"], none: ["var(--off)", "ไม่มีอุปกรณ์"] };
+function towerHtml(devs, I) {
+  const byName = (a, b) => nameOf(a).localeCompare(nameOf(b), "th", { numeric: true });
+  const st = (d) => I.get(d.id).state, live = (d) => st(d) === "ok";
+  const env = devs.filter(d => catOf(d) === "env"), pw = devs.filter(d => catOf(d) === "pow"), eq = devs.filter(d => catOf(d) === "eq");
+  const al = devs.filter(d => I.get(d.id).alert), stale = devs.filter(d => st(d) === "stale"), off = devs.filter(d => st(d) === "off");
+  const tNow = env.filter(live).map(d => I.get(d.id).last.temp_c).filter(v => v != null), hNow = env.filter(live).map(d => I.get(d.id).last.humidity).filter(v => v != null);
+  const avg = (a) => a.length ? a.reduce((x, y) => x + y, 0) / a.length : null;
+  const thSet = env.filter(d => numOr(m(d).t_max) != null || numOr(m(d).t_min) != null).length;
+  const kW = pw.filter(live).reduce((s, d) => s + (I.get(d.id).last.power_w || 0), 0) / 1000, kwh = pw.reduce((s, d) => s + used(I.get(d.id).rs), 0);
+  const eqOn = eq.filter(d => live(d) && I.get(d.id).last.switch_on === true).length, eqLive = eq.filter(live).length;
+  const onN = devs.filter(live).length;
+  const sevOf = (list, bad, warn) => !list.length ? "none" : bad ? "bad" : warn ? "warn" : "ok";
+  const sEnv = sevOf(env, al.length, env.some(d => !live(d))), sPow = sevOf(pw, 0, pw.some(d => !live(d))), sEq = sevOf(eq, 0, eq.some(d => !live(d))), sNet = sevOf(devs, off.length && off.length >= devs.length / 2, off.length || stale.length);
+  const overall = [sEnv, sPow, sEq, sNet].includes("bad") ? "bad" : [sEnv, sPow, sEq, sNet].includes("warn") ? "warn" : "ok";
+  const pct = (a, b) => b ? Math.round(a / b * 100) : 0;
+  const tile = (k, ic, g, sev, v, sub, bar = "") => `<button class="ct ${S.cat === k ? "on" : ""}" data-cat="${k}" style="--c:${SEV[sev][0]};--g:${g}">
+      <div class="top"><span class="ic2">${ICON[ic]}</span>${CAT[k]}<span class="pill2">${SEV[sev][1]}</span></div>
+      <div class="v">${v}</div><div class="s">${sub}</div>${bar}</button>`;
+  const bar3 = (a, b, c, n) => n ? `<div class="bar"><i style="width:${a / n * 100}%;background:var(--ok)"></i><i style="width:${b / n * 100}%;background:var(--warn)"></i><i style="width:${c / n * 100}%;background:var(--off)"></i></div>` : "";
+  const tiles = tile("env", "temp", "linear-gradient(135deg,#12a5c2,#0f5c8c)", sEnv, tNow.length ? `${f1(avg(tNow))}<small>°C เฉลี่ย</small>` : "–",
+      tNow.length ? `ช่วง ${f1(Math.min(...tNow))}–${f1(Math.max(...tNow))}°C · ความชื้น ${f1(avg(hNow), 0)}% · ${al.length ? `<b style="color:var(--bad)">ผิดเกณฑ์ ${al.length}</b>` : thSet ? "อยู่ในเกณฑ์" : "ยังไม่ตั้งเกณฑ์"}` : `${env.length} เครื่อง · ไม่มีค่าสด`)
+    + tile("pow", "pow", "linear-gradient(135deg,#9b6be0,#5b2fa6)", sPow, pw.length ? `${f1(kW, 2)}<small>kW ตอนนี้</small>` : "–", pw.length ? `ใช้ไป ${f1(kwh, 1)} kWh ใน ${RLAB()} · มิเตอร์ ${pw.filter(live).length}/${pw.length}` : "ไม่มีมิเตอร์ในคลังนี้")
+    + tile("eq", "sw", "linear-gradient(135deg,#34c38f,#1f7a55)", sEq, eq.length ? `${eqOn}<small>/ ${eq.length} เปิดอยู่</small>` : "–", eq.length ? `ออนไลน์ ${eqLive}/${eq.length} · พัดลม สวิตช์ แอร์ Skylight` : "ไม่มีอุปกรณ์ในคลังนี้")
+    + tile("net", "net", "linear-gradient(135deg,#64748b,#334155)", sNet, `${pct(onN, devs.length)}<small>% ออนไลน์</small>`, `ออนไลน์ ${onN} · ข้อมูลค้าง ${stale.length} · ออฟไลน์ ${off.length}`, bar3(onN, stale.length, off.length, devs.length));
+
+  // แผงตามหมวด
+  const sortAl = (a, b) => (I.get(b.id).alert ? 1 : 0) - (I.get(a.id).alert ? 1 : 0) || (st(a) === "ok" ? 0 : 1) - (st(b) === "ok" ? 0 : 1) || byName(a, b);
+  const panel = (k, ic, g, list, body) => (!S.cat || S.cat === k) && list.length ? `<section class="ctp"><h3><span class="dot" style="background:${g}">${ICON[ic]}</span>${CAT[k]} <span class="n">${list.length} เครื่อง</span></h3>${body}</section>` : "";
+  const card = (d) => KIND(d) === "temp" ? tempCard(d, I.get(d.id)) : KIND(d) === "pow" ? powCard(d, I.get(d.id)) : deadCard(d, I.get(d.id));
+  const panels = panel("env", "temp", "linear-gradient(135deg,#12a5c2,#0f5c8c)", env, `<div class="grid">${env.slice().sort(sortAl).map(card).join("")}</div>`)
+    + panel("pow", "pow", "linear-gradient(135deg,#9b6be0,#5b2fa6)", pw, `<div class="grid">${pw.slice().sort(sortAl).map(card).join("")}</div>`)
+    + panel("eq", "sw", "linear-gradient(135deg,#34c38f,#1f7a55)", eq, `<div class="sw">${eq.slice().sort(sortAl).map(d => live(d) ? swRow(d, I.get(d.id)) : deadCard(d, I.get(d.id))).join("")}</div>`)
+    + (S.cat !== "net" ? "" : panel("net", "net", "linear-gradient(135deg,#64748b,#334155)", devs, `<table class="htab"><thead><tr><th>อุปกรณ์</th><th>หมวด</th><th>คลัง · ตำแหน่ง</th><th>สถานะ</th><th>ค่าล่าสุด</th></tr></thead><tbody>${devs.slice().sort((a, b) => ({ off: 0, stale: 1, ok: 2 })[st(a)] - ({ off: 0, stale: 1, ok: 2 })[st(b)] || byName(a, b)).map(d =>
+        `<tr data-id="${esc(d.id)}"><td><b>${esc(nameOf(d))}</b></td><td>${CAT[catOf(d)]}</td><td>${esc([siteOf(d), m(d).loc].filter(Boolean).join(" · "))}</td><td>${stHtml(st(d))}</td><td>${I.get(d.id).t ? ago(I.get(d.id).t) : "–"}</td></tr>`).join("")}</tbody></table>`));   // ตารางสุขภาพอุปกรณ์แสดงเมื่อกดการ์ด "การเชื่อมต่อ IoT" (ปกติแผงแจ้งเตือนสรุปให้แล้ว)
+
+  // แผงแจ้งเตือน: ผิดเกณฑ์ (แดง) → ข้อมูลค้าง (ส้ม) → ออฟไลน์ (เทา)
+  const ev = (d, c, t2, vv) => `<button class="ev" data-id="${esc(d.id)}" style="--c:${c}"><span class="sv"></span><span class="bd"><div class="t1">${esc(nameOf(d))}</div><div class="t2">${t2}</div></span><span class="vv">${vv}</span></button>`;
+  const evs = al.map(d => { const x = I.get(d.id); return ev(d, "var(--bad)", `${esc(x.alert.txt)} · ${esc(siteOf(d))}`, x.alert.k === "humi" ? f1(x.last.humidity, 0) + "%" : f1(x.last.temp_c) + "°C"); })
+    .concat(stale.map(d => ev(d, "var(--warn)", `ข้อมูลค้าง · ค่าล่าสุด ${ago(I.get(d.id).t)}`, "ค้าง")))
+    .concat(off.map(d => ev(d, "var(--off)", `ออฟไลน์ · ${CAT[catOf(d)]} · ${ago(I.get(d.id).t)}`, "⏻")));
+  const feed = `<aside class="feed"><h3>🔔 แจ้งเตือน / เหตุการณ์${evs.length ? `<span class="cnt">${evs.length}</span>` : ""}</h3>
+      <div class="sum"><span style="color:var(--bad)">ผิดเกณฑ์ ${al.length}</span><span style="color:var(--warn)">ข้อมูลค้าง ${stale.length}</span><span>ออฟไลน์ ${off.length}</span></div>
+      ${evs.length ? evs.join("") : '<div class="okmsg">✓ ทุกอุปกรณ์ปกติ ไม่มีเหตุการณ์</div>'}
+      ${thSet < env.length ? `<div class="note2">ตั้งเกณฑ์อุณหภูมิแล้ว ${thSet}/${env.length} เครื่อง · <button class="more" data-set="1" type="button">ตั้งเกณฑ์ ⚙</button></div>` : ""}</aside>`;
+  return `<section class="ctw"><div class="cth"><h2>Control Tower</h2><span class="sub3">${esc((IOT_MAPS[S.map] || {}).name || "")} · ${devs.length} อุปกรณ์ · ${S.cat ? `กำลังดู: ${CAT[S.cat]} · <button class="more" data-cat="${S.cat}" type="button">ดูทั้งหมด</button>` : "กดการ์ดหมวดเพื่อดูเฉพาะหมวด"}</span>
+      <span class="health" style="--c:${SEV[overall][0]}"><i></i>สถานะรวม: ${SEV[overall][1]}</span></div>
+    <div class="cts">${tiles}</div>
+    <div class="ctb"><div>${panels || '<div class="ctp"><div class="empty" style="padding:18px 0">ไม่มีอุปกรณ์ในหมวดนี้</div></div>'}</div>${feed}</div></section>`;
 }
 const sub = (d) => [m(d).loc, nameOf(d) !== d.name ? d.name : ""].filter(Boolean).join(" · ");
 function tempCard(d, x) {
@@ -685,6 +762,7 @@ document.addEventListener("click", (e) => {
   const s = e.target.closest("#segSite button"); if (s) { S.site = s.dataset.s; const k = mapOfSite(S.site); if (k) S.map = k; render(); return; }
   const r = e.target.closest("#segRange button"); if (r) { S.range = +r.dataset.r; S.tAt = null; stopPlay(); document.querySelectorAll("#segRange button").forEach(b => b.classList.toggle("on", b === r)); load(); return; }
   const o = e.target.closest("[data-off]"); if (o) { S.open[o.dataset.off] = !S.open[o.dataset.off]; render(); return; }
+  const ca = e.target.closest("[data-cat]"); if (ca) { S.cat = S.cat === ca.dataset.cat ? "" : ca.dataset.cat; render(); return; }
   if (e.target.closest("#alMore")) { S.showAllAl = !S.showAllAl; render(); return; }
   if (e.target.closest("#btnSet,[data-set]")) { openSettings(); return; }
   if (e.target.closest("#box")) return;
