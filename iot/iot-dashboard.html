@@ -573,11 +573,14 @@ function render() {
 /* ---------- Control Tower (11 ต.ค.) ---------- */
 const CAT = { env: "สภาพแวดล้อม", pow: "พลังงาน", eq: "อุปกรณ์ / เครื่องจักร", net: "การเชื่อมต่อ IoT" };
 const catOf = (d) => KIND(d) === "temp" ? "env" : KIND(d) === "pow" ? "pow" : "eq";
+/* 11 ต.ค. ผู้ใช้ถาม "สวิตช์ Fan 1 หาย": WH5-Fan1 / WH5-Fan4 / WH8-FAN1 / WH8-FAN3 เป็นเบรกเกอร์วัดไฟ (dlq) ที่มีสวิตช์เปิด/ปิดด้วย
+   เดิมขึ้นแค่หมวดพลังงาน → ให้ขึ้นในหมวดอุปกรณ์ (แถวสวิตช์) ด้วย ถ้าชื่อเป็นพัดลม หรือมีค่าสวิตช์ */
+const hasSw = (d, I) => KIND(d) === "pow" && (/fan|พัดลม/i.test(nameOf(d) + " " + d.name) || I.get(d.id).last.switch_on != null);
 const SEV = { bad: ["var(--bad)", "ผิดปกติ"], warn: ["var(--warn)", "ต้องดู"], ok: ["var(--ok)", "ปกติ"], none: ["var(--off)", "ไม่มีอุปกรณ์"] };
 function towerHtml(devs, I) {
   const byName = (a, b) => nameOf(a).localeCompare(nameOf(b), "th", { numeric: true });
   const st = (d) => I.get(d.id).state, live = (d) => st(d) === "ok";
-  const env = devs.filter(d => catOf(d) === "env"), pw = devs.filter(d => catOf(d) === "pow"), eq = devs.filter(d => catOf(d) === "eq");
+  const env = devs.filter(d => catOf(d) === "env"), pw = devs.filter(d => catOf(d) === "pow"), eq = devs.filter(d => catOf(d) === "eq" || hasSw(d, I));
   const al = devs.filter(d => I.get(d.id).alert), stale = devs.filter(d => st(d) === "stale"), off = devs.filter(d => st(d) === "off");
   const tNow = env.filter(live).map(d => I.get(d.id).last.temp_c).filter(v => v != null), hNow = env.filter(live).map(d => I.get(d.id).last.humidity).filter(v => v != null);
   const avg = (a) => a.length ? a.reduce((x, y) => x + y, 0) / a.length : null;
@@ -659,7 +662,7 @@ function swRow(d, x) {
   const pill = ir ? "" : sOn == null ? "" : sOn ? '<span class="pill on">เปิดอยู่</span>' : '<span class="pill offp">ปิดอยู่</span>';
   const ctl = CONTROL_ON && CTRL.has(d.category) ? `<span class="ctl">${ir || sOn !== true ? `<button class="bOn" data-ctl="${esc(d.id)}" data-on="1">เปิด</button>` : ""}${ir || sOn !== false ? `<button class="bOff" data-ctl="${esc(d.id)}" data-on="0">ปิด</button>` : ""}</span>` : "";
   return `<div class="swi"><div class="main" data-id="${esc(d.id)}" role="button" tabindex="0"><div class="nm" title="${esc(nameOf(d))}">${esc(nameOf(d))}</div>
-    <div class="sub2">${ir ? "แอร์ · สั่งผ่านรีโมตอินฟราเรด" : pct != null ? `เปิด ${pct}% ของ ${RLAB()}` : TYPE_TH[KIND(d)]}${m(d).loc ? " · " + esc(m(d).loc) : ""}</div></div>${pill}${ctl}</div>`;
+    <div class="sub2">${ir ? "แอร์ · สั่งผ่านรีโมตอินฟราเรด" : pct != null ? `เปิด ${pct}% ของ ${RLAB()}` : TYPE_TH[KIND(d)]}${KIND(d) === "pow" ? ` · ไฟ ${f1((x.last.power_w || 0) / 1000, 2)} kW` : ""}${m(d).loc ? " · " + esc(m(d).loc) : ""}</div></div>${pill}${ctl}</div>`;
 }
 
 /* ---------- กราฟเส้น (1 ชุดต่อกราฟ · crosshair + tooltip · เส้นเกณฑ์ประสีแดง) ---------- */
