@@ -237,7 +237,14 @@ function siteDetail(M, H) {
   for (const f of M.fans || []) { const g = new THREE.Group(), r = P * (f.d || 7.3) / 2, y = P * (f.h || 12.5), cm = { metalness: .6, roughness: .35 };
     const rod = box(P * .15, P * 1.6, P * .15, 0x9aa3ad, cm); rod.position.y = P * .8; g.add(rod);
     const hub = new THREE.Mesh(new THREE.CylinderGeometry(P * .45, P * .45, P * .5, 16), new THREE.MeshStandardMaterial({ color: 0x3a3f46, ...cm })); g.add(hub);
-    for (let k = 0; k < 6; k++) { const bl = box(r, P * .06, P * .32, 0xc4cbd3, cm); bl.position.set(r / 2 + P * .3, 0, 0); const a = new THREE.Group(); a.rotation.y = k * Math.PI / 3 + (f.a || 0); a.add(bl); g.add(a); }
+    /* 11 ต.ค. ผู้ใช้สั่ง: Giant Fan ให้เด่น → ใบเหลือง ปลายดำ · ดุมแดง · วงลมฟ้าโปร่งใต้ใบ · วงบนพื้น · ป้าย */
+    const air = new THREE.Mesh(new THREE.CircleGeometry(r * 1.08, 40), new THREE.MeshBasicMaterial({ color: 0x22d3ee, transparent: true, opacity: .22, depthWrite: false, side: THREE.DoubleSide })); air.rotation.x = -Math.PI / 2; air.position.y = -P * .35; g.add(air);
+    const ring = new THREE.Mesh(new THREE.RingGeometry(r * .98, r * 1.08, 48), new THREE.MeshBasicMaterial({ color: 0x0ea5e9, side: THREE.DoubleSide })); ring.rotation.x = -Math.PI / 2; ring.position.y = -P * .34; g.add(ring);
+    const fr = new THREE.Mesh(new THREE.RingGeometry(r * .9, r, 48), new THREE.MeshBasicMaterial({ color: 0x22d3ee, transparent: true, opacity: .55, depthWrite: false })); fr.rotation.x = -Math.PI / 2; fr.position.set(f.x, 1.1, f.y); root.add(fr);
+    const lb = textSprite("Giant Fan", P * 1.5, "#0b2a4a", "rgba(250,204,21,.95)"); lb.position.set(0, P * 2.4, 0); g.add(lb);
+    hub.material.color.setHex(0xd9341e);
+    for (let k = 0; k < 6; k++) { const tip = box(r * .16, P * .1, P * .36, 0x1b1d21, cm); tip.position.set(r + P * .3 - r * .08, 0, 0); const a2 = new THREE.Group(); a2.rotation.y = k * Math.PI / 3 + (f.a || 0); a2.add(tip); g.add(a2); }
+    for (let k = 0; k < 6; k++) { const bl = box(r, P * .08, P * .42, 0xfacc15, cm); bl.position.set(r / 2 + P * .3, 0, 0); const a = new THREE.Group(); a.rotation.y = k * Math.PI / 3 + (f.a || 0); a.add(bl); g.add(a); }
     g.position.set(f.x, y, f.y); root.add(g); }
   /* อุปกรณ์หน้า Flow Rack ด้านใน: ทางม้าลาย · รถลากพาเลทเหลือง · เครื่อง Pallet Magazine */
   for (const o of M.props || []) {
@@ -316,6 +323,9 @@ function build(key) {
   // ชั้นวาง: เสา (กรมท่า) · คาน (ส้ม) · พาเลท + กล่องสินค้า
   const ups = [], beams = [], pals = [], goods = [], sgoods = [], shut = [], shU = [], shB = [], shG = [], solid = [], yel = [], blk = [], blu = [], roll = [];
   const R = rand(key.length * 7919 + M.boxes.length);
+  /* 11 ต.ค. ผู้ใช้สั่ง: แยกโซนสีชั้นวาง (`rackZones` {r, t, u = สีเสา, b = สีคาน, f = สีพื้น}) · ชั้นวางในโซนใช้สีโซน + พื้นโซน + ป้ายท้ายแถว + ป้ายโซนลอย */
+  const RZ = (M.rackZones || []).map(z => ({ ...z, U: [], B: [], rows: [] })), zoneOf = (x, y) => RZ.find(z => x >= z.r[0] && x <= z.r[0] + z.r[2] && y >= z.r[1] && y <= z.r[1] + z.r[3]);
+  let RU = ups, RB = beams;
   const bay = M.pxm * 2.8, lv = 4;
   for (const [bx, by, bw, bh, t] of M.boxes) {
     if (t === "flowrack") { /* 9 ต.ค. ตามรูปจริง: Flow Rack ทะลุผนัง Dock (เติมพาเลทจากฝั่ง Dock → ไหลมาออกด้านใน) · 1 ชุด = 2 ช่องทาง
@@ -384,7 +394,7 @@ function build(key) {
       continue;
     }
     if (t === "shelf" || t === "flow" || t === "desk" || t === "fix") { solid.push([bx, by, bw, bh, t]); continue; }
-    if (M.rack) { rackSpec(bx, by, bw, bh); continue; }
+    if (M.rack) { const z = zoneOf(bx + bw / 2, by + bh / 2); RU = z ? z.U : ups; RB = z ? z.B : beams; rackSpec(bx, by, bw, bh); if (z) z.rows.push([bx, by, bw, bh]); continue; }
     const along = bh >= bw, L = along ? bh : bw, WdAll = along ? bw : bh, nb = Math.max(1, Math.round(L / bay)), step = L / nb;
     // บล็อกกว้าง (หลายแถว) → แบ่งเป็นแถวชั้นวางย่อยกว้าง ~2.6 ม. เว้นช่องเดิน
     const nr = Math.max(1, Math.round(WdAll / (M.pxm * 2.6))), pitch = WdAll / nr, Wd = nr > 1 ? pitch * .82 : WdAll;
@@ -409,8 +419,8 @@ function build(key) {
     const side = P * (S.side || .9), lv = [0, ...S.beams].map(v => v * P);
     for (let r = 0; r < nr; r++) {
       const off = r * pitch + (pitch - Wd) / 2, Pt = (u, v) => along ? [bx + off + v, by + u] : [bx + u, by + off + v];
-      for (let i = 0; i <= nb; i++) for (const v of [.6, side, Wd - side, Wd - .6]) { const [px, pz] = Pt(i * step, v); ups.push([px, top / 2, pz, 1.6, top, 1.6]); }
-      for (const y of lv.slice(1)) for (const v of [.6, side, Wd - side, Wd - .6]) { const [px, pz] = Pt(L / 2, v); beams.push(along ? [px, y - 1, pz, 1.4, 2, L] : [px, y - 1, pz, L, 2, 1.4]); }
+      for (let i = 0; i <= nb; i++) for (const v of [.6, side, Wd - side, Wd - .6]) { const [px, pz] = Pt(i * step, v); RU.push([px, top / 2, pz, 1.6, top, 1.6]); }
+      for (const y of lv.slice(1)) for (const v of [.6, side, Wd - side, Wd - .6]) { const [px, pz] = Pt(L / 2, v); RB.push(along ? [px, y - 1, pz, 1.4, 2, L] : [px, y - 1, pz, L, 2, 1.4]); }
       for (let i = 0; i < nb; i++) for (let k = 0; k < lv.length; k++) for (const v of [side / 2, Wd - side / 2]) for (let q = 0; q < S.per; q++) {
         if (R() < .2) continue;
         const u = i * step + step * (q + .5) / S.per, [px, pz] = Pt(u, v), y = lv[k] + (k ? 0 : .2), gh = P * 1.2 * (.55 + R() * .4);
@@ -427,7 +437,14 @@ function build(key) {
     list.forEach((b, i) => { m4.makeScale(b[3], b[4], b[5]); m4.setPosition(b[0], b[1], b[2]); mesh.setMatrixAt(i, m4); if (opts.vary) mesh.setColorAt(i, c.setHex(opts.vary[i % opts.vary.length])); });
     mesh.castShadow = mesh.receiveShadow = true; root.add(mesh);
   };
-  inst(ups, COL.navy, { metal: .3 }); inst(beams, COL.beam, { metal: .2 }); inst(pals, COL.wood); inst(goods, 0xffffff, { vary: COL.box });
+  inst(ups, COL.navy, { metal: .3 }); inst(beams, COL.beam, { metal: .2 });
+  for (const z of RZ) { inst(z.U, z.u, { metal: .3 }); inst(z.B, z.b, { metal: .2 });
+    const [zx, zy, zw, zh] = z.r, P = M.pxm, top = P * (M.rack ? M.rack.h : 8), css = "#" + z.b.toString(16).padStart(6, "0");
+    const fl = new THREE.Mesh(new THREE.PlaneGeometry(zw, zh), new THREE.MeshStandardMaterial({ color: z.f, roughness: 1 })); fl.rotation.x = -Math.PI / 2; fl.position.set(zx + zw / 2, .5, zy + zh / 2); fl.receiveShadow = true; root.add(fl);
+    for (const [a, b2, w, h] of [[zx, zy, zw, 1.6], [zx, zy + zh - 1.6, zw, 1.6], [zx, zy, 1.6, zh], [zx + zw - 1.6, zy, 1.6, zh]]) { const e = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: z.b })); e.rotation.x = -Math.PI / 2; e.position.set(a + w / 2, .9, b2 + h / 2); root.add(e); }
+    /* ป้ายท้ายแถว (ฝั่งทางเดินหน้า) สีโซน */
+    for (const [bx, by, bw, bh] of z.rows) { const along = bh >= bw, sg = box(along ? bw * .9 : P * .2, P * 1.6, along ? P * .2 : bh * .9, z.b); sg.position.set(along ? bx + bw / 2 : bx + bw + P * .2, top * .78, along ? by + bh + P * .2 : by + bh / 2); root.add(sg); }
+    const t = textSprite(z.t, Math.min(46, zw * .09), "#ffffff", css + "ee"); t.position.set(zx + zw / 2, top + 14, zy + zh - 30); root.add(t); } inst(pals, COL.wood); inst(goods, 0xffffff, { vary: COL.box });
   inst(sgoods, 0xffffff, { vary: [0xb9bec4, 0xa7adb4, 0xc8ccd1, 0x9aa1a9, 0xb0b5bb, 0xd2d5d9] }); /* 10 ต.ค. ผู้ใช้สั่ง: กอง 2 ชั้นเป็นโทนเทา */
   inst(shut, 0xd9341e, { metal: .3 });
   inst(shU, 0x46505c, { metal: .4 }); inst(shB, 0x16a34a, { metal: .2 }); inst(shG, 0xffffff, { vary: [0xeef4fa, 0xdfeaf5, 0xf7f9fc, 0xcfe0f0, 0xe6eef7, 0xbcd4ea] });
