@@ -193,14 +193,14 @@ body.ui-a .feed .okmsg{background:#0f2a1d;color:#6ee7b7}
 .mhint{z-index:3000;position:absolute;left:50%;top:12px;transform:translateX(-50%);background:#0b2a4a;color:#fff;border-radius:999px;padding:7px 14px;font-weight:700;font-size:13px;box-shadow:0 6px 18px rgba(0,0,0,.25);display:none;white-space:nowrap}
 .mhint.on{display:block}
 .unplaced{z-index:2500;position:absolute;right:12px;top:12px;background:rgba(255,255,255,.95);border-radius:12px;padding:7px 12px;font-size:12.5px;font-weight:700;color:#8a5600;box-shadow:0 4px 14px rgba(0,0,0,.08);border:0;cursor:pointer}
-.ppanel{z-index:3000;position:absolute;right:12px;top:12px;bottom:12px;width:290px;background:rgba(255,255,255,.97);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.18);display:flex;flex-direction:column;overflow:hidden}
+.ppanel{z-index:3000;position:absolute;right:12px;top:12px;bottom:12px;width:290px;background:rgba(255,255,255,.97);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.18);display:flex;flex-direction:column;overflow:hidden;color:#0b2a4a}
 .ppanel .ph{padding:12px 14px;border-bottom:1px solid var(--line);font-weight:800;display:flex;align-items:center;gap:8px}
 .ppanel .ph button{margin-left:auto;border:0;background:#eef2f6;border-radius:8px;padding:4px 10px;font-weight:700;cursor:pointer}
 .ppanel .pl{overflow:auto;padding:6px 8px}
 .pr{display:flex;align-items:center;gap:8px;padding:7px 6px;border-radius:10px}
 .pr.sel{background:#e6f2fa}
 .pr .n{flex:1;min-width:0;font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pr .n small{display:block;color:var(--mute);font-weight:500;font-size:11.5px}
+.pr .n small{display:block;color:#5b6b7c;font-weight:500;font-size:11.5px}
 .pr button{border:0;border-radius:8px;padding:4px 9px;font-weight:700;font-size:12px;cursor:pointer;background:#0f5c8c;color:#fff}
 .pr button.rm{background:#eef2f6;color:#4d5864}
 .nomap{position:absolute;inset:0;display:grid;place-items:center;color:var(--mute);text-align:center;padding:20px}
@@ -345,6 +345,10 @@ body.ui-a .box{background:#111d2e;color:var(--ink)} body.ui-a .x,body.ui-a .inp{
 body.ui-a .tbl th{background:#111d2e} body.ui-a .pill.offp{background:#1a2738;color:#a9b8c8} body.ui-a .pill.on{background:#0f3324;color:#6ee7b7}
 body.ui-a .mapbar{border-color:var(--line)} body.ui-a .mtime{border-color:var(--line)}
 body.ui-a .kpi .v small{color:var(--ink2)}
+/* 11 ต.ค. ผู้ใช้ว่ารายชื่อในแผงวางหมุดสีเทาอ่านไม่ออก (แบบ A ห้องควบคุม) → แผงพื้นเข้ม ตัวอักษรสว่าง */
+body.ui-a .ppanel{background:rgba(13,24,39,.97);color:#e6edf5;box-shadow:0 0 0 1px #1f3049,0 10px 30px rgba(0,0,0,.5)}
+body.ui-a .ppanel .ph{border-color:#1f3049} body.ui-a .ppanel .ph button,body.ui-a .pr button.rm{background:#1a2b42;color:#e6edf5}
+body.ui-a .pr .n small{color:#a9b8c8} body.ui-a .pr.sel{background:#16304a} body.ui-a .pr button{background:#0ea5e9;color:#04121f}
 /* C · แผนที่เต็มจอ: แผนที่ใหญ่ สรุป+แจ้งเตือนลอยบนแผนที่ด้านขวา */
 body.ui-c header.hero{border-radius:0;margin-bottom:0}
 body.ui-c .hero .wrap{padding-top:12px;padding-bottom:14px} body.ui-c h1{font-size:22px;margin:8px 0 0} body.ui-c .sub{display:none} body.ui-c .ctrl{margin-top:10px}
