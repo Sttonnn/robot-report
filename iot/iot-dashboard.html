@@ -442,7 +442,9 @@ const m = (d) => { const x = META[d.id] || {}; if (x.map === "wha") x.map = (+x.
   if (x.map === "wh29") { x.map = "wh29r"; if (x.px != null) { x.px = 1820 - x.px; x.py = 1460 - x.py; } }   /* 10 ต.ค. ผัง WH29 หมุน 180° ให้ Dock อยู่ด้านหน้า (key ใหม่ wh29r) */
   return x; }; /* หมุดเดิมบนผังรวม WHA → แยกตามฝั่งผนัง */
 const nameOf = (d) => m(d).label || d.name;
-const siteOf = (d) => m(d).site || d.site || NOSITE;
+const SITE_HINT = [[/^\s*SKYLIGHT/i, "WH5"]];   // 11 ต.ค. ผู้ใช้ยืนยัน: Skylight ทั้ง 4 ตัว (AA-AH · AL-AT · AW-BA · BD-BL) อยู่คลัง 5
+const hintSite = (n) => (SITE_HINT.find(([re]) => re.test(n || "")) || [])[1];
+const siteOf = (d) => m(d).site || d.site || hintSite(d.name) || NOSITE;
 const numOr = (v) => v === "" || v == null || isNaN(+v) ? null : +v;
 async function loadMeta() {
   if (DEMO) { META = Object.assign(demoMeta(), lsMeta()); META_DB = false; return; }

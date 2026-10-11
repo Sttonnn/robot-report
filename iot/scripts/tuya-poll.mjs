@@ -47,7 +47,7 @@ async function sb(path, rows, prefer) {
 }
 
 // คลังจากชื่ออุปกรณ์ (WH5-xxx → WH5) · SKYLIGHT / ชื่ออื่น = ไม่ระบุ
-const siteOf = (n) => { const m = String(n || "").match(/^\s*(WH\s*\d+)/i); return m ? m[1].toUpperCase().replace(/\s+/g, "") : null; };
+const siteOf = (n) => { const m = String(n || "").match(/^\s*(WH\s*\d+)/i); return m ? m[1].toUpperCase().replace(/\s+/g, "") : /^\s*SKYLIGHT/i.test(n || "") ? "WH5" : null; };   // Skylight ทั้งหมดอยู่ WH5 (ผู้ใช้ยืนยัน 11 ต.ค.)
 
 // ถอดค่า phase_a (base64) ของตัวป้องกันไฟ: แรงดัน 2 ไบต์ (/10 V) · กระแส 3 ไบต์ (/1000 A) · กำลัง 3 ไบต์ (/1000 kW)
 function phaseA(b64) {
