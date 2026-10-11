@@ -15,6 +15,7 @@ jobs:
             r=$(curl -s -o /dev/null -w "%{http_code}" -D h.txt "$U/$t?select=*&limit=1" -H "apikey: $K" -H "Authorization: Bearer $K" -H "Prefer: count=exact")
             echo "$t | http=$r | $(grep -i content-range h.txt | tr -d '\r')"
           done
+          echo "== iot_devices (ชื่อ/หมวด/คลัง)"; curl -s "$U/iot_devices?select=name,category,site,online&order=category" -H "apikey: $K" -H "Authorization: Bearer $K" | jq -r '.[] | "\(.category) | \(.site) | \(.online) | \(.name)"'
           echo "== mhe FILE rows (ไฟล์แนบ)"; curl -s "$U/mhe_vehicles?select=id&id=like.FILE:*" -H "apikey: $K" -H "Authorization: Bearer $K" | jq length
           echo "== storage buckets (anon)"; curl -s "https://mgnshovnibcmiptoxdfe.supabase.co/storage/v1/bucket" -H "apikey: $K" -H "Authorization: Bearer $K" | head -c 300; echo
           echo "== auth signup enabled?"; curl -s "https://mgnshovnibcmiptoxdfe.supabase.co/auth/v1/settings" -H "apikey: $K" | jq -c '{disable_signup, mailer_autoconfirm, external: (.external|with_entries(select(.value==true))|keys)}'
