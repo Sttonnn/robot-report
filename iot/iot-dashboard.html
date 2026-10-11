@@ -428,7 +428,9 @@ const f1 = (x, d = 1) => x == null || isNaN(x) ? "–" : Number(x).toLocaleStrin
 const TH_TIME = (d) => d.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Bangkok" });
 const TH_DT = (d) => d.toLocaleString("th-TH", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Bangkok" });
 const ago = (t) => { const m = Math.round((Date.now() - t) / 60000); return m < 1 ? "เมื่อสักครู่" : m < 60 ? m + " นาทีที่แล้ว" : m < 1440 ? Math.floor(m / 60) + " ชม. ที่แล้ว" : Math.floor(m / 1440) + " วันที่แล้ว"; };
-const KIND = (d) => ({ qxj: "temp", wnykq: "temp", dlq: "pow", kg: "sw", znjdq: "sw", infrared_ac: "ir" })[d.category] || "sw";
+/* 11 ต.ค. ผู้ใช้สั่ง: WH5-Fan1 (เบรกเกอร์ dlq ชื่อมี fan/พัดลม) แสดงเป็นสวิตช์แบบ Fan2 · ยังเก็บค่าไฟ (isMeter) */
+const isMeter = (d) => d.category === "dlq", isFanMeter = (d) => isMeter(d) && /fan|พัดลม/i.test(d.name + " " + ((META[d.id] || {}).label || ""));
+const KIND = (d) => isFanMeter(d) ? "sw" : ({ qxj: "temp", wnykq: "temp", dlq: "pow", kg: "sw", znjdq: "sw", infrared_ac: "ir" })[d.category] || "sw";
 const TYPE_TH = { temp: "เซนเซอร์อุณหภูมิ", pow: "มิเตอร์ไฟ", sw: "สวิตช์", ir: "แอร์ (รีโมต)" };
 const ICON = {
   temp: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M14 14.8V4a2 2 0 1 0-4 0v10.8a4 4 0 1 0 4 0z"/></svg>',
@@ -557,7 +559,7 @@ function render() {
   const on = devs.filter(d => I.get(d.id).state === "ok");
   const liveT = devs.filter(d => KIND(d) === "temp" && I.get(d.id).state === "ok" && I.get(d.id).last.temp_c != null);
   const hot = liveT.slice().sort((a, b) => I.get(b.id).last.temp_c - I.get(a.id).last.temp_c)[0];
-  const pows = devs.filter(d => KIND(d) === "pow");
+  const pows = devs.filter(isMeter);
   const pNow = pows.filter(d => I.get(d.id).state === "ok").reduce((s, d) => s + (I.get(d.id).last.power_w || 0), 0);
   const kwh = pows.reduce((s, d) => s + used(I.get(d.id).rs), 0);
   const al = devs.filter(d => I.get(d.id).alert);
@@ -673,7 +675,7 @@ function swRow(d, x) {
   const pill = ir ? "" : sOn == null ? "" : sOn ? '<span class="pill on">เปิดอยู่</span>' : '<span class="pill offp">ปิดอยู่</span>';
   const ctl = CONTROL_ON && CTRL.has(d.category) ? `<span class="ctl">${ir || sOn !== true ? `<button class="bOn" data-ctl="${esc(d.id)}" data-on="1">เปิด</button>` : ""}${ir || sOn !== false ? `<button class="bOff" data-ctl="${esc(d.id)}" data-on="0">ปิด</button>` : ""}</span>` : "";
   return `<div class="swi"><div class="main" data-id="${esc(d.id)}" role="button" tabindex="0"><div class="nm" title="${esc(nameOf(d))}">${esc(nameOf(d))}</div>
-    <div class="sub2">${ir ? "แอร์ · สั่งผ่านรีโมตอินฟราเรด" : pct != null ? `เปิด ${pct}% ของ ${RLAB()}` : TYPE_TH[KIND(d)]}${KIND(d) === "pow" ? ` · ไฟ ${f1((x.last.power_w || 0) / 1000, 2)} kW` : ""}${m(d).loc ? " · " + esc(m(d).loc) : ""}</div></div>${pill}${ctl}</div>`;
+    <div class="sub2">${ir ? "แอร์ · สั่งผ่านรีโมตอินฟราเรด" : pct != null ? `เปิด ${pct}% ของ ${RLAB()}` : TYPE_TH[KIND(d)]}${isMeter(d) ? ` · ไฟ ${f1((x.last.power_w || 0) / 1000, 2)} kW` : ""}${m(d).loc ? " · " + esc(m(d).loc) : ""}</div></div>${pill}${ctl}</div>`;
 }
 
 /* ---------- กราฟเส้น (1 ชุดต่อกราฟ · crosshair + tooltip · เส้นเกณฑ์ประสีแดง) ---------- */
@@ -725,8 +727,8 @@ function line(svg, rs, k, o = {}) {
 function openDev(id) {
   const d = S.devs.find(x => x.id === id); if (!d) return;
   const x = info(d), k = KIND(d), mm = m(d);
-  const charts = k === "temp" ? [["temp_c", "อุณหภูมิ (°C)"], ["humidity", "ความชื้น (%)"]] : k === "pow" ? [["power_w", "กำลังไฟ (W)"], ["voltage_v", "แรงดัน (V)"]] : [];
-  const cols = k === "temp" ? [["temp_c", "°C", 1], ["humidity", "%", 0]] : k === "pow" ? [["power_w", "W", 0], ["voltage_v", "V", 1], ["current_a", "A", 2], ["energy_kwh", "kWh สะสม", 3]] : [["switch_on", "สถานะ"]];
+  const charts = k === "temp" ? [["temp_c", "อุณหภูมิ (°C)"], ["humidity", "ความชื้น (%)"]] : isMeter(d) ? [["power_w", "กำลังไฟ (W)"], ["voltage_v", "แรงดัน (V)"]] : [];
+  const cols = k === "temp" ? [["temp_c", "°C", 1], ["humidity", "%", 0]] : isMeter(d) ? [...(k === "sw" ? [["switch_on", "สถานะ"]] : []), ["power_w", "W", 0], ["voltage_v", "V", 1], ["current_a", "A", 2], ["energy_kwh", "kWh สะสม", 3]] : [["switch_on", "สถานะ"]];
   const rows = x.rs.slice().reverse();
   const sitesAll = [...new Set(S.devs.map(siteOf).filter(s => s !== NOSITE))].sort(sortSites);
   $("#box").className = "box";
