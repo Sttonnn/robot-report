@@ -461,7 +461,7 @@ function build(key) {
   view(VMODE); /* 9 ต.ค. ผู้ใช้สั่ง: ค่าเริ่ม = มุมบน (เปลี่ยนแผนที่แล้วใช้มุมเดิมที่เลือก) */
   needs = true;
 }
-let VMODE = "front"; // 9 ต.ค. ผู้ใช้สั่ง: ค่าเริ่ม = มุมหน้า
+let VMODE = "3d"; // 11 ต.ค. ผู้ใช้สั่ง: ค่าเริ่ม = มุม 3D (เดิม 9 ต.ค. มุมหน้า)
 function view(mode) {
   VMODE = mode || VMODE;
   { const w = el.clientWidth, h = el.clientHeight; if (w && h && Math.abs(camera.aspect - w / h) > 1e-3) { renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); } }   // ขนาดกรอบเพิ่งเปลี่ยน → ใช้สัดส่วนใหม่
