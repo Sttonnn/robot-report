@@ -337,10 +337,10 @@ body.ui-a .mstat .c{background:#0e1a2a;border-color:#1f3049} body.ui-a .mstat .c
   <div id="msg"></div>
   <div class="topgrid">
   <section class="mapcard"><div class="mapbar"><h2>🗺️ แผนที่คลัง 3D</h2><div class="tabs" id="mapTabs"></div>
-    <div class="tools"><button data-v="top">มุมบน</button><button data-v="front" class="on">มุมหน้า</button><button data-v="3d">มุม 3D</button><button id="btnHeat" class="on">🌡 Heatmap</button><button id="btnFull" title="เต็มจอ">⛶ เต็มจอ</button><button id="btnPlace">📍 วางหมุด</button></div></div>
+    <div class="tools"><button data-v="top">มุมบน</button><button data-v="front" class="on">มุมหน้า</button><button data-v="3d">มุม 3D</button><button id="btnHeat" class="on">🌡 Heatmap</button><button id="btnLock" title="ภาพล็อกอยู่ · กดเพื่อลาก/หมุน/ซูม">✎ แก้ไขมุม</button><button id="btnFull" title="เต็มจอ">⛶ เต็มจอ</button><button id="btnPlace">📍 วางหมุด</button></div></div>
     <div class="mstat" id="mstat"></div>
     <div id="map3d"><div id="pins"></div><div class="mhint" id="mhint"></div><div id="mside"></div><div id="mlist"></div><div class="mcard" id="mcard"></div><div class="hlegend" id="hlegend"></div>
-      <div class="mlegend"><span><i style="background:#0f7fb0"></i>อุณหภูมิ</span><span><i style="background:#7a4fc9"></i>ไฟฟ้า</span><span><i style="background:#1f9d61"></i>สวิตช์/แอร์</span><span><i style="background:#c7362b"></i>ผิดเกณฑ์</span><span><i style="background:#8a96a3"></i>ออฟไลน์</span><span class="mtip" style="color:var(--mute);font-weight:500">ลาก = เลื่อน · คลิกขวา/สองนิ้ว = หมุน · ล้อ/บีบ = ซูม</span></div></div><div class="mtime" id="mtime"></div></section>
+      <div class="mlegend"><span><i style="background:#0f7fb0"></i>อุณหภูมิ</span><span><i style="background:#7a4fc9"></i>ไฟฟ้า</span><span><i style="background:#1f9d61"></i>สวิตช์/แอร์</span><span><i style="background:#c7362b"></i>ผิดเกณฑ์</span><span><i style="background:#8a96a3"></i>ออฟไลน์</span><span class="mtip" id="mtip" style="color:var(--mute);font-weight:500">🔒 ภาพล็อกอยู่ · กด ✎ แก้ไขมุม เพื่อลาก/หมุน/ซูม</span></div></div><div class="mtime" id="mtime"></div></section>
   </div>
   <div id="sites"></div>
 </main>
@@ -832,6 +832,9 @@ document.addEventListener("click", async (e) => {
   const t = e.target;
   const mt = t.closest("[data-map]"); if (mt) { S.map = mt.dataset.map; S.placeSel = ""; S.selPin = null; S.showAllAl = false; $("#mcard").style.display = "none"; render(); return; }
   const v = t.closest(".tools [data-v]"); if (v && window.IOT3D) { document.querySelectorAll(".tools [data-v]").forEach(b => b.classList.toggle("on", b === v)); IOT3D.view(v.dataset.v); return; }
+  const lk = t.closest("#btnLock"); if (lk && window.IOT3D) { /* 11 ต.ค. ผู้ใช้สั่ง: ภาพล็อกเป็นค่าเริ่ม · กดแก้ไขถึงหมุนได้ · กดอีกครั้ง = ล็อก + กลับมุมพอดีกรอบ */
+    const locked = IOT3D.lock(!lk.classList.contains("on") ? false : true); lk.classList.toggle("on", !locked); lk.textContent = locked ? "✎ แก้ไขมุม" : "🔒 ล็อกมุม";
+    $("#mtip").textContent = locked ? "🔒 ภาพล็อกอยู่ · กด ✎ แก้ไขมุม เพื่อลาก/หมุน/ซูม" : "ลาก = เลื่อน · คลิกขวา/สองนิ้ว = หมุน · ล้อ/บีบ = ซูม · กด 🔒 ล็อกมุม เพื่อกลับภาพพอดีกรอบ"; return; }
   const sp = t.closest("#btnSpin"); if (sp && window.IOT3D) { sp.classList.toggle("on", IOT3D.spin(!sp.classList.contains("on"))); return; }
   if (t.closest("#btnHeat")) { S.heat = !S.heat; renderMap(); return; }
   if (t.closest("#btnFull")) { const c = document.querySelector(".mapcard"); if (document.fullscreenElement) document.exitFullscreen(); else c.requestFullscreen?.().catch(() => c.classList.toggle("fs")); return; }

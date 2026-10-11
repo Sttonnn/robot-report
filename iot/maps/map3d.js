@@ -10,6 +10,7 @@ const pinLayer = document.getElementById("pins");
 /* 9 ต.ค. ผู้ใช้ขอสีสดขึ้น: เสาฟ้าสด · คานส้มสด · สินค้าหลายสี (ลังน้ำตาลอ่อน + ฟิล์มสี) */
 const COL = { navy: 0x1670e0, beam: 0xff6a00, wood: 0xd9a066, box: [0xd9ac72, 0xe8c48e, 0xeef2f6, 0xd9ac72, 0xf3c623, 0xe8c48e, 0xdfe6ee, 0xc99a5b, 0xf3c623, 0x4a86d9, 0xd9ac72, 0xe0533d], /* 9 ต.ค. ปรับตามรูปจริง: ลังน้ำตาล · ฟิล์มใส · กระสอบเหลือง · บางส่วนสีอื่น */ shelf: 0x16a3c9, flow: 0xe8b80c, floor: 0xf6f9fc, slab: 0xffffff };
 
+let LOCKED = true; // 11 ต.ค. ล็อกมุมกล้องเป็นค่าเริ่ม (IOT3D.lock)
 let renderer, scene, camera, controls, root, floor, ground, cur = null, raf = 0, placing = null, needs = true, THEME = "light";
 const TH = { light: { bg: 0xe9f0f7, ground: 0xdfe7ef, floor: 0xf6f9fc, wall: 0x7fb3d5, cap: 0x0f5c8c, wo: .14 }, dark: { bg: 0x0a1320, ground: 0x0e1b2b, floor: 0x16283d, wall: 0x38bdf8, cap: 0x38bdf8, wo: .1 } };
 const wallMats = [], capMats = [];
@@ -28,6 +29,7 @@ function init() {
   camera = new THREE.PerspectiveCamera(38, 1, 5, 20000);
   controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true; controls.dampingFactor = .08;
+  controls.enabled = !LOCKED; /* 11 ต.ค. ผู้ใช้สั่ง: ล็อกมุมกล้องเป็นค่าเริ่ม · กดปุ่ม "แก้ไขมุม" ถึงลาก/หมุน/ซูมได้ */
   /* 9 ต.ค. ผู้ใช้ว่าหมุนแล้วงง → ควบคุมแบบแผนที่: ลากซ้าย/นิ้วเดียว = เลื่อน · ลากขวา/สองนิ้ว = หมุน (จำกัดมุม) · ล้อ/บีบ = ซูม
      มุมก้ม 20–70° · หมุนรอบได้ ±40° จากมุมเริ่มต้น · จุดกลางไม่หลุดออกนอกคลัง */
   controls.mouseButtons = { LEFT: THREE.MOUSE.PAN, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.ROTATE };
@@ -50,6 +52,7 @@ function init() {
 function resize() {
   const w = el.clientWidth, h = el.clientHeight; if (!w || !h) return;
   renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); needs = true;
+  if (LOCKED && cur && !fly) view(); // ล็อกอยู่ = ปรับให้พอดีกรอบใหม่ทุกครั้งที่ขนาดเปลี่ยน
 }
 let fly = null, MOVERS = [], lastMove = 0;
 let onScreen = true; /* แผนที่เลื่อนพ้นจอ = หยุดรถวิ่ง (ประหยัดเครื่อง) */
@@ -448,14 +451,25 @@ function view(mode) {
   VMODE = mode || VMODE;
   const M = MAPS[cur]; if (!M) return;
   const [x0, y0, x1, y1] = M.view || M.bounds, W = x1 - x0, D = y1 - y0, cx = (x0 + x1) / 2, cz = (y0 + y1) / 2;
-  // ระยะกล้องให้เห็นทั้งคลังพอดีจอ (คิดทั้งกว้างและลึก ตามสัดส่วนจอ)
-  const vf = THREE.MathUtils.degToRad(camera.fov) / 2, hf = Math.atan(Math.tan(vf) * camera.aspect);
-  /* มุมหน้า (front) = มองจากฝั่ง Dock ระดับต่ำ */
-  const top = VMODE === "top", front = VMODE === "front", dist = Math.max((W / 2) / Math.tan(hf) * (top ? 1 : 1.5), (D / 2) / Math.tan(vf) * (top ? 1 : 1.35)) * (top ? 1.22 : front ? .82 : .98);
+  const top = VMODE === "top", front = VMODE === "front";
   const dir = top ? new THREE.Vector3(0, 1, .001) : front ? new THREE.Vector3(0, .4, .92).normalize() : camera.aspect < 1 ? new THREE.Vector3(-.03, .86, .5).normalize() : new THREE.Vector3(-.04, .62, .78).normalize();
-  controls.target.set(cx, 0, cz + (top ? 0 : D * .04));
-  camera.position.copy(controls.target).addScaledVector(dir, dist);
-  controls.maxDistance = dist * 2.2; controls.minDistance = Math.max(W, D) * .06;
+  /* 11 ต.ค. ผู้ใช้สั่ง: ภาพสมส่วนพอดีกรอบทุกคลัง → ฉายมุม 8 จุดของขอบเขต (พื้น + ยอดชั้นวาง) ลงจอ แล้วปรับระยะ/จุดกลางจนเต็มกรอบ (เผื่อขอบ 6%) */
+  const hh = (M.rackH || 70) * 1.15, pts = [];
+  for (const x of [x0, x1]) for (const z of [y0, y1]) for (const y of [0, hh]) pts.push(new THREE.Vector3(x, y, z));
+  for (const l of M.labels || []) pts.push(new THREE.Vector3(l.x, 0, l.y + 60));   // ป้ายชื่อคลังใต้ผังต้องไม่โดนตัด
+  const tgt = new THREE.Vector3(cx, 0, cz); let d = Math.max(W, D) * 1.2;
+  const right = new THREE.Vector3(), up = new THREE.Vector3(), v = new THREE.Vector3(), tf = Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2);
+  for (let k = 0; k < 8; k++) {
+    camera.position.copy(tgt).addScaledVector(dir, d); camera.lookAt(tgt); camera.updateMatrixWorld();
+    let a = 1e9, b = -1e9, c = 1e9, e = -1e9;
+    for (const p of pts) { v.copy(p).project(camera); a = Math.min(a, v.x); b = Math.max(b, v.x); c = Math.min(c, v.y); e = Math.max(e, v.y); }
+    right.setFromMatrixColumn(camera.matrixWorld, 0); up.setFromMatrixColumn(camera.matrixWorld, 1);
+    /* เผื่อขอบบน (รายการเซนเซอร์) / ขอบล่าง (คำอธิบายสี) ไม่ให้ทับผัง: พื้นที่ใช้ได้ y −0.84…0.84, x −0.95…0.95 */
+    tgt.addScaledVector(right, (a + b) / 2 * d * tf * camera.aspect).addScaledVector(up, (c + e) / 2 * d * tf);
+    d *= Math.max((b - a) / 2 / .95, (e - c) / 2 / .84);
+  }
+  controls.target.copy(tgt); camera.position.copy(tgt).addScaledVector(dir, d);
+  controls.maxDistance = d * 2.2; controls.minDistance = Math.max(W, D) * .06;
   /* จำกัดหมุนรอบ ±40° จากมุมเริ่ม (มุมบน = ไม่จำกัด เพราะมองตรงลง) */
   const az = Math.atan2(dir.x, dir.z); controls.minAzimuthAngle = top ? -Infinity : az - .7; controls.maxAzimuthAngle = top ? Infinity : az + .7;
   camera.lookAt(controls.target); controls.update(); needs = true;
@@ -562,6 +576,7 @@ window.IOT3D = {
     ground?.material.color.setHex(T.ground); floor?.material.color.setHex(T.floor);
     wallMats.forEach(m => { m.color.setHex(T.wall); m.opacity = T.wo; }); capMats.forEach(m => m.color.setHex(T.cap)); needs = true;
   },
+  lock(on) { LOCKED = !!on; if (controls) controls.enabled = !LOCKED; if (LOCKED) view(); return LOCKED; },
   spin(on) { controls.autoRotate = !!on; controls.autoRotateSpeed = .8; needs = true; return controls.autoRotate; },
   place(id) { placing = id; el.classList.toggle("placing", !!id); },
   onPlace: null
