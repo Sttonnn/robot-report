@@ -452,14 +452,21 @@ async function loadMeta() {
     const r = await fetch(SB + "/rest/v1/iot_device_meta?select=*", { headers: H });
     if (!r.ok) throw 0;
     META = {}; for (const x of await r.json()) META[x.id] = x; META_DB = true;
-  } catch { META = lsMeta(); META_DB = false; }
+  } catch { META = lsMeta(); META_DB = false; return; }
+  /* 11 ต.ค. ผู้ใช้เพิ่งรัน iot-meta.sql: ค่าที่เคยตั้ง/หมุดที่เคยวางไว้ในเครื่องนี้ (localStorage) แต่ยังไม่มีใน Supabase → ส่งขึ้นครั้งเดียว ทุกเครื่องเห็นตรงกัน */
+  const COLS = ["label", "site", "loc", "t_max", "t_min", "h_max", "hidden", "map", "px", "py"], local = lsMeta(), up = [];
+  for (const [id, x] of Object.entries(local)) if (!META[id] && x) { const row = { id, updated_at: new Date().toISOString() }; COLS.forEach(k => { if (x[k] !== undefined && x[k] !== "") row[k] = x[k]; }); up.push(row); }
+  if (up.length) {
+    const r2 = await fetch(SB + "/rest/v1/iot_device_meta?on_conflict=id", { method: "POST", headers: { ...H, "Content-Type": "application/json", Prefer: "resolution=ignore-duplicates,return=minimal" }, body: JSON.stringify(up) }).catch(() => null);
+    if (r2 && r2.ok) { up.forEach(x => META[x.id] = x); try { localStorage.removeItem(LSM); } catch {} }
+  }
 }
 async function saveMeta(id, patch) {
   META[id] = Object.assign({}, META[id], patch, { id });
   if (META_DB) {
     const r = await fetch(SB + "/rest/v1/iot_device_meta?on_conflict=id", { method: "POST",
       headers: { ...H, "Content-Type": "application/json", Prefer: "resolution=merge-duplicates,return=minimal" },
-      body: JSON.stringify({ ...META[id], updated_at: new Date().toISOString() }) }).catch(() => null);
+      body: JSON.stringify(Object.fromEntries(Object.entries({ ...META[id], updated_at: new Date().toISOString() }).filter(([k]) => ["id", "label", "site", "loc", "t_max", "t_min", "h_max", "hidden", "map", "px", "py", "updated_at"].includes(k)))) }).catch(() => null);
     if (r && r.ok) return true;
     META_DB = false; showMsg();
   }
