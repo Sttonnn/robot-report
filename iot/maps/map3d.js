@@ -449,6 +449,7 @@ function build(key) {
 let VMODE = "front"; // 9 ต.ค. ผู้ใช้สั่ง: ค่าเริ่ม = มุมหน้า
 function view(mode) {
   VMODE = mode || VMODE;
+  { const w = el.clientWidth, h = el.clientHeight; if (w && h && Math.abs(camera.aspect - w / h) > 1e-3) { renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); } }   // ขนาดกรอบเพิ่งเปลี่ยน → ใช้สัดส่วนใหม่
   const M = MAPS[cur]; if (!M) return;
   const [x0, y0, x1, y1] = M.view || M.bounds, W = x1 - x0, D = y1 - y0, cx = (x0 + x1) / 2, cz = (y0 + y1) / 2;
   const top = VMODE === "top", front = VMODE === "front";
@@ -456,7 +457,7 @@ function view(mode) {
   /* 11 ต.ค. ผู้ใช้สั่ง: ภาพสมส่วนพอดีกรอบทุกคลัง → ฉายมุม 8 จุดของขอบเขต (พื้น + ยอดชั้นวาง) ลงจอ แล้วปรับระยะ/จุดกลางจนเต็มกรอบ (เผื่อขอบ 6%) */
   const hh = (M.rackH || 70) * 1.15, pts = [];
   for (const x of [x0, x1]) for (const z of [y0, y1]) for (const y of [0, hh]) pts.push(new THREE.Vector3(x, y, z));
-  for (const l of M.labels || []) pts.push(new THREE.Vector3(l.x, 0, l.y + 60));   // ป้ายชื่อคลังใต้ผังต้องไม่โดนตัด
+  for (const l of M.labels || []) pts.push(new THREE.Vector3(l.x, 0, l.y + 110));   // ป้ายชื่อคลังใต้ผังต้องไม่โดนตัด
   const tgt = new THREE.Vector3(cx, 0, cz); let d = Math.max(W, D) * 1.2;
   const right = new THREE.Vector3(), up = new THREE.Vector3(), v = new THREE.Vector3(), tf = Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2);
   for (let k = 0; k < 8; k++) {
@@ -464,11 +465,16 @@ function view(mode) {
     let a = 1e9, b = -1e9, c = 1e9, e = -1e9;
     for (const p of pts) { v.copy(p).project(camera); a = Math.min(a, v.x); b = Math.max(b, v.x); c = Math.min(c, v.y); e = Math.max(e, v.y); }
     right.setFromMatrixColumn(camera.matrixWorld, 0); up.setFromMatrixColumn(camera.matrixWorld, 1);
-    /* เผื่อขอบบน (รายการเซนเซอร์) / ขอบล่าง (คำอธิบายสี) ไม่ให้ทับผัง: พื้นที่ใช้ได้ y −0.84…0.84, x −0.95…0.95 */
-    tgt.addScaledVector(right, (a + b) / 2 * d * tf * camera.aspect).addScaledVector(up, (c + e) / 2 * d * tf);
-    d *= Math.max((b - a) / 2 / .95, (e - c) / 2 / .84);
+    /* 11 ต.ค. ผู้ใช้ขอเต็มกรอบ (ส่งภาพตัวอย่าง): ใช้พื้นที่ x −0.99…0.99 · y −0.98…0.92 (ยอมให้ป้าย/คำอธิบายสีทับขอบผังได้) */
+    const Y0 = -.98, Y1 = .92, cy0 = (Y0 + Y1) / 2;
+    tgt.addScaledVector(right, (a + b) / 2 * d * tf * camera.aspect).addScaledVector(up, ((c + e) / 2 - cy0) * d * tf);
+    d *= Math.max((b - a) / 2 / .99, (e - c) / (Y1 - Y0));
   }
   controls.target.copy(tgt); camera.position.copy(tgt).addScaledVector(dir, d);
+  /* 11 ต.ค. เต็มกรอบไม่มีที่ว่าง: ถ้าผังเต็มความกว้างแล้วแต่ยังเหลือที่บน-ล่าง → บอกหน้าเว็บความสูงที่พอดี (IOT3D.onFit) ให้ย่อกรอบแผนที่ลง */
+  if (LOCKED && window.IOT3D && IOT3D.onFit) { camera.lookAt(tgt); camera.updateMatrixWorld(); let c = 1e9, e = -1e9;
+    let a = 1e9, b = -1e9; for (const p of pts) { v.copy(p).project(camera); a = Math.min(a, v.x); b = Math.max(b, v.x); c = Math.min(c, v.y); e = Math.max(e, v.y); }
+    IOT3D.onFit((e - c) / 1.9 * el.clientHeight * (1.98 / Math.max(.2, b - a)), VMODE); }   // ความสูงที่ทำให้ผังเต็มทั้งกว้างและสูง
   controls.maxDistance = d * 2.2; controls.minDistance = Math.max(W, D) * .06;
   /* จำกัดหมุนรอบ ±40° จากมุมเริ่ม (มุมบน = ไม่จำกัด เพราะมองตรงลง) */
   const az = Math.atan2(dir.x, dir.z); controls.minAzimuthAngle = top ? -Infinity : az - .7; controls.maxAzimuthAngle = top ? Infinity : az + .7;
@@ -579,6 +585,7 @@ window.IOT3D = {
   lock(on) { LOCKED = !!on; if (controls) controls.enabled = !LOCKED; if (LOCKED) view(); return LOCKED; },
   spin(on) { controls.autoRotate = !!on; controls.autoRotateSpeed = .8; needs = true; return controls.autoRotate; },
   place(id) { placing = id; el.classList.toggle("placing", !!id); },
-  onPlace: null
+  onPlace: null,
+  onFit: null
 };
 window.dispatchEvent(new Event("iot3d-ready"));

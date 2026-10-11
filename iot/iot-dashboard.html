@@ -818,6 +818,10 @@ function renderMap() {
   $("#mapTabs").innerHTML = keys.map(k => `<button data-map="${k}" class="${S.map === k ? "on" : ""}">${esc(IOT_MAPS[k].name)}</button>`).join("");
   renderTime();
   if (!window.IOT3D) { if (!window.__mapWait) { window.__mapWait = 1; addEventListener("iot3d-ready", renderMap); setTimeout(() => { if (!window.IOT3D) $("#mside").innerHTML = '<div class="nomap">โหลดแผนที่ 3D ไม่สำเร็จ (ต้องต่ออินเทอร์เน็ตเพื่อโหลด three.js)</div>'; }, 8000); } return; }
+  IOT3D.onFit = (px, mode) => { /* 11 ต.ค. ผู้ใช้ขอเต็มกรอบ: ย่อ/ขยายความสูงกรอบแผนที่ให้พอดีผัง (ไม่เกิน 100vh−250 · ไม่ต่ำกว่า 480) */
+    const el = $("#map3d"), key = S.map + "|" + mode + "|" + el.clientWidth + "|" + innerHeight; if (IOT3D._fk === key) return; IOT3D._fk = key;   // ปรับครั้งเดียวต่อ แผนที่/มุม/ความกว้าง (กันวนไม่จบ)
+    const mx = Math.max(480, innerHeight - 250), hgt = Math.round(Math.max(480, Math.min(mx, px + 8)));
+    if (Math.abs(el.clientHeight - hgt) > 6) { el.style.height = hgt + "px"; el.style.minHeight = "0"; setTimeout(() => IOT3D.view(), 60); } };
   IOT3D.show(S.map);
   IOT3D.onPlace = async (id, map, px, py) => { await saveMeta(id, { map, px, py }); S.placeSel = ""; toast("✓ วางหมุดแล้ว"); renderMap(); };
   const vis = S.devs.filter(d => !m(d).hidden);
