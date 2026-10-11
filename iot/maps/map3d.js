@@ -311,7 +311,7 @@ function build(key) {
     const s = textSprite(t, 22); s.position.set(ox + ow / 2, H * .45 + 1, oy + oh / 2); root.add(s);
   }
   // ชั้นวาง: เสา (กรมท่า) · คาน (ส้ม) · พาเลท + กล่องสินค้า
-  const ups = [], beams = [], pals = [], goods = [], sgoods = [], shut = [], solid = [], yel = [], blk = [], blu = [], roll = [];
+  const ups = [], beams = [], pals = [], goods = [], sgoods = [], shut = [], shU = [], shB = [], shG = [], solid = [], yel = [], blk = [], blu = [], roll = [];
   const R = rand(key.length * 7919 + M.boxes.length);
   const bay = M.pxm * 2.8, lv = 4;
   for (const [bx, by, bw, bh, t] of M.boxes) {
@@ -345,17 +345,18 @@ function build(key) {
     }
     if (t === "shuttle") { /* 10 ต.ค. ผู้ใช้ชี้ WH32: Shuttle Rack 7 ชั้น · ช่องลึก (Drive-in แบบรถ Shuttle วิ่งในราง) · เสาฟ้า + รางส้มทุกชั้น
          แบ่ง 2 บล็อก มีทางเดินกลาง (ด้านหน้าช่อง) · พาเลทแน่นเกือบเต็ม · รถ Shuttle แดงที่หน้าช่องบางช่อง */
+      /* 11 ต.ค. ผู้ใช้สั่ง: สีให้ต่างจาก Selective Rack → โครงเทาเข้ม · รางเขียว · สินค้าห่อฟิล์มโทนขาว-ฟ้า */
       const P = M.pxm, lvN = 7, lh = P * 1.5, top = lvN * lh + P * .4, laneW = P * 1.4, pd = P * 1.25, aisle = P * 4;
       const nl = Math.max(1, Math.floor(bw / laneW)), lw = bw / nl, blkD = (bh - aisle) / 2;
       for (const y0 of [by, by + blkD + aisle]) {
         const np = Math.max(1, Math.floor(blkD / pd)), sp = blkD / np, nposts = Math.max(1, Math.round(blkD / (P * 2.7)));
         for (let i = 0; i <= nl; i++) { const x = bx + i * lw;
-          for (let j = 0; j <= nposts; j++) ups.push([x, top / 2, y0 + j * blkD / nposts, 1.3, top, 1.3]);
-          for (let k = 1; k <= lvN; k++) beams.push([x, k * lh - 1, y0 + blkD / 2, 1.5, 1.2, blkD]); }
-        for (let k = 1; k <= lvN; k++) for (const yy of [y0, y0 + blkD]) beams.push([bx + bw / 2, k * lh - .4, yy, bw, 1.6, 1.2]);
+          for (let j = 0; j <= nposts; j++) shU.push([x, top / 2, y0 + j * blkD / nposts, 1.3, top, 1.3]);
+          for (let k = 1; k <= lvN; k++) shB.push([x, k * lh - 1, y0 + blkD / 2, 1.5, 1.2, blkD]); }
+        for (let k = 1; k <= lvN; k++) for (const yy of [y0, y0 + blkD]) shB.push([bx + bw / 2, k * lh - .4, yy, bw, 1.6, 1.2]);
         for (let i = 0; i < nl; i++) for (let k = 0; k < lvN; k++) { const fill = .78 + R() * .2;
           for (let j = 0; j < np; j++) { if (R() > fill) continue; const px = bx + (i + .5) * lw, pz = y0 + (j + .5) * sp, y = k * lh + (k ? 0 : .3), gh = P * (.9 + R() * .3);
-            pals.push([px, y + .7, pz, lw * .82, 1.4, sp * .9]); goods.push([px, y + 1.4 + gh / 2, pz, lw * .78, gh, sp * .86]); }
+            pals.push([px, y + .7, pz, lw * .82, 1.4, sp * .9]); shG.push([px, y + 1.4 + gh / 2, pz, lw * .78, gh, sp * .86]); }
           if (R() < .06) { const zf = y0 === by ? y0 + blkD - P * .5 : y0 + P * .5; shut.push([bx + (i + .5) * lw, k * lh + P * .35, zf, lw * .7, P * .3, P * 1.0]); } }
       }
       continue;
@@ -426,6 +427,7 @@ function build(key) {
   inst(ups, COL.navy, { metal: .3 }); inst(beams, COL.beam, { metal: .2 }); inst(pals, COL.wood); inst(goods, 0xffffff, { vary: COL.box });
   inst(sgoods, 0xffffff, { vary: [0xb9bec4, 0xa7adb4, 0xc8ccd1, 0x9aa1a9, 0xb0b5bb, 0xd2d5d9] }); /* 10 ต.ค. ผู้ใช้สั่ง: กอง 2 ชั้นเป็นโทนเทา */
   inst(shut, 0xd9341e, { metal: .3 });
+  inst(shU, 0x46505c, { metal: .4 }); inst(shB, 0x16a34a, { metal: .2 }); inst(shG, 0xffffff, { vary: [0xeef4fa, 0xdfeaf5, 0xf7f9fc, 0xcfe0f0, 0xe6eef7, 0xbcd4ea] });
   inst(yel, 0xf5c400); inst(blk, 0x1b1d21); inst(blu, 0x1f4fa8); inst(roll, 0x8d98a5, { metal: .5 });
   for (const [bx, by, bw, bh, t] of solid) { // ชั้นวางสีฟ้า (shelf) / Flow rack สีเหลือง
     if (t === "desk" || t === "fix") { // สำนักงาน: โต๊ะ (ไม้) · สุขภัณฑ์/อุปกรณ์ (ขาว)
