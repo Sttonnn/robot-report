@@ -522,9 +522,12 @@ function onUp(e) {
   const r = renderer.domElement.getBoundingClientRect();
   v2.set((e.clientX - r.left) / r.width * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
   ray.setFromCamera(v2, camera);
-  const hit = ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), new THREE.Vector3());
+  /* 11 ต.ค. ผู้ใช้วางหมุดในสำนักงานไม่ได้: เดิมรับเฉพาะในตัวอาคารคลัง (bounds) + ใช้จุดบนพื้น → อาคารนอกคลัง (สำนักงาน โรงอาหาร Canopy) วางไม่ได้
+     ตอนนี้ยิงหาวัตถุที่คลิกจริงก่อน (หลังคา/ผนัง) แล้วค่อยตกไปที่พื้น · รับทั้งขอบเขต view (รวมลาน/อาคารรอบคลัง) */
+  const obj = root ? ray.intersectObject(root, true).find(h => h.object.visible && h.object.isMesh && h.object !== ground && h.object !== heat && !h.object.material?.transparent) : null;
+  const hit = obj ? obj.point : ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), new THREE.Vector3());
   if (!hit) return;
-  const [x0, y0, x1, y1] = MAPS[cur].bounds;
+  const [x0, y0, x1, y1] = MAPS[cur].view || MAPS[cur].bounds;
   if (hit.x < x0 || hit.x > x1 || hit.z < y0 || hit.z > y1) return;
   const id = placing; placing = null; el.classList.remove("placing");
   window.IOT3D.onPlace?.(id, cur, Math.round(hit.x), Math.round(hit.z));
@@ -582,6 +585,7 @@ window.IOT3D = {
     ground?.material.color.setHex(T.ground); floor?.material.color.setHex(T.floor);
     wallMats.forEach(m => { m.color.setHex(T.wall); m.opacity = T.wo; }); capMats.forEach(m => m.color.setHex(T.cap)); needs = true;
   },
+  toScreen(x, z, y = 0) { const r = renderer.domElement.getBoundingClientRect(); tmp.set(x, y, z).project(camera); return [r.left + (tmp.x + 1) / 2 * r.width, r.top + (1 - tmp.y) / 2 * r.height]; },
   lock(on) { LOCKED = !!on; if (controls) controls.enabled = !LOCKED; if (LOCKED) view(); return LOCKED; },
   spin(on) { controls.autoRotate = !!on; controls.autoRotateSpeed = .8; needs = true; return controls.autoRotate; },
   place(id) { placing = id; el.classList.toggle("placing", !!id); },
