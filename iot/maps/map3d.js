@@ -444,7 +444,7 @@ function build(key) {
     for (const [a, b2, w, h] of [[zx, zy, zw, 1.6], [zx, zy + zh - 1.6, zw, 1.6], [zx, zy, 1.6, zh], [zx + zw - 1.6, zy, 1.6, zh]]) { const e = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: z.b })); e.rotation.x = -Math.PI / 2; e.position.set(a + w / 2, .9, b2 + h / 2); root.add(e); }
     /* ป้ายท้ายแถว (ฝั่งทางเดินหน้า) สีโซน */
     for (const [bx, by, bw, bh] of z.rows) { const along = bh >= bw, sg = box(along ? bw * .9 : P * .2, P * 1.6, along ? P * .2 : bh * .9, z.b); sg.position.set(along ? bx + bw / 2 : bx + bw + P * .2, top * .78, along ? by + bh + P * .2 : by + bh / 2); root.add(sg); }
-    const t = textSprite(z.t, Math.min(46, zw * .09), "#ffffff", css + "ee"); t.position.set(zx + zw / 2, top + 14, zy + zh - 30); root.add(t); } inst(pals, COL.wood); inst(goods, 0xffffff, { vary: COL.box });
+    const t = textSprite(z.t, z.sz || Math.min(46, zw * .09), z.tc || "#1b1d21", css + "ee"); t.position.set(zx + zw / 2, top + 8, zy + zh - 20); root.add(t); } inst(pals, COL.wood); inst(goods, 0xffffff, { vary: COL.box });
   inst(sgoods, 0xffffff, { vary: [0xb9bec4, 0xa7adb4, 0xc8ccd1, 0x9aa1a9, 0xb0b5bb, 0xd2d5d9] }); /* 10 ต.ค. ผู้ใช้สั่ง: กอง 2 ชั้นเป็นโทนเทา */
   inst(shut, 0xd9341e, { metal: .3 });
   inst(shU, 0x46505c, { metal: .4 }); inst(shB, 0x16a34a, { metal: .2 }); inst(shG, 0xffffff, { vary: [0xeef4fa, 0xdfeaf5, 0xf7f9fc, 0xcfe0f0, 0xe6eef7, 0xbcd4ea] });
