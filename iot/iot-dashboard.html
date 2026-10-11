@@ -84,7 +84,19 @@ h1{margin:14px 0 2px;font:800 30px/1.15 Archivo,"IBM Plex Sans Thai",sans-serif;
 .ct .s{color:var(--mute);font-size:12.5px;margin-top:2px;min-height:18px}
 .ct .bar{display:flex;height:6px;border-radius:4px;overflow:hidden;background:var(--grid);margin-top:8px}
 .ct .bar i{display:block;height:100%}
-.ctb{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start}
+.ctb{display:grid;grid-template-columns:270px minmax(0,1fr) 300px;gap:16px;align-items:start}
+.ctnav{position:sticky;top:12px;display:flex;flex-direction:column;gap:8px;background:var(--card);border-radius:22px;box-shadow:var(--sh);padding:10px}
+.cn{position:relative;display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:0;border-radius:16px;padding:10px 10px 10px 12px;cursor:pointer;font:inherit;color:inherit}
+.cn:hover{background:var(--grid)}
+.cn.on{background:color-mix(in srgb,var(--c) 10%,var(--grid));box-shadow:inset 4px 0 0 var(--c)}
+.cn .ic2{flex:none;width:36px;height:36px;border-radius:11px;display:grid;place-items:center;color:#fff;background:var(--g)}
+.cn .ic2 svg{width:18px;height:18px}
+.cn .tx{flex:1;min-width:0;display:flex;flex-direction:column}
+.cn .l{font-weight:800;font-size:13.5px;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.cn .l i{width:8px;height:8px;border-radius:50%;background:var(--c)}
+.cn .v{font:800 15px Archivo,"IBM Plex Sans Thai",sans-serif;font-variant-numeric:tabular-nums}
+.cn .s{color:var(--mute);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cn .n{flex:none;font-size:12px;font-weight:800;color:var(--ink2);background:var(--grid);border-radius:999px;padding:1px 8px}
 .ctp{background:var(--card);border-radius:22px;box-shadow:var(--sh);padding:6px 18px 18px;margin-bottom:16px}
 .ctp > h3{display:flex;align-items:center;gap:8px;margin:12px 0 10px;font-size:15px;color:var(--ink)}
 .ctp > h3 .dot{width:24px;height:24px;border-radius:8px;display:grid;place-items:center;color:#fff}
@@ -109,8 +121,10 @@ h1{margin:14px 0 2px;font:800 30px/1.15 Archivo,"IBM Plex Sans Thai",sans-serif;
 .htab td{padding:8px;border-bottom:1px solid var(--line)}
 .htab tr[data-id]{cursor:pointer} .htab tr[data-id]:hover td{background:var(--grid)}
 @media (max-width:1100px){.cts{grid-template-columns:repeat(2,minmax(0,1fr))}.ctb{grid-template-columns:1fr}.feed{position:static;max-height:none;order:-1;margin-bottom:16px}}
+@media (max-width:1300px){.ctb{grid-template-columns:260px minmax(0,1fr)}.ctb .feed{grid-column:1/-1;position:static;max-height:none;order:-1}}
+@media (max-width:820px){.ctb{grid-template-columns:1fr}.ctnav{position:static;flex-direction:row;overflow-x:auto;padding:8px}.cn{flex:0 0 200px}}
 @media (max-width:520px){.cts{gap:10px}.ct{padding:12px}.ct .v{font-size:24px}}
-body.ui-a .ct,body.ui-a .ctp,body.ui-a .feed,body.ui-a .cth .health{background:var(--card)} body.ui-a .cth h2{color:#7dd3fc}
+body.ui-a .ctnav,body.ui-a .ct,body.ui-a .ctp,body.ui-a .feed,body.ui-a .cth .health{background:var(--card)} body.ui-a .cth h2{color:#7dd3fc}
 body.ui-a .feed .okmsg{background:#0f2a1d;color:#6ee7b7}
 /* บล็อกคลัง */
 .site{background:var(--card);border-radius:24px;box-shadow:var(--sh);margin-bottom:22px;overflow:hidden}
@@ -437,6 +451,7 @@ const ICON = {
   temp: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M14 14.8V4a2 2 0 1 0-4 0v10.8a4 4 0 1 0 4 0z"/></svg>',
   pow: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>',
   sw: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 3v8"/><path d="M6.4 6.6a8 8 0 1 0 11.2 0"/></svg>',
+  sky: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M3 20 7 6h10l4 14z"/><path d="M5 13h14M10 6l-1.5 14M14 6l1.5 14"/></svg>',
   net: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M2 9a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0"/><circle cx="12" cy="19.5" r="1.2" fill="currentColor"/></svg>'
 };
 
@@ -585,8 +600,8 @@ function render() {
   renderMap();
 }
 /* ---------- Control Tower (11 ต.ค.) ---------- */
-const CAT = { env: "สภาพแวดล้อม", pow: "พลังงาน", eq: "อุปกรณ์ / เครื่องจักร", net: "การเชื่อมต่อ IoT" };
-const catOf = (d) => KIND(d) === "temp" ? "env" : KIND(d) === "pow" ? "pow" : "eq";
+const CAT = { env: "อุณหภูมิ / ความชื้น", sky: "Skylight", eq: "พัดลม / สวิตช์ / แอร์", pow: "การใช้ไฟฟ้า", net: "การเชื่อมต่อ IoT" };
+const catOf = (d) => KIND(d) === "temp" ? "env" : KIND(d) === "pow" ? "pow" : d.category === "znjdq" ? "sky" : "eq";
 /* 11 ต.ค. ผู้ใช้ถาม "สวิตช์ Fan 1 หาย": WH5-Fan1 / WH5-Fan4 / WH8-FAN1 / WH8-FAN3 เป็นเบรกเกอร์วัดไฟ (dlq) ที่มีสวิตช์เปิด/ปิดด้วย
    เดิมขึ้นแค่หมวดพลังงาน → ให้ขึ้นในหมวดอุปกรณ์ (แถวสวิตช์) ด้วย ถ้าชื่อเป็นพัดลม หรือมีค่าสวิตช์ */
 const hasSw = (d, I) => KIND(d) === "pow" && (/fan|พัดลม/i.test(nameOf(d) + " " + d.name) || I.get(d.id).last.switch_on != null);
@@ -606,25 +621,33 @@ function towerHtml(devs, I) {
   const sEnv = sevOf(env, al.length, env.some(d => !live(d))), sPow = sevOf(pw, 0, pw.some(d => !live(d))), sEq = sevOf(eq, 0, eq.some(d => !live(d))), sNet = sevOf(devs, off.length && off.length >= devs.length / 2, off.length || stale.length);
   const overall = [sEnv, sPow, sEq, sNet].includes("bad") ? "bad" : [sEnv, sPow, sEq, sNet].includes("warn") ? "warn" : "ok";
   const pct = (a, b) => b ? Math.round(a / b * 100) : 0;
-  const tile = (k, ic, g, sev, v, sub, bar = "") => `<button class="ct ${S.cat === k ? "on" : ""}" data-cat="${k}" style="--c:${SEV[sev][0]};--g:${g}">
-      <div class="top"><span class="ic2">${ICON[ic]}</span>${CAT[k]}<span class="pill2">${SEV[sev][1]}</span></div>
-      <div class="v">${v}</div><div class="s">${sub}</div>${bar}</button>`;
-  const bar3 = (a, b, c, n) => n ? `<div class="bar"><i style="width:${a / n * 100}%;background:var(--ok)"></i><i style="width:${b / n * 100}%;background:var(--warn)"></i><i style="width:${c / n * 100}%;background:var(--off)"></i></div>` : "";
-  const tiles = tile("env", "temp", "linear-gradient(135deg,#12a5c2,#0f5c8c)", sEnv, tNow.length ? `${f1(avg(tNow))}<small>°C เฉลี่ย</small>` : "–",
-      tNow.length ? `ช่วง ${f1(Math.min(...tNow))}–${f1(Math.max(...tNow))}°C · ความชื้น ${f1(avg(hNow), 0)}% · ${al.length ? `<b style="color:var(--bad)">ผิดเกณฑ์ ${al.length}</b>` : thSet ? "อยู่ในเกณฑ์" : "ยังไม่ตั้งเกณฑ์"}` : `${env.length} เครื่อง · ไม่มีค่าสด`)
-    + tile("pow", "pow", "linear-gradient(135deg,#9b6be0,#5b2fa6)", sPow, pw.length ? `${f1(kW, 2)}<small>kW ตอนนี้</small>` : "–", pw.length ? `ใช้ไป ${f1(kwh, 1)} kWh ใน ${RLAB()} · มิเตอร์ ${pw.filter(live).length}/${pw.length}` : "ไม่มีมิเตอร์ในคลังนี้")
-    + tile("eq", "sw", "linear-gradient(135deg,#34c38f,#1f7a55)", sEq, eq.length ? `${eqOn}<small>/ ${eq.length} เปิดอยู่</small>` : "–", eq.length ? `ออนไลน์ ${eqLive}/${eq.length} · พัดลม สวิตช์ แอร์ Skylight` : "ไม่มีอุปกรณ์ในคลังนี้")
-    + tile("net", "net", "linear-gradient(135deg,#64748b,#334155)", sNet, `${pct(onN, devs.length)}<small>% ออนไลน์</small>`, `ออนไลน์ ${onN} · ข้อมูลค้าง ${stale.length} · ออฟไลน์ ${off.length}`, bar3(onN, stale.length, off.length, devs.length));
+  /* 11 ต.ค. ผู้ใช้สั่ง: รายละเอียดเป็นแถบด้านข้าง (อุณหภูมิ/ความชื้น · Skylight · พัดลม/สวิตช์/แอร์ · การใช้ไฟฟ้า · การเชื่อมต่อ) · กดเมนู = แสดงหมวดนั้นทางขวา */
+  const sky = devs.filter(d => catOf(d) === "sky"), fan = eq.filter(d => catOf(d) !== "sky"), mt = devs.filter(isMeter);
+  const kWall = mt.filter(live).reduce((s, d) => s + (I.get(d.id).last.power_w || 0), 0) / 1000, kwhAll = mt.reduce((s, d) => s + used(I.get(d.id).rs), 0);
+  const onOf = (l) => l.filter(d => live(d) && I.get(d.id).last.switch_on === true).length;
+  const sSky = sevOf(sky, 0, sky.some(d => !live(d))), sFan = sevOf(fan, 0, fan.some(d => !live(d))), sMt = sevOf(mt, 0, mt.some(d => !live(d)));
+  const NAV = [
+    ["env", "temp", "linear-gradient(135deg,#12a5c2,#0f5c8c)", sEnv, env, tNow.length ? `${f1(avg(tNow))}°C · ${f1(avg(hNow), 0)}%` : "–", tNow.length ? (al.length ? `<b style="color:var(--bad)">ผิดเกณฑ์ ${al.length}</b>` : `ช่วง ${f1(Math.min(...tNow))}–${f1(Math.max(...tNow))}°C`) : "ไม่มีค่าสด"],
+    ["sky", "sky", "linear-gradient(135deg,#f5b301,#c27c00)", sSky, sky, sky.length ? `เปิด ${onOf(sky)}/${sky.length}` : "–", sky.length ? `ออนไลน์ ${sky.filter(live).length}/${sky.length}` : "ไม่มีในคลังนี้"],
+    ["eq", "sw", "linear-gradient(135deg,#34c38f,#1f7a55)", sFan, fan, fan.length ? `เปิด ${onOf(fan)}/${fan.length}` : "–", fan.length ? `ออนไลน์ ${fan.filter(live).length}/${fan.length}` : "ไม่มีในคลังนี้"],
+    ["pow", "pow", "linear-gradient(135deg,#9b6be0,#5b2fa6)", sMt, mt, mt.length ? `${f1(kWall, 2)} kW` : "–", mt.length ? `${f1(kwhAll, 1)} kWh ใน ${RLAB()}` : "ไม่มีมิเตอร์"],
+    ["net", "net", "linear-gradient(135deg,#64748b,#334155)", sNet, devs, `${pct(onN, devs.length)}% ออนไลน์`, `ค้าง ${stale.length} · ออฟไลน์ ${off.length}`],
+  ];
+  const cur = NAV.find(n => n[0] === S.cat) ? S.cat : (NAV.find(n => n[4].length) || NAV[0])[0];
+  const nav = `<nav class="ctnav">${NAV.map(([k, ic, g, sev, list, v, sub]) => `<button class="cn ${cur === k ? "on" : ""}" data-cat="${k}" style="--c:${SEV[sev][0]};--g:${g}" type="button">
+      <span class="ic2">${ICON[ic]}</span><span class="tx"><span class="l">${CAT[k]}<i title="${SEV[sev][1]}"></i></span><span class="v">${v}</span><span class="s">${sub}</span></span><span class="n">${list.length}</span></button>`).join("")}</nav>`;
 
-  // แผงตามหมวด
   const sortAl = (a, b) => (I.get(b.id).alert ? 1 : 0) - (I.get(a.id).alert ? 1 : 0) || (st(a) === "ok" ? 0 : 1) - (st(b) === "ok" ? 0 : 1) || byName(a, b);
-  const panel = (k, ic, g, list, body) => (!S.cat || S.cat === k) && list.length ? `<section class="ctp"><h3><span class="dot" style="background:${g}">${ICON[ic]}</span>${CAT[k]} <span class="n">${list.length} เครื่อง</span></h3>${body}</section>` : "";
-  const card = (d) => KIND(d) === "temp" ? tempCard(d, I.get(d.id)) : KIND(d) === "pow" ? powCard(d, I.get(d.id)) : deadCard(d, I.get(d.id));
-  const panels = panel("env", "temp", "linear-gradient(135deg,#12a5c2,#0f5c8c)", env, `<div class="grid">${env.slice().sort(sortAl).map(card).join("")}</div>`)
-    + panel("pow", "pow", "linear-gradient(135deg,#9b6be0,#5b2fa6)", pw, `<div class="grid">${pw.slice().sort(sortAl).map(card).join("")}</div>`)
-    + panel("eq", "sw", "linear-gradient(135deg,#34c38f,#1f7a55)", eq, `<div class="sw">${eq.slice().sort(sortAl).map(d => live(d) ? swRow(d, I.get(d.id)) : deadCard(d, I.get(d.id))).join("")}</div>`)
-    + (S.cat !== "net" ? "" : panel("net", "net", "linear-gradient(135deg,#64748b,#334155)", devs, `<table class="htab"><thead><tr><th>อุปกรณ์</th><th>หมวด</th><th>คลัง · ตำแหน่ง</th><th>สถานะ</th><th>ค่าล่าสุด</th></tr></thead><tbody>${devs.slice().sort((a, b) => ({ off: 0, stale: 1, ok: 2 })[st(a)] - ({ off: 0, stale: 1, ok: 2 })[st(b)] || byName(a, b)).map(d =>
-        `<tr data-id="${esc(d.id)}"><td><b>${esc(nameOf(d))}</b></td><td>${CAT[catOf(d)]}</td><td>${esc([siteOf(d), m(d).loc].filter(Boolean).join(" · "))}</td><td>${stHtml(st(d))}</td><td>${I.get(d.id).t ? ago(I.get(d.id).t) : "–"}</td></tr>`).join("")}</tbody></table>`));   // ตารางสุขภาพอุปกรณ์แสดงเมื่อกดการ์ด "การเชื่อมต่อ IoT" (ปกติแผงแจ้งเตือนสรุปให้แล้ว)
+  const nv = NAV.find(n => n[0] === cur), head = `<h3><span class="dot" style="background:${nv[2]}">${ICON[nv[1]]}</span>${CAT[cur]} <span class="n">${nv[4].length} เครื่อง · ${nv[5]}</span></h3>`;
+  const card = (d) => KIND(d) === "temp" ? tempCard(d, I.get(d.id)) : isMeter(d) ? powCard(d, I.get(d.id)) : deadCard(d, I.get(d.id));
+  const swList = (l) => `<div class="sw">${l.slice().sort(sortAl).map(d => live(d) ? swRow(d, I.get(d.id)) : deadCard(d, I.get(d.id))).join("")}</div>`;
+  const body = !nv[4].length ? '<div class="empty" style="padding:18px 0">ไม่มีอุปกรณ์ในหมวดนี้ในคลังนี้</div>'
+    : cur === "env" ? `<div class="grid">${env.slice().sort(sortAl).map(card).join("")}</div>`
+    : cur === "sky" ? swList(sky) : cur === "eq" ? swList(fan)
+    : cur === "pow" ? `<div class="grid">${mt.slice().sort(sortAl).map(card).join("")}</div>`
+    : `<table class="htab"><thead><tr><th>อุปกรณ์</th><th>หมวด</th><th>คลัง · ตำแหน่ง</th><th>สถานะ</th><th>ค่าล่าสุด</th></tr></thead><tbody>${devs.slice().sort((a, b) => ({ off: 0, stale: 1, ok: 2 })[st(a)] - ({ off: 0, stale: 1, ok: 2 })[st(b)] || byName(a, b)).map(d =>
+        `<tr data-id="${esc(d.id)}"><td><b>${esc(nameOf(d))}</b></td><td>${CAT[catOf(d)]}</td><td>${esc([siteOf(d), m(d).loc].filter(Boolean).join(" · "))}</td><td>${stHtml(st(d))}</td><td>${I.get(d.id).t ? ago(I.get(d.id).t) : "–"}</td></tr>`).join("")}</tbody></table>`;
+  const panels = `<section class="ctp">${head}${body}</section>`;
 
   // แผงแจ้งเตือน: ผิดเกณฑ์ (แดง) → ข้อมูลค้าง (ส้ม) → ออฟไลน์ (เทา)
   const ev = (d, c, t2, vv) => `<button class="ev" data-id="${esc(d.id)}" style="--c:${c}"><span class="sv"></span><span class="bd"><div class="t1">${esc(nameOf(d))}</div><div class="t2">${t2}</div></span><span class="vv">${vv}</span></button>`;
@@ -635,10 +658,9 @@ function towerHtml(devs, I) {
       <div class="sum"><span style="color:var(--bad)">ผิดเกณฑ์ ${al.length}</span><span style="color:var(--warn)">ข้อมูลค้าง ${stale.length}</span><span>ออฟไลน์ ${off.length}</span></div>
       ${evs.length ? evs.join("") : '<div class="okmsg">✓ ทุกอุปกรณ์ปกติ ไม่มีเหตุการณ์</div>'}
       ${thSet < env.length ? `<div class="note2">ตั้งเกณฑ์อุณหภูมิแล้ว ${thSet}/${env.length} เครื่อง · <button class="more" data-set="1" type="button">ตั้งเกณฑ์ ⚙</button></div>` : ""}</aside>`;
-  return `<section class="ctw"><div class="cth"><h2>Control Tower</h2><span class="sub3">${esc((IOT_MAPS[S.map] || {}).name || "")} · ${devs.length} อุปกรณ์ · ${S.cat ? `กำลังดู: ${CAT[S.cat]} · <button class="more" data-cat="${S.cat}" type="button">ดูทั้งหมด</button>` : "กดการ์ดหมวดเพื่อดูเฉพาะหมวด"}</span>
+  return `<section class="ctw"><div class="cth"><h2>Control Tower</h2><span class="sub3">${esc((IOT_MAPS[S.map] || {}).name || "")} · ${devs.length} อุปกรณ์ · เลือกหมวดจากแถบด้านซ้าย</span>
       <span class="health" style="--c:${SEV[overall][0]}"><i></i>สถานะรวม: ${SEV[overall][1]}</span></div>
-    <div class="cts">${tiles}</div>
-    <div class="ctb"><div>${panels || '<div class="ctp"><div class="empty" style="padding:18px 0">ไม่มีอุปกรณ์ในหมวดนี้</div></div>'}</div>${feed}</div></section>`;
+    <div class="ctb">${nav}<div>${panels}</div>${feed}</div></section>`;
 }
 /* 11 ต.ค. ผู้ใช้ถาม Skylight หายไปไหน: อุปกรณ์ที่ชื่อไม่มี WHn (SKYLIGHT_xx-xx 4 ตัว · แอร์รีโมต 4 ตัว) ไม่รู้คลัง → เดิมถูกซ่อนทุกแท็บ
    ตอนนี้แสดงแผงแยกท้ายทุกแท็บ จนกว่าจะตั้งคลัง (⚙) หรือกำหนดใน `SITE_HINT` */
@@ -791,7 +813,7 @@ document.addEventListener("click", (e) => {
   const s = e.target.closest("#segSite button"); if (s) { S.site = s.dataset.s; const k = mapOfSite(S.site); if (k) S.map = k; render(); return; }
   const r = e.target.closest("#segRange button"); if (r) { S.range = +r.dataset.r; S.tAt = null; stopPlay(); document.querySelectorAll("#segRange button").forEach(b => b.classList.toggle("on", b === r)); load(); return; }
   const o = e.target.closest("[data-off]"); if (o) { S.open[o.dataset.off] = !S.open[o.dataset.off]; render(); return; }
-  const ca = e.target.closest("[data-cat]"); if (ca) { S.cat = S.cat === ca.dataset.cat ? "" : ca.dataset.cat; render(); return; }
+  const ca = e.target.closest("[data-cat]"); if (ca) { S.cat = ca.dataset.cat; render(); return; }
   if (e.target.closest("#alMore")) { S.showAllAl = !S.showAllAl; render(); return; }
   if (e.target.closest("#btnSet,[data-set]")) { openSettings(); return; }
   if (e.target.closest("#box")) return;
