@@ -563,7 +563,7 @@ function render() {
     (noMap.length ? '<span class="sep"></span>' + chip("#c9a227", `ยังไม่ระบุคลัง <b>${noMap.length}</b> · กด ⚙ ตั้งคลัง`, "", 'data-set="1" type="button"') : "");
 
   // 11 ต.ค. Control Tower: แถบสุขภาพ 4 หมวด → แผงอุปกรณ์ตามหมวด + แผงแจ้งเตือน (ข้อยกเว้นมาก่อน)
-  $("#sites").innerHTML = towerHtml(devs, I);
+  $("#sites").innerHTML = towerHtml(devs, I) + noMapHtml(noMap, I);
   document.querySelectorAll("svg[data-spark]").forEach(el => { const d = S.devs.find(x => x.id === el.dataset.spark); line(el, S.reads[el.dataset.spark] || [], el.dataset.k, { spark: true, th: d && el.dataset.k === "temp_c" ? [numOr(m(d).t_min), numOr(m(d).t_max)] : null }); });
   if (CONTROL_ON) loadLog();
   renderMap();
@@ -620,6 +620,16 @@ function towerHtml(devs, I) {
       <span class="health" style="--c:${SEV[overall][0]}"><i></i>สถานะรวม: ${SEV[overall][1]}</span></div>
     <div class="cts">${tiles}</div>
     <div class="ctb"><div>${panels || '<div class="ctp"><div class="empty" style="padding:18px 0">ไม่มีอุปกรณ์ในหมวดนี้</div></div>'}</div>${feed}</div></section>`;
+}
+/* 11 ต.ค. ผู้ใช้ถาม Skylight หายไปไหน: อุปกรณ์ที่ชื่อไม่มี WHn (SKYLIGHT_xx-xx 4 ตัว · แอร์รีโมต 4 ตัว) ไม่รู้คลัง → เดิมถูกซ่อนทุกแท็บ
+   ตอนนี้แสดงแผงแยกท้ายทุกแท็บ จนกว่าจะตั้งคลัง (⚙) หรือกำหนดใน `SITE_HINT` */
+function noMapHtml(list, I) {
+  if (!list.length) return "";
+  const byName = (a, b) => nameOf(a).localeCompare(nameOf(b), "th", { numeric: true });
+  const row = (d) => { const x = I.get(d.id); return x.state === "ok" && (KIND(d) === "sw" || KIND(d) === "ir") ? swRow(d, x) : KIND(d) === "temp" ? tempCard(d, x) : KIND(d) === "pow" ? powCard(d, x) : deadCard(d, x); };
+  return `<section class="ctp" style="margin-top:4px"><h3><span class="dot" style="background:linear-gradient(135deg,#c9a227,#8a6d12)">${ICON.sw}</span>อุปกรณ์ที่ยังไม่ระบุคลัง <span class="n">${list.length} เครื่อง · แสดงทุกแท็บ</span>
+      <button class="more" data-set="1" type="button" style="margin-left:auto">ตั้งคลัง ⚙</button></h3>
+    <div class="sw">${list.slice().sort(byName).map(row).join("")}</div></section>`;
 }
 const sub = (d) => [m(d).loc, nameOf(d) !== d.name ? d.name : ""].filter(Boolean).join(" · ");
 function tempCard(d, x) {
