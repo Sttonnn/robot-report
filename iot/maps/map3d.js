@@ -129,6 +129,54 @@ function trailer(x, z, r, rr, P) {
       for (const z of [L * .2, L * .3, L + P * 1.6, L + P * 3.1]) for (const sx of [-1, 1]) { const w = new THREE.Mesh(new THREE.CylinderGeometry(P * .5, P * .5, P * .35, 14), new THREE.MeshStandardMaterial({ color: 0x1b1d21 })); w.rotation.z = Math.PI / 2; w.position.set(sx * Wt * .45, P * .5, z); g.add(w); }
   g.position.set(x, 0, z); g.rotation.y = r; g.traverse(o => { if (o.isMesh) o.castShadow = o.receiveShadow = true; }); root.add(g);
 }
+/* 14 ต.ค. ผู้ใช้สั่ง (WH32): รถบรรทุกสีเทาสีเดียว · มีทั้ง 6 ล้อ และ 10 ล้อ (รถตู้ทึบ ไม่ใช่หัวลาก) · M.rigid = ใช้รถบรรทุก · M.truckCol = สีตู้ */
+function rigidTruck(x, z, r, rr, P, M) {
+  const ten = rr >= .5, L = P * (ten ? 9.2 : 6.6), Wt = P * 2.45, Ht = P * (ten ? 3.4 : 3.1), g = new THREE.Group(), col = M.truckCol ?? 0xa3a9b1;
+  const bx = box(Wt, Ht, L, col, { roughness: .6 }); bx.position.set(0, Ht / 2 + P * 1.15, L / 2 + P * .6); g.add(bx);
+  const rib = box(Wt * 1.01, P * .12, L, 0x8a9098); rib.position.set(0, P * 1.2, L / 2 + P * .6); g.add(rib);
+  const ch = box(Wt * .8, P * .45, L + P * 1.6, 0x2f343b); ch.position.set(0, P * .85, L / 2 + P * 1.3); g.add(ch);
+  const cab = box(Wt, P * 2.7, P * 2.2, 0xc5cad1); cab.position.set(0, P * 1.95, L + P * 1.95); g.add(cab);
+  const ws = box(Wt * .9, P * .95, P * .1, 0x1d2a3a); ws.position.set(0, P * 2.6, L + P * 3.07); g.add(ws);
+  const ax = ten ? [L * .62, L * .78, L + P * 2.1] : [L * .72, L + P * 2.1];
+  for (const az of ax) for (const sx of [-1, 1]) { const w = new THREE.Mesh(new THREE.CylinderGeometry(P * .48, P * .48, P * (az > L ? .3 : .55), 14), new THREE.MeshStandardMaterial({ color: 0x1b1d21 })); w.rotation.z = Math.PI / 2; w.position.set(sx * Wt * .42, P * .48, az); g.add(w); }
+  g.position.set(x, 0, z); g.rotation.y = r; root.add(g);
+}
+const truckAt = (x, z, r, rr, P, M) => M && M.rigid ? rigidTruck(x, z, r, rr, P, M) : trailer(x, z, r, rr, P);
+/* 14 ต.ค. อุปกรณ์โหลดหน้าประตู Dock (ผู้ใช้สั่ง WH32): d.eq = "robot" Robot Arm + Conveyor · "gravity" สายพาน Fix Gravity (ลูกกลิ้ง) · "mobile" สายพานล้อลาก · วางในอาคารจากประตูเข้าไป (−z) */
+function dockEquip(d, y, P) {
+  const x = d.x, g = new THREE.Group(), add = (w, h, dd, c, px, py, pz, o) => { const m = box(w * P, h * P, dd * P, c, o); m.position.set(px * P, py * P, pz * P); g.add(m); return m; };
+  const steel = { metalness: .5, roughness: .4 };
+  if (d.eq === "robot") {
+    for (let k = 0; k < 6; k++) add(.9, .25, 1.6, 0x2b2f36, 0, 1.0, -1 - k * 1.6);                          // สายพานยืดหด (ช่วงในอาคาร)
+    add(.95, .08, 9.6, 0x1b1d21, 0, 1.16, -5.3);                                                         // ผิวสายพาน
+    for (const sx of [-.5, .5]) add(.1, .45, 9.6, 0xc9ced4, sx, 1.05, -5.3, steel);                       // ขอบข้าง
+    for (let k = 0; k < 5; k++) for (const sx of [-.4, .4]) add(.1, 1, .1, 0x9aa3ad, sx, .5, -1.5 - k * 2.1, steel);
+    add(.85, .2, 4, 0x2b2f36, 0, 1.05, 2.2);                                                             // ส่วนยื่นเข้าไปในตู้
+    // แขนกล (เหลือง-ส้ม) ที่ปากประตู
+    const by = 0, bz = -1.6; add(1.5, .5, 1.5, 0x3a3f46, 1.4, by + .25, bz); add(1.1, 1, 1.1, 0xf29a05, 1.4, by + 1, bz);
+    const a1 = add(.5, 2.8, .5, 0xf2b705, 1.4, by + 2.7, bz + .5); a1.rotation.x = .35;
+    const a2 = add(.45, .45, 2.6, 0xf2b705, 1.0, by + 3.9, bz + 2.2); a2.rotation.x = .3; a2.rotation.y = -.35;
+    add(.9, .6, .4, 0x2b2f36, .6, by + 3.2, bz + 3.4);                                                 // หัวจับ (gripper)
+    const lb = textSprite(d.lb || "Robot Arm", P * 1.5, "#8a4b00", "rgba(255,255,255,.9)"); lb.position.set(0, P * 5.2, -P * 4); g.add(lb);
+  } else if (d.eq === "gravity") {
+    const n = 18, len = 8;
+    for (const sx of [-.55, .55]) { const rl = add(.12, .22, len, 0xb8c0c8, sx, 0, -len / 2 - .4, steel); rl.position.y = P * .95; rl.rotation.x = -.05; }
+    for (let k = 0; k < n; k++) { const zz = -.6 - k * (len - .4) / (n - 1), r = new THREE.Mesh(new THREE.CylinderGeometry(P * .09, P * .09, P * 1.05, 10), new THREE.MeshStandardMaterial({ color: 0x8e979f, ...steel })); r.rotation.z = Math.PI / 2; r.position.set(0, P * (1 + (-zz) * .05 - .05), zz * P); g.add(r); }
+    for (let k = 0; k < 4; k++) for (const sx of [-.55, .55]) add(.1, .9 + k * .12, .1, 0x6f7883, sx, (.9 + k * .12) / 2, -1 - k * 2.3, steel);
+    const lb = textSprite(d.lb || "Gravity", P * 1.5, "#3c4a68", "rgba(255,255,255,.9)"); lb.position.set(0, P * 3.4, -P * 4.5); g.add(lb);
+  } else if (d.eq === "mobile") {
+    const len = 7, belt = new THREE.Group();
+    const fr = box(1.1 * P, .35 * P, len * P, 0x2f6fb5, steel); belt.add(fr);
+    const bt = box(.95 * P, .06 * P, len * P, 0x15171a); bt.position.y = .2 * P; belt.add(bt);
+    belt.position.set(0, P * 1.35, -P * (len / 2 + .3)); belt.rotation.x = -.12; g.add(belt);
+    add(1.4, .25, 2.2, 0x3a3f46, 0, .55, -len * .62);                                                    // ฐานรถเข็น
+    for (const sx of [-.6, .6]) add(.12, 1.1, .12, 0x6f7883, sx, 1.05, -len * .62, steel);
+    for (const sx of [-.65, .65]) for (const sz of [-.8, .8]) { const w = new THREE.Mesh(new THREE.CylinderGeometry(P * .32, P * .32, P * .22, 12), new THREE.MeshStandardMaterial({ color: 0x15171a })); w.rotation.z = Math.PI / 2; w.position.set(sx * P, P * .32, (-len * .62 + sz) * P); g.add(w); }
+    add(.08, .08, 1.6, 0x9aa3ad, 0, .7, -len * .62 - 1.8, steel);                                        // คันลาก
+    const lb = textSprite(d.lb || "ล้อลาก", P * 1.5, "#1f4fa8", "rgba(255,255,255,.9)"); lb.position.set(0, P * 3.6, -P * 4.5); g.add(lb);
+  } else return;
+  g.position.set(x, 0, y); root.add(g);
+}
 /* รถเก๋ง (ภายนอกคลัง) */
 function car(x, z, r, c, P) { const g = new THREE.Group(), add = (w, h, d, col, px, py, pz, o) => { const m = box(w * P, h * P, d * P, col, o); m.position.set(px * P, py * P, pz * P); g.add(m); };
   add(1.8, .75, 4.4, c, 0, .6, 0, { metalness: .4, roughness: .4 }); add(1.6, .6, 2.3, 0x24303d, 0, 1.25, -.1, { metalness: .5, roughness: .2 }); add(1.55, .08, 2.2, c, 0, 1.58, -.1);
@@ -170,7 +218,8 @@ function siteDetail(M, H) {
     const lv = box(DW * .9, P * .15, P * 2.4, 0x6f7883); lv.position.set(x, P * .1, y - P * 1.2); root.add(lv);                   // Dock leveler
     flat(x - DW / 2, y + P * 1, DW, P * .25, 0xf2c200, .45);                                                                       // เส้นเหลือง
     const n = textSprite(String(d.n), P * 1.6, "#0b2a4a", "rgba(255,255,255,.9)"); n.position.set(x, .8, y + P * 3); root.add(n);
-    if (d.truck ?? R() < (M.trucks ?? .45)) trailer(x, y + P * .3, 0, R(), P);                                         // รถเทรลเลอร์
+    const rr = R(); if (d.truck ?? (d.eq ? true : rr < (M.trucks ?? .45))) truckAt(x, y + P * .3, 0, R(), P, M);   // รถเทรลเลอร์ / รถบรรทุก
+    dockEquip(d, y, P);
   }
   /* 9 ต.ค. ตามรูปจริง: Canopy โครงเหล็กดำ-ส้ม (ท่อนล่างเหลือง) ฐานคอนกรีต · หลังคาเมทัลชีทขาว · ยางกั้นเหลืองดำแนวเสา */
   for (const c of M.canopies || []) { const [cx, cy, cw, ch, ct] = c, Hc = P * 7, oy = cy + ch - 3;
@@ -196,7 +245,7 @@ function siteDetail(M, H) {
     const RR = rand(901 + Math.round(x0)), cols = [0xf4f5f7, 0x1d2026, 0xb7bec7, 0xf4f5f7, 0x3a4250, 0x9a1f1f], [p0, p1] = F.park || [0, 0], blocked = (x) => inGap(x) || (M.offices || []).some(o => x > o[0] - 10 && x < o[0] + o[2] + 10 && o[1] + o[3] > p0) || (M.carport || []).concat(M.canteen || []).some(o => x > o.r[0] - 10 && x < o.r[0] + o.r[2] + 10 && o.r[1] + o.r[3] > p0);
     if (F.park) for (let x = x0 + P * 2; x < x1 - P * 2; x += P * 2.7) { if (blocked(x) || RR() < .4) continue; car(x, (p0 + p1) / 2, Math.PI / 2 * (RR() < .5 ? 1 : -1) * 0 + Math.PI, cols[Math.floor(RR() * cols.length)], P); }
     if (F.park) for (let x = x0; x < x1; x += P * 2.7) flat(x, p0, P * .15, p1 - p0, 0xf4f4f4, .55);
-    for (const t of F.trailers || []) trailer(t.x, t.y, t.r ?? Math.PI / 2, t.c ?? RR(), P);
+    for (const t of F.trailers || []) truckAt(t.x, t.y, t.r ?? Math.PI / 2, t.c ?? RR(), P, M);
     // เสาไฟฟ้า + สายไฟ + หม้อแปลง
     const tops = []; for (const px of F.poles || []) { const po = box(P * .35, P * 11, P * .35, 0xb9bec4); po.position.set(px, P * 5.5, fy - P * 1.2); root.add(po);
       const arm = box(P * 2.4, P * .2, P * .2, 0x6f7883); arm.position.set(px, P * 10.3, fy - P * 1.2); root.add(arm); tops.push([px, fy - P * 1.2]);
