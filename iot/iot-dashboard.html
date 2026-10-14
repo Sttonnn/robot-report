@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>IOT Dashboard · PCG</title>
+<title>PCG Smart Warehouse Command Center</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap">
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
@@ -372,6 +372,15 @@ body.ui-a .ppanel .ph{border-color:#1f3049} body.ui-a .ppanel .ph button,body.ui
 body.ui-a .pr .n small{color:#a9b8c8} body.ui-a .pr.sel{background:#16304a} body.ui-a .pr button{background:#0ea5e9;color:#04121f}
 /* C · แผนที่เต็มจอ: แผนที่ใหญ่ สรุป+แจ้งเตือนลอยบนแผนที่ด้านขวา */
 body.ui-c header.hero{border-radius:0;margin-bottom:0}
+/* 14 ต.ค. ผู้ใช้ขอชื่อให้ดูยิ่งใหญ่ → "PCG Smart Warehouse Command Center" + ไอคอน + ตัวอักษรไล่สี (ทุกรูปแบบ) */
+h1.brand{display:flex;align-items:center;gap:12px;font-size:32px !important;letter-spacing:-.02em}
+h1.brand .bmark{width:46px;height:46px;flex:none;border-radius:14px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#22d3ee,#1d4ed8);box-shadow:0 8px 20px rgba(29,78,216,.35)}
+h1.brand .bmark svg{width:26px;height:26px}
+h1.brand .btxt{display:grid;line-height:1.05;background:linear-gradient(90deg,#0b2a4a,#1d4ed8 55%,#0891b2);-webkit-background-clip:text;background-clip:text;color:transparent}
+h1.brand .btxt small{font:800 12px/1.4 Archivo,sans-serif;letter-spacing:.22em;text-transform:uppercase;color:#0891b2;-webkit-text-fill-color:#0891b2}
+body.ui-a h1.brand .btxt{background:linear-gradient(90deg,#e0f2fe,#7dd3fc 60%,#22d3ee);-webkit-background-clip:text;background-clip:text}
+body.ui-a h1.brand .btxt small{color:#67e8f9;-webkit-text-fill-color:#67e8f9}
+@media (max-width:700px){h1.brand{font-size:24px !important} h1.brand .bmark{width:38px;height:38px}}
 body.ui-c .hero .wrap{padding-top:12px;padding-bottom:14px} body.ui-c h1{font-size:22px;margin:8px 0 0} body.ui-c .sub{display:none} body.ui-c .ctrl{margin-top:10px}
 body.ui-c main.wrap{max-width:none;padding:0 0 40px}
 body.ui-c .topgrid{position:relative;margin-bottom:22px}
@@ -397,8 +406,8 @@ body.ui-a .mstat .c{background:#0e1a2a;border-color:#1f3049} body.ui-a .mstat .c
   <div class="top"><a class="home" href="https://sttonnn.github.io/pcg-logistics/index.html">← หน้าหลัก</a><span class="badge">LIVE</span>
     <div class="uisw" id="uiSw" role="group" aria-label="รูปแบบหน้าจอ"><span>รูปแบบ</span><button data-ui="a">A · ห้องควบคุม</button><button data-ui="b">B · แบ่งจอ</button><button data-ui="c">C · แผนที่เต็มจอ</button></div>
     <button class="hbtn" id="btnSet" type="button">⚙ ตั้งชื่อ / เกณฑ์</button></div>
-  <h1>IOT Dashboard</h1>
-  <div class="sub">อุณหภูมิ/ความชื้น · ไฟฟ้า · สถานะเครื่อง แยกตามคลัง · อัปเดตอัตโนมัติทุก 15 นาที</div>
+  <h1 class="brand"><span class="bmark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 4l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M8 21v-6h8v6"/><circle cx="12" cy="11" r="1.6"/><path d="M8.6 8.6a4.8 4.8 0 0 1 6.8 0"/></svg></span><span class="btxt"><small>PCG · Smart Warehouse</small>Command Center</span></h1>
+  <div class="sub">ศูนย์ควบคุมคลังสินค้าอัจฉริยะ · Digital Twin 3D · อุณหภูมิ/ความชื้น · ไฟฟ้า · สถานะเครื่อง · อัปเดตอัตโนมัติทุก 15 นาที</div>
   <div class="ctrl">
     <div class="seg" id="segSite" role="group" aria-label="เลือกคลัง"></div>
     <div class="seg" id="segRange" role="group" aria-label="ช่วงเวลา">
