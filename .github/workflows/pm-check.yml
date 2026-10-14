@@ -11,7 +11,7 @@ jobs:
       - run: |
           K="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1nbnNob3ZuaWJjbWlwdG94ZGZlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkzNzI1NDIsImV4cCI6MjEwNDk0ODU0Mn0.UoPu-i6ODMEgyuqoO6oKHf0JIqFKpWkSpBkOKrpITwQ"
           U="https://mgnshovnibcmiptoxdfe.supabase.co/rest/v1"
-          for t in robot_loads robot_entries robot_days warehouses mhe_vehicles shift_edits pm_work_orders pm_fail_followup pm_upload_log iot_devices iot_readings iot_device_meta iot_commands machine_checks machine_daily_audit; do
+          for t in cm_work_orders cm_upload_log robot_loads robot_entries robot_days warehouses mhe_vehicles shift_edits pm_work_orders pm_fail_followup pm_upload_log iot_devices iot_readings iot_device_meta iot_commands machine_checks machine_daily_audit; do
             r=$(curl -s -o /dev/null -w "%{http_code}" -D h.txt "$U/$t?select=*&limit=1" -H "apikey: $K" -H "Authorization: Bearer $K" -H "Prefer: count=exact")
             echo "$t | http=$r | $(grep -i content-range h.txt | tr -d '\r')"
           done
