@@ -167,6 +167,8 @@ body.ui-a .feed .okmsg{background:#0f2a1d;color:#6ee7b7}
 .swi .sub2{font-size:12.5px;color:var(--mute)}
 .pill{font-size:12.5px;font-weight:800;padding:4px 12px;border-radius:999px;white-space:nowrap}
 .pill.on{background:#dcf5e8;color:#11683f} .pill.offp{background:#eef1f4;color:#4d5864}
+.pill .tgl{display:inline-block;vertical-align:-3px;width:26px;height:15px;border-radius:99px;margin-right:5px;position:relative} .pill .tgl b{position:absolute;top:2px;width:11px;height:11px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.35)}
+.pill .tgl.on{background:#34c759} .pill .tgl.on b{left:13px} .pill .tgl.off{background:#c3cad3} .pill .tgl.off b{left:2px}
 .ctl{display:inline-flex;gap:6px;flex-shrink:0}
 .ctl button{font-weight:700;font-size:12.5px;border:0;border-radius:999px;padding:6px 12px;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.08)}
 .ctl .bOn{background:linear-gradient(135deg,#34c38f,#1f9d61);color:#fff} .ctl .bOff{background:#eef2f6;color:#33404d}
@@ -194,6 +196,10 @@ body.ui-a .feed .okmsg{background:#0f2a1d;color:#6ee7b7}
 .pin .pb small{font-weight:600;color:var(--mute);font-size:11px;margin-left:4px}
 .pin i{position:absolute;left:-5px;top:-6px;width:10px;height:10px;border-radius:50%;background:var(--pc,#0f7fb0);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.3)}
 .pin.temp{--pc:#0f7fb0} .pin.pow{--pc:#7a4fc9} .pin.sw,.pin.ir{--pc:#1f9d61}
+.pin .tgl{display:inline-block;vertical-align:-3px;width:28px;height:16px;border-radius:99px;margin-right:5px;position:relative;transition:background .2s}
+.pin .tgl b{position:absolute;top:2px;width:12px;height:12px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.35);transition:left .2s}
+.pin .tgl.on{background:#34c759} .pin .tgl.on b{left:14px} .pin .tgl.off{background:#c3cad3} .pin .tgl.off b{left:2px}
+.pin.swoff{--pc:#9aa4b1} .pin.swoff .pb{color:#5b6672}
 .pin.off{--pc:#8a96a3} .pin.off .pb{color:#8a96a3;background:#f4f6f8}
 .pin.hot{--pc:#c7362b} .pin.hot .pb{background:#c7362b;color:#fff;animation:pulse 1.4s infinite} .pin.hot .pb small{color:#ffd9d4}
 .pin.cold{--pc:#2a62c9} .pin.cold .pb{background:#2a62c9;color:#fff}
@@ -695,7 +701,7 @@ function deadCard(d, x) {
 function swRow(d, x) {
   const ir = KIND(d) === "ir", sOn = x.last.switch_on;
   const pct = !ir && x.rs.length ? Math.round(x.rs.filter(r => r.switch_on).length / x.rs.length * 100) : null;
-  const pill = ir ? "" : sOn == null ? "" : sOn ? '<span class="pill on">เปิดอยู่</span>' : '<span class="pill offp">ปิดอยู่</span>';
+  const pill = ir ? "" : sOn == null ? "" : `<span class="pill ${sOn ? "on" : "offp"}"><span class="tgl ${sOn ? "on" : "off"}"><b></b></span>${sOn ? "เปิดอยู่" : "ปิดอยู่"}</span>`;
   const ctl = CONTROL_ON && CTRL.has(d.category) ? `<span class="ctl">${ir || sOn !== true ? `<button class="bOn" data-ctl="${esc(d.id)}" data-on="1">เปิด</button>` : ""}${ir || sOn !== false ? `<button class="bOff" data-ctl="${esc(d.id)}" data-on="0">ปิด</button>` : ""}</span>` : "";
   return `<div class="swi"><div class="main" data-id="${esc(d.id)}" role="button" tabindex="0"><div class="nm" title="${esc(nameOf(d))}">${esc(nameOf(d))}</div>
     <div class="sub2">${ir ? "แอร์ · สั่งผ่านรีโมตอินฟราเรด" : pct != null ? `เปิด ${pct}% ของ ${RLAB()}` : TYPE_TH[KIND(d)]}${isMeter(d) ? ` · ไฟ ${f1((x.last.power_w || 0) / 1000, 2)} kW` : ""}${m(d).loc ? " · " + esc(m(d).loc) : ""}</div></div>${pill}${ctl}</div>`;
@@ -861,7 +867,9 @@ function pinHtml(d, x) {
   if (k === "temp") return `${f1(x.last.temp_c)}°<small>${f1(x.last.humidity, 0)}%</small>${n}`;
   if (k === "pow") return `${f1((x.last.power_w || 0) / 1000, 2)} kW${n}`;
   if (k === "ir") return `❄ แอร์<span class="nm2">${esc(swLabel(d))}</span>`;
-  return `${x.last.switch_on ? "⏻ เปิด" : x.last.switch_on === false ? "⏻ ปิด" : "⏻"}<span class="nm2">${esc(swLabel(d))}</span>`;
+  /* 14 ต.ค. ผู้ใช้ถาม (ปิด = แดง หรือสวิตช์แบบ iPhone): ใช้สวิตช์แบบ iPhone · เปิด = เขียว · ปิด = เทา (แดงสงวนไว้สำหรับผิดเกณฑ์/แจ้งเตือน) */
+  const on = x.last.switch_on;
+  return `${on == null ? "⏻" : `<span class="tgl ${on ? "on" : "off"}"><b></b></span>${on ? "เปิด" : "ปิด"}`}<span class="nm2">${esc(swLabel(d))}</span>`;
 }
 /* 11 ต.ค. ผู้ใช้สั่ง: หมุดสวิตช์ที่เขียน "เปิด/ปิด" ให้บอกด้วยว่าเป็นอุปกรณ์อะไร (ประเภท + ชื่อ แสดงตลอด) */
 function swLabel(d) {
@@ -886,7 +894,7 @@ function renderMap() {
   const X = new Map(placed.map(d => [d.id, infoAt(d)]));
   IOT3D.setPins(placed.map(d => { const x = X.get(d.id), k = KIND(d);
     return { id: d.id, px: +m(d).px, py: +m(d).py, html: pinHtml(d, x), title: "", color: parseInt(PCOL[k].slice(1), 16),
-      cls: [k, x.state === "off" ? "off" : "", x.alert && x.alert.k !== "humi" ? x.alert.k : "", (S.placeSel || S.selPin) === d.id ? "sel" : ""].join(" ") }; }));
+      cls: [k, x.state === "off" ? "off" : "", (k === "sw") && x.last && x.last.switch_on === false ? "swoff" : "", x.alert && x.alert.k !== "humi" ? x.alert.k : "", (S.placeSel || S.selPin) === d.id ? "sel" : ""].join(" ") }; }));
   // Heatmap อุณหภูมิ
   const hp = S.heat ? placed.filter(d => KIND(d) === "temp" && X.get(d.id).state === "ok" && X.get(d.id).last.temp_c != null).map(d => ({ x: +m(d).px, z: +m(d).py, v: +X.get(d.id).last.temp_c })) : [];
   let lo = 0, hi = 0;
