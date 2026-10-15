@@ -12,13 +12,24 @@ concurrency: { group: iot-poll, cancel-in-progress: false }
 jobs:
   poll:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    # GitHub ลดรอบ cron เหลือ 2–3 ชม./ครั้ง (15 ต.ค.) → รอบ schedule/Run เอง วนดึงเองทุก 15 นาทีได้นาน ~5 ชม. 40 นาที
+    # รอบถัดไปจะรอคิว (concurrency) แล้วต่อทันทีเมื่อรอบนี้จบ · repo public = ไม่เสียนาที Actions
+    timeout-minutes: 355
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 20 }
-      - run: node iot/scripts/tuya-poll.mjs
+      - run: |
+          if [ "$EV" = "push" ]; then node iot/scripts/tuya-poll.mjs; exit $?; fi
+          end=$(( $(date +%s) + 340*60 ))
+          while :; do
+            node iot/scripts/tuya-poll.mjs || echo "::warning::รอบนี้ดึงไม่สำเร็จ จะลองใหม่รอบหน้า"
+            now=$(date +%s); next=$(( ((now-420)/900 + 1)*900 + 420 ))   # นาที 7/22/37/52
+            [ $next -ge $end ] && break
+            sleep $(( next - now ))
+          done
         env:
+          EV: ${{ github.event_name }}
           TUYA_ACCESS_ID: ${{ secrets.TUYA_ACCESS_ID }}
           TUYA_ACCESS_SECRET: ${{ secrets.TUYA_ACCESS_SECRET }}
           TUYA_REGION: ${{ secrets.TUYA_REGION }}
