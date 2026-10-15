@@ -38,6 +38,7 @@ jobs:
             if sz>=0: a[1].add(r[sz])
           for k,v in agg.items(): print(k,'pallets',round(v[0],1),'size',v[1])
           PY
+          echo "== robot_entries columns"; curl -s "$U/robot_entries?select=*&limit=1" -H "apikey: $K" -H "Authorization: Bearer $K" | jq -c ".[0] | keys"
           echo "== iot_devices (ชื่อ/หมวด/คลัง)"; curl -s "$U/iot_devices?select=name,category,site,online&order=category" -H "apikey: $K" -H "Authorization: Bearer $K" | jq -r '.[] | "\(.category) | \(.site) | \(.online) | \(.name)"'
           echo "== ค่าล่าสุดของ FAN (dlq)"; for n in WH5-Fan1 WH5-Fan4 WH8-FAN1 WH8-FAN3; do id=$(curl -s "$U/iot_devices?select=id&name=eq.$n" -H "apikey: $K" -H "Authorization: Bearer $K" | jq -r '.[0].id'); echo "$n $(curl -s "$U/iot_readings?select=ts,power_w,switch_on&device_id=eq.$id&order=ts.desc&limit=1" -H "apikey: $K" -H "Authorization: Bearer $K")"; done
           echo "== mhe FILE rows (ไฟล์แนบ)"; curl -s "$U/mhe_vehicles?select=id&id=like.FILE:*" -H "apikey: $K" -H "Authorization: Bearer $K" | jq length
