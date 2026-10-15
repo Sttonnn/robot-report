@@ -15,6 +15,18 @@ jobs:
             r=$(curl -s -o /dev/null -w "%{http_code}" -D h.txt "$U/$t?select=*&limit=1" -H "apikey: $K" -H "Authorization: Bearer $K" -H "Prefer: count=exact")
             echo "$t | http=$r | $(grep -i content-range h.txt | tr -d '\r')"
           done
+          echo "== daily_tasks summary"
+          curl -s "$U/daily_tasks?select=id,rec,updated_at" -H "apikey: $K" -H "Authorization: Bearer $K" -H "Range: 0-1999" -o dt.json
+          python3 - <<'PY'
+          import json,collections
+          a=json.load(open('dt.json')); recs=[x['rec'] for x in a if x.get('rec')]
+          snaps=[r for r in recs if r.get('snap')]; T=[r for r in recs if not r.get('snap') and not r.get('del')]
+          print('rows',len(a),'tasks',len(T),'snaps',sorted(r.get('m') for r in snaps))
+          print('by board',collections.Counter(r.get('bd') or 'ton' for r in T))
+          print('web-created',sum(1 for r in T if str(r.get('id','')).startswith('W')),'with why',sum(1 for r in T if r.get('why')),'with tchg',sum(1 for r in T if r.get('tchg')),'with hist',sum(1 for r in T if r.get('hist')),'doneAt',sum(1 for r in T if r.get('doneAt')))
+          print('last updated',sorted((x['updated_at'] or '')[:16] for x in a)[-5:])
+          print('owners',collections.Counter(r.get('owner') for r in T).most_common(8))
+          PY
           echo "== robot.csv ขนาดตู้ 14/10 (เฉพาะคอลัมน์ วันที่/ตู้/สายส่ง/พาเลท/ขนาด)"
           curl -sL "https://dl.dropboxusercontent.com/scl/fi/ne9lil4vs5ds1kvodrqjv/robot.csv?rlkey=jyfr275jx5f2bb4swgj9kms03" -o r.csv
           python3 - <<'PY'
