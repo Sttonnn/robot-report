@@ -315,6 +315,7 @@ details summary{cursor:pointer;color:var(--acc);font-weight:600;margin-top:12px}
 .uisw button{border:0;background:none;color:inherit;font-weight:700;font-size:12px;border-radius:999px;padding:5px 10px;cursor:pointer}
 .uisw button.on{background:#fff;color:var(--h1)}
 .uisw + .hbtn{margin-left:0}
+.hbtn.ctlb{margin-left:0;background:rgba(250,204,21,.22);border-color:rgba(250,204,21,.6)} .hbtn.ctlb.on{background:#16a34a;border-color:#16a34a}
 .topgrid{display:block}
 /* 9 ต.ค. ผู้ใช้สั่ง: สถานะเป็นแถบเล็ก · แผนที่ใหญ่ · ด้านล่างแสดงเฉพาะคลังที่เลือก (ตามแท็บแผนที่) */
 #segSite{display:none}
@@ -405,7 +406,7 @@ body.ui-a .mstat .c{background:#0e1a2a;border-color:#1f3049} body.ui-a .mstat .c
 <header class="hero"><div class="wrap">
   <div class="top"><a class="home" href="https://sttonnn.github.io/pcg-logistics/index.html">← หน้าหลัก</a><span class="badge">LIVE</span>
     <div class="uisw" id="uiSw" role="group" aria-label="รูปแบบหน้าจอ"><span>รูปแบบ</span><button data-ui="a">A · ห้องควบคุม</button><button data-ui="b">B · แบ่งจอ</button><button data-ui="c">C · แผนที่เต็มจอ</button></div>
-    <button class="hbtn" id="btnSet" type="button">⚙ ตั้งชื่อ / เกณฑ์</button></div>
+    <button class="hbtn" id="btnSet" type="button">⚙ ตั้งชื่อ / เกณฑ์</button><button class="hbtn ctlb" id="btnCtl" type="button" title="ใส่รหัสสั่งการเพื่อเปิด/ปิดอุปกรณ์">🔒 สั่งการ</button></div>
   <h1 class="brand"><span class="bmark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 4l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M8 21v-6h8v6"/><circle cx="12" cy="11" r="1.6"/><path d="M8.6 8.6a4.8 4.8 0 0 1 6.8 0"/></svg></span><span class="btxt"><small>PCG · Smart Warehouse</small>Command Center</span></h1>
   <div class="sub">ศูนย์ควบคุมคลังสินค้าอัจฉริยะ · Digital Twin 3D · อุณหภูมิ/ความชื้น · ไฟฟ้า · สถานะเครื่อง · อัปเดตอัตโนมัติทุก 15 นาที</div>
   <div class="ctrl">
@@ -448,7 +449,7 @@ function setUI(u) {
   if (window.IOT3D) { IOT3D.theme(u === "a" ? "dark" : "light"); setTimeout(() => IOT3D.show(S.map), 30); }
   window.__ui = u;
 }
-const CONTROL_ON = false;       // ปุ่มเปิด/ปิด: เปิดใช้หลังติดตั้ง Edge Function iot-control (ผู้ใช้ขอให้ทำหน้าให้เรียบร้อยก่อน 6 ต.ค.)
+const CONTROL_ON = true;        // 19 ต.ค. ผู้ใช้ขอให้สั่งการได้ + ต้องใส่รหัสสั่งการ (ปุ่มเปิด/ปิดโชว์หลังปลดล็อกด้วยรหัสเท่านั้น)
 const S = { site: "", range: 24, devs: [], reads: {}, open: {}, showAllAl: false, map: "wh5", placeMode: false, placeSel: "", heat: true, tAt: null, selPin: null, hoverId: null, listOpen: false, cat: "" };
 const STALE_MIN = 45;           // ไม่ได้ค่าใหม่เกิน 45 นาที = ข้อมูลค้าง
 const NOSITE = "ไม่ระบุคลัง";
@@ -711,7 +712,7 @@ function swRow(d, x) {
   const ir = KIND(d) === "ir", sOn = x.last.switch_on;
   const pct = !ir && x.rs.length ? Math.round(x.rs.filter(r => r.switch_on).length / x.rs.length * 100) : null;
   const pill = ir ? "" : sOn == null ? "" : `<span class="pill ${sOn ? "on" : "offp"}"><span class="tgl ${sOn ? "on" : "off"}"><b></b></span>${sOn ? "เปิดอยู่" : "ปิดอยู่"}</span>`;
-  const ctl = CONTROL_ON && CTRL.has(d.category) ? `<span class="ctl">${ir || sOn !== true ? `<button class="bOn" data-ctl="${esc(d.id)}" data-on="1">เปิด</button>` : ""}${ir || sOn !== false ? `<button class="bOff" data-ctl="${esc(d.id)}" data-on="0">ปิด</button>` : ""}</span>` : "";
+  const ctl = CONTROL_ON && ctlOn() && CTRL.has(d.category) ? `<span class="ctl">${ir || sOn !== true ? `<button class="bOn" data-ctl="${esc(d.id)}" data-on="1">เปิด</button>` : ""}${ir || sOn !== false ? `<button class="bOff" data-ctl="${esc(d.id)}" data-on="0">ปิด</button>` : ""}</span>` : "";
   return `<div class="swi"><div class="main" data-id="${esc(d.id)}" role="button" tabindex="0"><div class="nm" title="${esc(nameOf(d))}">${esc(nameOf(d))}</div>
     <div class="sub2">${ir ? "แอร์ · สั่งผ่านรีโมตอินฟราเรด" : pct != null ? `เปิด ${pct}% ของ ${RLAB()}` : TYPE_TH[KIND(d)]}${isMeter(d) ? ` · ไฟ ${f1((x.last.power_w || 0) / 1000, 2)} kW` : ""}${m(d).loc ? " · " + esc(m(d).loc) : ""}</div></div>${pill}${ctl}</div>`;
 }
@@ -1048,6 +1049,30 @@ function askCmd(id, on) {
   };
 }
 async function loadLog() { /* รายการการสั่งงานล่าสุด (iot_commands) — แสดงเมื่อเปิดใช้ปุ่มสั่งงาน */ }
+/* 19 ต.ค. ผู้ใช้ขอ: สั่งการได้ + เข้ารหัสสั่งการ · ปุ่ม 🔒 สั่งการ → ใส่รหัส (ตรวจที่เซิร์ฟเวอร์ check:true) → ปุ่มเปิด/ปิดโผล่ (ปลดล็อกวันละครั้ง ถึงเที่ยงคืน) · ลิงก์ ?ctl=1 = เปิดหน้าแล้วถามรหัสทันที */
+function ctlOn() { return !!pinGet(); }
+function ctlSync() { const on = ctlOn(), b = $("#btnCtl"); document.body.classList.toggle("ctl-on", on); if (b) { b.classList.toggle("on", on); b.textContent = on ? "🔓 สั่งการได้ · ล็อก" : "🔒 สั่งการ"; } }
+function askUnlock() {
+  if (ctlOn()) { pinSet(""); ctlSync(); render(); toast("🔒 ล็อกการสั่งการแล้ว"); return; }
+  $("#box").className = "box";
+  $("#box").innerHTML = `<form class="pinbox" id="ulForm"><div class="bh"><h3>🔒 ใส่รหัสสั่งการ</h3></div>
+    <div style="color:var(--ink2)">ใส่รหัสเพื่อเปิด/ปิด พัดลม · สวิตช์ · Skylight · แอร์ จากหน้านี้ (ใช้ได้ถึงเที่ยงคืน · ผิด 5 ครั้งล็อก 10 นาที)</div>
+    <input type="password" inputmode="numeric" autocomplete="off" placeholder="รหัสสั่งการ" id="ulIn">
+    <div class="err" id="ulErr"></div>
+    <div class="row"><button type="button" class="cancel" id="ulNo">ยกเลิก</button><button type="submit" class="go" id="ulGo">ปลดล็อก</button></div></form>`;
+  $("#dlg").classList.add("open"); $("#ulIn").focus();
+  $("#ulNo").onclick = closeDev;
+  $("#ulForm").onsubmit = async (e) => {
+    e.preventDefault();
+    const pin = $("#ulIn").value.trim(); if (!pin) { $("#ulErr").textContent = "ใส่รหัสก่อน"; return; }
+    $("#ulGo").disabled = true; $("#ulGo").textContent = "กำลังตรวจ…";
+    const r = await callFn({ check: true, pin });
+    if (!r.ok) { $("#ulGo").disabled = false; $("#ulGo").textContent = "ปลดล็อก"; $("#ulErr").textContent = r.msg; return; }
+    pinSet(pin); closeDev(); ctlSync(); render(); toast("🔓 สั่งการได้แล้ว · กดเปิด/ปิดที่อุปกรณ์");
+  };
+}
+document.addEventListener("click", (e) => { if (e.target.closest("#btnCtl,[data-ctlu]")) { e.stopPropagation(); askUnlock(); } }, true);
+setTimeout(() => { ctlSync(); if (/[?&]ctl=1/.test(location.search) && !ctlOn()) askUnlock(); }, 600);
 document.addEventListener("click", (e) => { const c = e.target.closest("[data-ctl]"); if (c) { e.stopPropagation(); askCmd(c.dataset.ctl, c.dataset.on === "1"); } }, true);
 
 /* ---------- ข้อมูลตัวอย่าง (?demo=1) ---------- */

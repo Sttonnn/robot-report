@@ -19,6 +19,9 @@ const HOST = HOSTS[REGION];
 // สั่งได้เฉพาะสวิตช์ / ตั้งเวลา / แอร์อินฟราเรด (ไม่รวมมิเตอร์ไฟเครื่องจักร dlq — ผู้ใช้เลือก 6 ต.ค.)
 const ALLOW = new Set(["kg", "znjdq", "infrared_ac"]);
 
+const FAILS = new Map<string, number[]>();
+// เทียบรหัสแบบเวลาคงที่ (กันเดาจากเวลาตอบ)
+async function same(x: string, y: string) { const [hx, hy] = await Promise.all([sha256(x), sha256(y)]); let d = 0; for (let i = 0; i < hx.length; i++) d |= hx.charCodeAt(i) ^ hy.charCodeAt(i); return d === 0 && x.length > 0; }
 const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "authorization, apikey, content-type", "Access-Control-Allow-Methods": "POST, OPTIONS" };
 const json = (o: unknown, status = 200) => new Response(JSON.stringify(o), { status, headers: { ...CORS, "Content-Type": "application/json" } });
 
@@ -52,11 +55,14 @@ Deno.serve(async (req) => {
   let b: { device_id?: string; on?: boolean; pin?: string; check?: boolean };
   try { b = await req.json(); } catch { return json({ ok: false, msg: "ข้อมูลไม่ถูกต้อง" }, 400); }
 
-  // กันเดารหัส: ผิดเกิน 5 ครั้งใน 10 นาที = ล็อก
-  const since = new Date(Date.now() - 10 * 60000).toISOString();
+  // กันเดารหัส: ผิดเกิน 5 ครั้งใน 10 นาที = ล็อก (นับจากตาราง iot_commands + ในหน่วยความจำต่อ IP เผื่อไม่มีตาราง)
+  const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "?";
+  const now = Date.now(); FAILS.set(ip, (FAILS.get(ip) ?? []).filter(t => now - t < 10 * 60000));
+  const since = new Date(now - 10 * 60000).toISOString();
   const fr = await sb(`iot_commands?select=id&ok=eq.false&msg=eq.bad_pin&ts=gte.${since}`);
-  if (fr.ok && (await fr.json()).length >= 5) return json({ ok: false, msg: "ใส่รหัสผิดหลายครั้ง รอ 10 นาทีแล้วลองใหม่" }, 429);
-  if (String(b.pin ?? "").trim() !== PIN) { await log({ device_id: b.device_id ?? null, action: b.check ? "check" : (b.on ? "on" : "off"), ok: false, msg: "bad_pin" }); return json({ ok: false, msg: "รหัสสั่งงานไม่ถูกต้อง" }, 401); }
+  const dbFails = fr.ok ? (await fr.json()).length : 0;
+  if (dbFails >= 5 || (FAILS.get(ip) ?? []).length >= 5) return json({ ok: false, msg: "ใส่รหัสผิดหลายครั้ง รอ 10 นาทีแล้วลองใหม่" }, 429);
+  if (!(await same(String(b.pin ?? "").trim(), PIN))) { FAILS.get(ip)!.push(now); await log({ device_id: b.device_id ?? null, action: b.check ? "check" : (b.on ? "on" : "off"), ok: false, msg: "bad_pin" }); return json({ ok: false, msg: "รหัสสั่งงานไม่ถูกต้อง" }, 401); }
   if (b.check) return json({ ok: true });
 
   const id = String(b.device_id ?? ""), on = !!b.on;
