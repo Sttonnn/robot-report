@@ -27,28 +27,23 @@ jobs:
           print('last updated',sorted((x['updated_at'] or '')[:16] for x in a)[-5:])
           print('owners',collections.Counter(r.get('owner') for r in T).most_common(8))
           PY
-          echo "== robot.csv ขนาดตู้ 14/10 (เฉพาะคอลัมน์ วันที่/ตู้/สายส่ง/พาเลท/ขนาด)"
-          curl -sL "https://dl.dropboxusercontent.com/scl/fi/tackqddg35xdt41rs4r5x/robot.csv?rlkey=ikqlvz6gfujzyo5ik07ni680b" -o r.csv
+          echo "== robot.csv ล่าสุด"
+          curl -sL -D rh.txt "https://dl.dropboxusercontent.com/scl/fi/tackqddg35xdt41rs4r5x/robot.csv?rlkey=ikqlvz6gfujzyo5ik07ni680b" -o r.csv
+          grep -iE "^(HTTP|last-modified|content-length|etag)" rh.txt | tr -d '\r'
           python3 - <<'PY'
-          import csv,io
+          import csv,io,collections
           t=open('r.csv',encoding='utf-8-sig',errors='replace').read(); rows=list(csv.reader(io.StringIO(t)))
-          h=[x.replace(' ','').lower() for x in rows[0]]; print('HEAD',rows[0])
-          def ix(*n):
-            for k in n:
-              k=k.replace(' ','').lower()
-              if k in h: return h.index(k)
-            return -1
-          d,c,sp,pl,sz=ix('วันที่โหลด','date'),ix('ตู้ที่','container'),ix('สายส่ง'),ix('จำนวนพาเลท'),ix('ขนาด','ขนาดตู้','size','size_ft')
-          print('idx',d,c,sp,pl,sz)
-          agg={}
+          print('rows',len(rows)-1,'HEAD',rows[0][:6])
+          h=[x.strip() for x in rows[0]]; d=h.index('วันที่โหลด'); c=h.index('ตู้ที่'); sp=h.index('สายส่ง')
+          per=collections.OrderedDict()
           for r in rows[1:]:
-            if len(r)<=max(d,c,sp,pl): continue
-            if not (r[d].startswith('14/10') or r[d].startswith('2026-10-14') or r[d].strip() in ('46309',)): continue
-            k=(r[c],r[sp]); a=agg.setdefault(k,[0,set()]); 
-            try: a[0]+=float(r[pl] or 0)
-            except: pass
-            if sz>=0: a[1].add(r[sz])
-          for k,v in agg.items(): print(k,'pallets',round(v[0],1),'size',v[1])
+            if len(r)>sp: per.setdefault(r[d],set()).add((r[c],r[sp]))
+          ks=list(per.keys()); print('first',ks[:2],'last',ks[-4:])
+          def num(x):
+            try: return float(x)
+            except: return -1
+          for k in sorted(per,key=num)[-4:]: print(k,sorted(per[k]))
+          print('LAST ROWS'); [print(r[:6]) for r in rows[-3:]]
           PY
           echo "== robot_entries columns"; curl -s "$U/robot_entries?select=*&limit=1" -H "apikey: $K" -H "Authorization: Bearer $K" | jq -c ".[0] | keys"
           echo "== iot_devices (ชื่อ/หมวด/คลัง)"; curl -s "$U/iot_devices?select=name,category,site,online&order=category" -H "apikey: $K" -H "Authorization: Bearer $K" | jq -r '.[] | "\(.category) | \(.site) | \(.online) | \(.name)"'
