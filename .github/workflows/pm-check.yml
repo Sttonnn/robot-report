@@ -28,7 +28,7 @@ jobs:
           print('owners',collections.Counter(r.get('owner') for r in T).most_common(8))
           PY
           echo "== robot.csv ขนาดตู้ 14/10 (เฉพาะคอลัมน์ วันที่/ตู้/สายส่ง/พาเลท/ขนาด)"
-          curl -sL "https://dl.dropboxusercontent.com/scl/fi/ne9lil4vs5ds1kvodrqjv/robot.csv?rlkey=jyfr275jx5f2bb4swgj9kms03" -o r.csv
+          curl -sL "https://dl.dropboxusercontent.com/scl/fi/tackqddg35xdt41rs4r5x/robot.csv?rlkey=ikqlvz6gfujzyo5ik07ni680b" -o r.csv
           python3 - <<'PY'
           import csv,io
           t=open('r.csv',encoding='utf-8-sig',errors='replace').read(); rows=list(csv.reader(io.StringIO(t)))
