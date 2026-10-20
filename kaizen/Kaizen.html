@@ -127,6 +127,7 @@ window.dash = (() => {
 .pcg-month-b .pcg-wn small { color: var(--muted); font-size: .75rem; width: 100%; }
 .pcg-amt { font-weight: 700; color: var(--good); font-variant-numeric: tabular-nums; white-space: nowrap; text-align: right; }
 .pcg-amt small { display: block; font-weight: 500; color: #b06a00; font-size: .7rem; }
+.pcg-tie { grid-column: 1 / -1; font-size: .74rem; color: #b06a00; background: #fff6e5; border-radius: 6px; padding: 2px 8px; margin-bottom: 2px; }
 .pcg-month-empty { padding: 8px 10px; font-size: .8rem; color: var(--muted); }
 .pcg-prize-period { text-align: center; background: #eef2ff; border-radius: 10px; padding: 6px; font-size: .9rem; }
 .pcg-prize-period b { font-size: 1.2rem; color: #1d2f9a; }
@@ -210,7 +211,7 @@ window.dash = (() => {
       </div>
       <div class="pcg-panel" role="tabpanel" id="pcg-panel-win" aria-labelledby="pcg-tab-win" hidden>
         <h3>ผู้ชนะประจำเดือน</h3>
-        <p class="pcg-note pcg-center">รางวัลที่ 1 · 500 บาท &nbsp; รางวัลที่ 2 · 200 บาท &nbsp; รางวัลที่ 3 · 100 บาท</p>
+        <p class="pcg-note pcg-center">รางวัลที่ 1 · 500 บาท &nbsp; รางวัลที่ 2 · 200 บาท &nbsp; รางวัลที่ 3 · 100 บาท<br>คะแนนเท่ากันแบ่งรางวัลเท่า ๆ กัน</p>
         <div class="pcg-winners" id="pcg-winners"></div>
       </div>
       <div class="pcg-panel" role="tabpanel" id="pcg-panel-prize" aria-labelledby="pcg-tab-prize" hidden>
@@ -524,6 +525,7 @@ window.dash = (() => {
   const PRIZES = [500, 200, 100];
   const PROGRAM_MONTHS = ['2026-07', '2026-08', '2026-09', '2026-10', '2026-11', '2026-12'];
   const THAI_MON = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+  const baht = (v) => (Number.isInteger(v) ? fmt(v) : d3.format(',.2f')(v));
   const thaiMonth = (m) => `${THAI_MON[Number(m.slice(5, 7)) - 1]} ${Number(m.slice(0, 4)) + 543}`;
 
   // Places 1-3 by distinct score (ties share a place), only scores above 0
@@ -541,19 +543,23 @@ window.dash = (() => {
       const h = el('div', 'pcg-month-h', thaiMonth(m));
       const rows = all.filter((r) => r.period === m);
       const places = dataMonths.has(m) ? placesFor(rows) : [];
-      h.appendChild(el('span', null, 'งบ 800 บาท'));
+      const paid = places.reduce((a, p) => a + p.prize, 0);
+      h.appendChild(el('span', null, dataMonths.has(m) ? `จ่าย ${baht(paid)} / 800 บาท` : 'งบ 800 บาท'));
       card.appendChild(h);
       if (!dataMonths.has(m)) { card.appendChild(el('div', 'pcg-month-empty', 'ยังไม่มีผลประเมิน')); box.appendChild(card); continue; }
       if (!places.length) { card.appendChild(el('div', 'pcg-month-empty', 'ไม่มีหัวข้อที่ผ่านการประเมิน')); box.appendChild(card); continue; }
       const b = el('div', 'pcg-month-b');
       for (const p of places) {
-        const md = el('span'); md.appendChild(medal(p.place));
-        const names = el('div', 'pcg-wn');
-        p.rows.forEach((r) => { const n = el('span', null, r.warehouse); names.appendChild(n); clickable([n], r, m); });
-        names.appendChild(el('small', null, `${fmt(p.score)} คะแนน` + (p.rows.length > 1 ? ` · เสมอ ${p.rows.length} คลัง` : '')));
-        const amt = el('div', 'pcg-amt', `${fmt(p.prize)} บาท`);
-        if (p.rows.length > 1) amt.appendChild(el('small', null, 'คะแนนเท่ากัน รอตัดสิน'));
-        b.append(md, names, amt);
+        // Tied warehouses share the place's prize equally
+        const share = p.prize / p.rows.length;
+        p.rows.forEach((r, i) => {
+          const md = el('span'); if (i === 0) md.appendChild(medal(p.place));
+          const names = el('div', 'pcg-wn');
+          const n = el('span', null, r.warehouse); names.appendChild(n); clickable([n], r, m);
+          names.appendChild(el('small', null, `${fmt(p.score)} คะแนน`));
+          b.append(md, names, el('div', 'pcg-amt', `${baht(share)} บาท`));
+        });
+        if (p.rows.length > 1) b.appendChild(el('div', 'pcg-tie', `เสมอ ${p.rows.length} คลัง · แบ่งรางวัลที่ ${p.place} (${fmt(p.prize)} บาท) เท่า ๆ กัน`));
       }
       card.appendChild(b);
       box.appendChild(card);
@@ -574,7 +580,8 @@ window.dash = (() => {
     const lead = rows.filter((r) => r.score === hi).sort((a, b) => a.order - b.order);
     box.append(document.createTextNode('ผู้นำตอนนี้ (สะสม ก.ค.–ธ.ค. 2569): '));
     lead.forEach((r, i) => { if (i) box.append(document.createTextNode(', ')); box.append(el('b', null, r.warehouse)); });
-    box.append(document.createTextNode(` · ${fmt(hi)} คะแนน` + (lead.length > 1 ? ` (เสมอ ${lead.length} คลัง)` : '')));
+    box.append(document.createTextNode(` · ${fmt(hi)} คะแนน`));
+    if (lead.length > 1) box.append(el('div', null, `เสมอ ${lead.length} คลัง · ถ้าจบโครงการแบบนี้ จะได้คลังละ ${baht(1000 / lead.length)} บาท`));
   }
 
   function barRow(b, r, scaleMax) {
