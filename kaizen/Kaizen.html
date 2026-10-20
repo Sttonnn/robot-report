@@ -109,6 +109,43 @@ window.dash = (() => {
 .pcg-matrix .pcg-reg td { background: #f4f5f8; font-weight: 700; color: #1d2f9a; }
 .pcg-matrix .pcg-tot { font-weight: 700; }
 .pcg-matrix .pcg-zero { color: var(--muted); }
+.pcg-tabs { display: flex; gap: 4px; background: #eef0f6; border-radius: 10px; padding: 4px; }
+.pcg-tab { flex: 1; font: inherit; font-size: .85rem; font-weight: 600; border: 0; background: transparent; color: var(--muted); border-radius: 8px; padding: 6px 4px; cursor: pointer; white-space: nowrap; }
+.pcg-tab[aria-selected="true"] { background: var(--navy); color: #fff; }
+.pcg-tab:focus-visible { outline: 2px solid #1d2f9a; outline-offset: 1px; }
+.pcg-panel { display: flex; flex-direction: column; gap: 10px; }
+.pcg-panel[hidden] { display: none; }
+.pcg-center { text-align: center; margin: -4px 0 0; }
+.pcg-winners { display: flex; flex-direction: column; gap: 10px; }
+.pcg-month { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.pcg-month.sel { border-color: #1d2f9a; box-shadow: 0 0 0 1px #1d2f9a; }
+.pcg-month-h { display: flex; justify-content: space-between; align-items: center; background: #f4f5f8; padding: 6px 10px; font-weight: 700; font-size: .9rem; }
+.pcg-month-h span { font-weight: 500; font-size: .78rem; color: var(--muted); }
+.pcg-month-b { padding: 6px 10px 8px; display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; gap: 6px 8px; align-items: center; font-size: .85rem; }
+.pcg-month-b .pcg-wn { display: flex; flex-wrap: wrap; gap: 2px 6px; min-width: 0; }
+.pcg-month-b .pcg-wn .pcg-click { font-weight: 700; padding: 0 3px; }
+.pcg-month-b .pcg-wn small { color: var(--muted); font-size: .75rem; width: 100%; }
+.pcg-amt { font-weight: 700; color: var(--good); font-variant-numeric: tabular-nums; white-space: nowrap; text-align: right; }
+.pcg-amt small { display: block; font-weight: 500; color: #b06a00; font-size: .7rem; }
+.pcg-month-empty { padding: 8px 10px; font-size: .8rem; color: var(--muted); }
+.pcg-prize-period { text-align: center; background: #eef2ff; border-radius: 10px; padding: 6px; font-size: .9rem; }
+.pcg-prize-period b { font-size: 1.2rem; color: #1d2f9a; }
+.pcg-prize-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.pcg-prize { border-radius: 10px; padding: 8px 4px; text-align: center; display: flex; flex-direction: column; align-items: center; font-size: .78rem; }
+.pcg-prize b { font-size: 1.5rem; line-height: 1.1; }
+.pcg-prize.p1 { background: #fff6dc; } .pcg-prize.p1 .pcg-prize-l { background: #e2a812; }
+.pcg-prize.p2 { background: #eef1f6; } .pcg-prize.p2 .pcg-prize-l { background: #2f5fd0; }
+.pcg-prize.p3 { background: #e9f7ee; } .pcg-prize.p3 .pcg-prize-l { background: #1f8a4c; }
+.pcg-prize .pcg-prize-l { color: #fff; border-radius: 999px; padding: 1px 8px; font-weight: 700; margin-bottom: 2px; }
+.pcg-prize-special { border: 1px solid var(--line); border-radius: 12px; padding: 10px; font-size: .85rem; display: flex; flex-direction: column; gap: 6px; }
+.pcg-prize-special b { font-size: 1.5rem; color: #1d2f9a; }
+.pcg-prize-special .pcg-prize-l { display: block; font-weight: 700; }
+.pcg-leader { font-size: .82rem; color: var(--muted); }
+.pcg-leader b { font-size: .95rem; color: var(--good); }
+.pcg-budget { width: 100%; border-collapse: collapse; font-size: .82rem; }
+.pcg-budget td { padding: 4px 2px; border-bottom: 1px solid var(--line); }
+.pcg-budget td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+.pcg-budget .tot td { font-weight: 700; color: #1d2f9a; border-bottom: 0; font-size: .95rem; }
 .pcg-click { cursor: pointer; border-radius: 6px; transition: background .15s; }
 .pcg-click:hover, .pcg-click.pcg-hover { background: #eaf0ff; }
 .pcg-click:focus-visible { outline: 2px solid #1d2f9a; outline-offset: 1px; }
@@ -155,8 +192,39 @@ window.dash = (() => {
     </section>
 
     <aside class="pcg-rank" id="pcg-ranking">
-      <h3>Ranking คะแนนสะสมรวม</h3>
-      <div class="pcg-rank-list" id="pcg-rank-list"></div>
+      <div class="pcg-tabs" role="tablist" aria-label="แผงด้านขวา">
+        <button class="pcg-tab" role="tab" id="pcg-tab-rank" aria-controls="pcg-panel-rank" aria-selected="true" type="button">คะแนนรวม</button>
+        <button class="pcg-tab" role="tab" id="pcg-tab-win" aria-controls="pcg-panel-win" aria-selected="false" tabindex="-1" type="button">ผู้ชนะรายเดือน</button>
+        <button class="pcg-tab" role="tab" id="pcg-tab-prize" aria-controls="pcg-panel-prize" aria-selected="false" tabindex="-1" type="button">รางวัล</button>
+      </div>
+      <div class="pcg-panel" role="tabpanel" id="pcg-panel-rank" aria-labelledby="pcg-tab-rank">
+        <h3>Ranking คะแนนสะสมรวม</h3>
+        <div class="pcg-rank-list" id="pcg-rank-list"></div>
+      </div>
+      <div class="pcg-panel" role="tabpanel" id="pcg-panel-win" aria-labelledby="pcg-tab-win" hidden>
+        <h3>ผู้ชนะประจำเดือน</h3>
+        <p class="pcg-note pcg-center">รางวัลที่ 1 · 500 บาท &nbsp; รางวัลที่ 2 · 200 บาท &nbsp; รางวัลที่ 3 · 100 บาท</p>
+        <div class="pcg-winners" id="pcg-winners"></div>
+      </div>
+      <div class="pcg-panel" role="tabpanel" id="pcg-panel-prize" aria-labelledby="pcg-tab-prize" hidden>
+        <h3>เงินรางวัล Kaizen Logistics 2026</h3>
+        <p class="pcg-note pcg-center">ส่งเสริมการเสนอแนวคิด Kaizen และการปรับปรุงงานอย่างต่อเนื่อง ฝ่าย Logistics</p>
+        <div class="pcg-prize-period">เดือนละ <b>800</b> บาท · ก.ค.–ธ.ค. 2569 · 6 เดือน</div>
+        <div class="pcg-prize-grid">
+          <div class="pcg-prize p1"><span class="pcg-prize-l">รางวัลที่ 1</span><b>500</b><span>บาท</span></div>
+          <div class="pcg-prize p2"><span class="pcg-prize-l">รางวัลที่ 2</span><b>200</b><span>บาท</span></div>
+          <div class="pcg-prize p3"><span class="pcg-prize-l">รางวัลที่ 3</span><b>100</b><span>บาท</span></div>
+        </div>
+        <div class="pcg-prize-special">
+          <div><span class="pcg-prize-l">รางวัลพิเศษคะแนนสะสมสูงสุด</span><b>1,000</b> บาท</div>
+          <div class="pcg-leader" id="pcg-leader"></div>
+        </div>
+        <table class="pcg-budget">
+          <tr><td>เงินรางวัลรายเดือน 800 × 6 เดือน</td><td>4,800</td></tr>
+          <tr><td>รางวัลพิเศษสะสม</td><td>1,000</td></tr>
+          <tr class="tot"><td>งบประมาณรวมทั้งหมด</td><td>5,800 บาท</td></tr>
+        </table>
+      </div>
     </aside>
 
     <section class="pcg-strip" id="pcg-summary">
@@ -321,9 +389,9 @@ window.dash = (() => {
   modalBg.addEventListener('click', (e) => { if (e.target === modalBg) closeDetail(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modalBg.hidden) closeDetail(); });
 
-  function openDetail(r) {
+  function openDetail(r, forPeriod) {
     lastFocus = document.activeElement;
-    const period = currentPeriod;
+    const period = forPeriod || currentPeriod;
     const d = dash.data('kaizen_topics');
     const list = (d.data || [])
       .filter((t) => t.warehouse === r.warehouse && t.topic)
@@ -354,18 +422,97 @@ window.dash = (() => {
   }
 
   // Make the cells of one warehouse row act as one button
-  function clickable(cells, r) {
+  function clickable(cells, r, forPeriod) {
     const on = () => cells.forEach((c) => c.classList.add('pcg-hover'));
     const off = () => cells.forEach((c) => c.classList.remove('pcg-hover'));
     cells.forEach((c, i) => {
       c.classList.add('pcg-click');
-      c.addEventListener('click', () => openDetail(r));
+      c.addEventListener('click', () => openDetail(r, forPeriod));
       c.addEventListener('mouseenter', on); c.addEventListener('mouseleave', off);
       if (i === 0) {
         c.tabIndex = 0; c.setAttribute('role', 'button'); c.setAttribute('aria-label', `ดูหัวข้อ Kaizen ของ ${r.warehouse}`);
-        c.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDetail(r); } });
+        c.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDetail(r, forPeriod); } });
       }
     });
+  }
+
+  // ----- Right-side tabs -----
+  const TABS = ['rank', 'win', 'prize'];
+  function showTab(name, focus) {
+    TABS.forEach((t) => {
+      const tab = document.getElementById('pcg-tab-' + t);
+      const on = t === name;
+      tab.setAttribute('aria-selected', String(on)); tab.tabIndex = on ? 0 : -1;
+      document.getElementById('pcg-panel-' + t).hidden = !on;
+      if (on && focus) tab.focus();
+    });
+  }
+  TABS.forEach((t, i) => {
+    const tab = document.getElementById('pcg-tab-' + t);
+    tab.addEventListener('click', () => showTab(t));
+    tab.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        const n = (i + (e.key === 'ArrowRight' ? 1 : -1) + TABS.length) % TABS.length;
+        showTab(TABS[n], true);
+      }
+    });
+  });
+
+  // ----- Rewards (from the approved Kaizen Logistics 2026 budget) -----
+  const PRIZES = [500, 200, 100];
+  const PROGRAM_MONTHS = ['2026-07', '2026-08', '2026-09', '2026-10', '2026-11', '2026-12'];
+  const THAI_MON = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+  const thaiMonth = (m) => `${THAI_MON[Number(m.slice(5, 7)) - 1]} ${Number(m.slice(0, 4)) + 543}`;
+
+  // Places 1-3 by distinct score (ties share a place), only scores above 0
+  function placesFor(rows) {
+    const scores = [...new Set(rows.filter((r) => r.score > 0).map((r) => r.score))].sort((a, b) => b - a).slice(0, 3);
+    return scores.map((s, i) => ({ place: i + 1, score: s, prize: PRIZES[i], rows: rows.filter((r) => r.score === s).sort((a, b) => a.order - b.order) }));
+  }
+
+  function drawWinners(all, period) {
+    const box = document.getElementById('pcg-winners');
+    box.replaceChildren();
+    const dataMonths = new Set(all.map((r) => r.period).filter((x) => x.length === 7));
+    for (const m of PROGRAM_MONTHS) {
+      const card = el('div', 'pcg-month' + (m === period ? ' sel' : ''));
+      const h = el('div', 'pcg-month-h', thaiMonth(m));
+      const rows = all.filter((r) => r.period === m);
+      const places = dataMonths.has(m) ? placesFor(rows) : [];
+      h.appendChild(el('span', null, 'งบ 800 บาท'));
+      card.appendChild(h);
+      if (!dataMonths.has(m)) { card.appendChild(el('div', 'pcg-month-empty', 'ยังไม่มีผลประเมิน')); box.appendChild(card); continue; }
+      if (!places.length) { card.appendChild(el('div', 'pcg-month-empty', 'ไม่มีหัวข้อที่ผ่านการประเมิน')); box.appendChild(card); continue; }
+      const b = el('div', 'pcg-month-b');
+      for (const p of places) {
+        const md = el('span'); md.appendChild(medal(p.place));
+        const names = el('div', 'pcg-wn');
+        p.rows.forEach((r) => { const n = el('span', null, r.warehouse); names.appendChild(n); clickable([n], r, m); });
+        names.appendChild(el('small', null, `${fmt(p.score)} คะแนน` + (p.rows.length > 1 ? ` · เสมอ ${p.rows.length} คลัง` : '')));
+        const amt = el('div', 'pcg-amt', `${fmt(p.prize)} บาท`);
+        if (p.rows.length > 1) amt.appendChild(el('small', null, 'คะแนนเท่ากัน รอตัดสิน'));
+        b.append(md, names, amt);
+      }
+      card.appendChild(b);
+      box.appendChild(card);
+    }
+  }
+
+  function drawLeader(all) {
+    const box = document.getElementById('pcg-leader');
+    const by = new Map();
+    all.filter((r) => PROGRAM_MONTHS.includes(r.period)).forEach((r) => {
+      const o = by.get(r.warehouse) || { ...r, score: 0 };
+      o.score += r.score; by.set(r.warehouse, o);
+    });
+    const rows = [...by.values()];
+    const hi = d3.max(rows, (r) => r.score) || 0;
+    box.replaceChildren();
+    if (!hi) { box.textContent = 'ยังไม่มีคลังที่ได้คะแนนในช่วงโครงการ'; return; }
+    const lead = rows.filter((r) => r.score === hi).sort((a, b) => a.order - b.order);
+    box.append(document.createTextNode('ผู้นำตอนนี้ (สะสม ก.ค.–ธ.ค. 2569): '));
+    lead.forEach((r, i) => { if (i) box.append(document.createTextNode(', ')); box.append(el('b', null, r.warehouse)); });
+    box.append(document.createTextNode(` · ${fmt(hi)} คะแนน` + (lead.length > 1 ? ` (เสมอ ${lead.length} คลัง)` : '')));
   }
 
   function barRow(b, r, scaleMax) {
@@ -495,6 +642,8 @@ window.dash = (() => {
     drawRanking(rows, scaleMax);
     drawKpi(period);
     drawMatrix(all, period);
+    drawWinners(all, period);
+    drawLeader(all);
     drawTopics(period);
   });
 })();
