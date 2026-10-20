@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kaizen Score Dashboard 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script>
+window.KAIZEN_DATA = {"generated":"2026-10-20 10:50","kaizen_topics":[{"topic_id":"KZ-001","round":"2026-08","region":"คลังสมุทรปราการ","warehouse":"คลัง 32 (WHA)","department":"คลังสินค้า","topic":"ลดเวลาการทำงานด้วยการใช้ประตูโหลดว่างอย่างเหมาะสม","category":"Process Improvement","category_points":"5","votes_yes":"4","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-002","round":"2026-08","region":"คลังสมุทรปราการ","warehouse":"คลัง 32 (WHA)","department":"คลังสินค้า","topic":"ปรับปรุงสายพาน","category":"Machine","category_points":"3","votes_yes":"2","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-003","round":"2026-08","region":"ภาคเหนือ","warehouse":"คลังเชียงใหม่","department":"คลังสินค้า","topic":"Damage system","category":"Digital","category_points":"4","votes_yes":"5","voters":"8","result_points":"4","ranking":"2"},{"topic_id":"KZ-004","round":"2026-08","region":"ภาคเหนือ","warehouse":"คลังเชียงราย","department":"คลังสินค้า","topic":"Stockscan","category":"Digital","category_points":"4","votes_yes":"5","voters":"8","result_points":"4","ranking":"2"},{"topic_id":"KZ-005","round":"2026-08","region":"ภาคเหนือ","warehouse":"คลังเชียงราย","department":"คลังสินค้า","topic":"แจ้งสินค้า Damage จาก แจ้งเตือนใน LINE เข้า  Microsoft Teams","category":"Digital","category_points":"","votes_yes":"3","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-006","round":"2026-08","region":"ภาคเหนือ","warehouse":"คลังพิษณุโลก","department":"ขนส่ง","topic":"APPLICATION แจ้งเตือนและจัดการเอกสารขนส่ง","category":"Digital","category_points":"4","votes_yes":"5","voters":"8","result_points":"4","ranking":"2"},{"topic_id":"KZ-007","round":"2026-08","region":"ภาคเหนือ","warehouse":"คลังพิษณุโลก","department":"คลังสินค้า","topic":"App Script รวมข้อมูล และ Tracking การส่งของ MAKRO","category":"Digital","category_points":"","votes_yes":"4","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-008","round":"2026-08","region":"ภาคอีสาน","warehouse":"คลังขอนแก่น","department":"คลังสินค้า","topic":"Dead Stock All RDC","category":"Process Improvement","category_points":"5","votes_yes":"4","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-009","round":"2026-08","region":"ภาคอีสาน","warehouse":"คลังขอนแก่น","department":"คลังสินค้า","topic":"พันไม่พัก","category":"Machine","category_points":"","votes_yes":"4","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-010","round":"2026-08","region":"ภาคอีสาน","warehouse":"คลังอุบลฯ","department":"คลังสินค้า","topic":"Policy Up เปลี่ยนการรับทราบ สู่ความเข้าใจที่แท้จริง คลังสินค้าอุบลราชธานี","category":"Process Improvement","category_points":"5","votes_yes":"4","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-011","round":"2026-08","region":"ภาคอีสาน","warehouse":"คลังโคราช","department":"ขนส่ง","topic":"กลยุทร์จัดส่งอาหารม้า Same Day","category":"Process Improvement","category_points":"5","votes_yes":"0","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-012","round":"2026-08","region":"ภาคอีสาน","warehouse":"คลังโคราช","department":"คลังสินค้า","topic":"Master File Daily Trend Customer","category":"Digital","category_points":"","votes_yes":"4","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-013","round":"2026-08","region":"ภาคใต้","warehouse":"คลังสุราษฯ","department":"ขนส่ง","topic":"เวลาว่างเป็นประโยชน์","category":"Process Improvement","category_points":"5","votes_yes":"5","voters":"8","result_points":"5","ranking":"1"},{"topic_id":"KZ-014","round":"2026-08","region":"ภาคใต้","warehouse":"คลังสุราษฯ","department":"ขนส่ง","topic":"SDS Flip","category":"Office และพื้นที่การทำงาน","category_points":"","votes_yes":"2","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-015","round":"2026-08","region":"ภาคใต้","warehouse":"คลังหาดใหญ่","department":"คลังสินค้า","topic":"จับกลุ่มแบ่งโซนสินค้า","category":"Process Improvement","category_points":"5","votes_yes":"4","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-016","round":"2026-08","region":"ภาคใต้","warehouse":"คลังหาดใหญ่","department":"คลังสินค้า","topic":"Picker ก็เก็บได้","category":"Process Improvement","category_points":"","votes_yes":"4","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-017","round":"2026-08","region":"ภาคกลาง","warehouse":"คลังราชบุรี","department":"ขนส่ง","topic":"KPI ทันใจ","category":"Digital","category_points":"4","votes_yes":"4","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-018","round":"2026-08","region":"ภาคกลาง","warehouse":"คลังศรีราชา","department":"คลังสินค้า","topic":"รถขยะเคลื่อนที่","category":"Office และพื้นที่การทำงาน","category_points":"1","votes_yes":"4","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-019","round":"2026-08","region":"กรุงเทพฯ","warehouse":"คลังวังน้อย","department":"ขนส่ง","topic":"ย้ายพื้นที่จัดส่งสินค้า","category":"Process Improvement","category_points":"5","votes_yes":"0","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-020","round":"2026-08","region":"กรุงเทพฯ","warehouse":"คลังลาดพร้าว","department":"ขนส่ง","topic":"ขยายเขตจัดส่งสินค้า","category":"Process Improvement","category_points":"5","votes_yes":"3","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-021","round":"2026-08","region":"กรุงเทพฯ","warehouse":"คลังลาดพร้าว","department":"คลังสินค้า","topic":"แผ่นป้ายโลเคชั่นติดแม่เหล็ก","category":"Machine","category_points":"","votes_yes":"2","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-022","round":"2026-08","region":"กรุงเทพฯ","warehouse":"คลังสายไหม","department":"คลังสินค้า","topic":"T-Mail (Template Mailer)","category":"Process Improvement","category_points":"5","votes_yes":"3","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-023","round":"2026-08","region":"กรุงเทพฯ","warehouse":"คลังสายไหม","department":"คลังสินค้า","topic":"KPI_Supplier_RDC","category":"Process Improvement","category_points":"5","votes_yes":"4","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-024","round":"2026-08","region":"กรุงเทพฯ","warehouse":"คลังปากเกร็ด","department":"","topic":"","category":"","category_points":"0","votes_yes":"0","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-025","round":"2026-08","region":"กรุงเทพฯ","warehouse":"คลังหนองแขม","department":"","topic":"","category":"","category_points":"0","votes_yes":"0","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-026","round":"2026-08","region":"คลังสมุทรปราการ","warehouse":"คลัง 29 (WHA)","department":"","topic":"","category":"","category_points":"0","votes_yes":"0","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-027","round":"2026-08","region":"คลังสมุทรปราการ","warehouse":"คลัง 5 (WHA)","department":"","topic":"","category":"","category_points":"0","votes_yes":"0","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-028","round":"2026-09","region":"คลังสมุทรปราการ","warehouse":"คลัง 5 (WHA)","department":"คลังสินค้า","topic":"Improvement Process CN E-commerce","category":"Process Improvement","category_points":"5","votes_yes":"4","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-029","round":"2026-09","region":"คลังสมุทรปราการ","warehouse":"คลัง 5 (WHA)","department":"คลังสินค้า","topic":"การจัดการพัสดุสิ้นเปลือง","category":"Process Improvement","category_points":"5","votes_yes":"2","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-030","round":"2026-09","region":"คลังสมุทรปราการ","warehouse":"คลัง 29 (WHA)","department":"คลังสินค้า","topic":"บ้านน้อย คอยนก","category":"Process Improvement","category_points":"5","votes_yes":"2","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-031","round":"2026-09","region":"คลังสมุทรปราการ","warehouse":"คลัง 29 (WHA)","department":"คลังสินค้า","topic":"ปรับปรุุงพาเลท เหล็ก","category":"Process Improvement","category_points":"5","votes_yes":"2","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-032","round":"2026-09","region":"คลังสมุทรปราการ","warehouse":"คลัง 32 (WHA)","department":"คลังสินค้า","topic":"Dashboard สู่ Power BI","category":"Process Improvement","category_points":"5","votes_yes":"2","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-033","round":"2026-09","region":"คลังสมุทรปราการ","warehouse":"คลัง 32 (WHA)","department":"คลังสินค้า","topic":"","category":"","category_points":"0","votes_yes":"0","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-034","round":"2026-09","region":"ภาคเหนือ","warehouse":"คลังเชียงใหม่","department":"คลังสินค้า","topic":"จัดกลุ่ม Pickface สินค้าพิเศษ","category":"Process Improvement","category_points":"5","votes_yes":"5","voters":"8","result_points":"5","ranking":"1"},{"topic_id":"KZ-035","round":"2026-09","region":"ภาคเหนือ","warehouse":"คลังเชียงราย","department":"คลังสินค้า","topic":"โปรแกรมจัดลำดับเรียงสินค้าตู้โอนย้าย","category":"Process Improvement","category_points":"5","votes_yes":"5","voters":"8","result_points":"5","ranking":"1"},{"topic_id":"KZ-036","round":"2026-09","region":"ภาคเหนือ","warehouse":"คลังพิษณุโลก","department":"คลังสินค้า","topic":"ระบบควบคุมการส่ง invoice ร้านค้าพิเศษ","category":"Process Improvement","category_points":"5","votes_yes":"2","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-037","round":"2026-09","region":"ภาคเหนือ","warehouse":"คลังพิษณุโลก","department":"คลังสินค้า","topic":"แบ่งโซนการจัดเก็ยสินค้าเข้าชั้นเศษ","category":"Process Improvement","category_points":"5","votes_yes":"0","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-038","round":"2026-09","region":"ภาคอีสาน","warehouse":"คลังขอนแก่น","department":"คลังสินค้า","topic":"สายสืบพวงมาลัย","category":"Process Improvement","category_points":"5","votes_yes":"5","voters":"8","result_points":"5","ranking":"1"},{"topic_id":"KZ-039","round":"2026-09","region":"ภาคอีสาน","warehouse":"คลังขอนแก่น","department":"คลังสินค้า","topic":"ขนส่งคีย์ไว จัดสายไร้สะดุด","category":"Digital","category_points":"4","votes_yes":"4","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-040","round":"2026-09","region":"ภาคอีสาน","warehouse":"คลังอุบลฯ","department":"คลังสินค้า","topic":"","category":"","category_points":"0","votes_yes":"0","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-041","round":"2026-09","region":"ภาคอีสาน","warehouse":"คลังโคราช","department":"คลังสินค้า","topic":"Rolling Task หมุนตารางงานอย่างลงตัว","category":"Process Improvement","category_points":"5","votes_yes":"5","voters":"8","result_points":"5","ranking":"1"},{"topic_id":"KZ-042","round":"2026-09","region":"ภาคอีสาน","warehouse":"คลังโคราช","department":"คลังสินค้า","topic":"","category":"","category_points":"0","votes_yes":"0","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-043","round":"2026-09","region":"ภาคใต้","warehouse":"คลังสุราษฯ","department":"คลังสินค้า","topic":"Improvement Pickface Freestyle","category":"Process Improvement","category_points":"5","votes_yes":"1","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-044","round":"2026-09","region":"ภาคใต้","warehouse":"คลังสุราษฯ","department":"คลังสินค้า","topic":"Kaizen Open mans hours","category":"Process Improvement","category_points":"5","votes_yes":"1","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-045","round":"2026-09","region":"ภาคใต้","warehouse":"คลังหาดใหญ่","department":"คลังสินค้า","topic":"คูหู ดูโอ้","category":"Process Improvement","category_points":"5","votes_yes":"3","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-046","round":"2026-09","region":"ภาคใต้","warehouse":"คลังหาดใหญ่","department":"คลังสินค้า","topic":"ยังเก็บได้อีก","category":"Process Improvement","category_points":"5","votes_yes":"2","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-047","round":"2026-09","region":"ภาคกลาง","warehouse":"คลังราชบุรี","department":"คลังสินค้า","topic":"ขยับเวลาชาร์ทรถยก เพื่อลดค่าไฟ","category":"Process Improvement","category_points":"5","votes_yes":"5","voters":"8","result_points":"5","ranking":"1"},{"topic_id":"KZ-048","round":"2026-09","region":"ภาคกลาง","warehouse":"คลังศรีราชา","department":"คลังสินค้า","topic":"สร้างการแข่งขันระหว่างทีมโหลด","category":"Process Improvement","category_points":"5","votes_yes":"3","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-049","round":"2026-09","region":"กรุงเทพฯ","warehouse":"คลังวังน้อย","department":"คลังสินค้า","topic":"Route Matching","category":"Process Improvement","category_points":"5","votes_yes":"3","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-050","round":"2026-09","region":"กรุงเทพฯ","warehouse":"คลังลาดพร้าว","department":"คลังสินค้า","topic":"","category":"","category_points":"0","votes_yes":"0","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-051","round":"2026-09","region":"กรุงเทพฯ","warehouse":"คลังลาดพร้าว","department":"คลังสินค้า","topic":"","category":"","category_points":"0","votes_yes":"0","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-052","round":"2026-09","region":"กรุงเทพฯ","warehouse":"คลังสายไหม","department":"คลังสินค้า","topic":"Pre-order_Process_Improvement","category":"Process Improvement","category_points":"5","votes_yes":"2","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-053","round":"2026-09","region":"กรุงเทพฯ","warehouse":"คลังสายไหม","department":"คลังสินค้า","topic":"","category":"","category_points":"0","votes_yes":"0","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-054","round":"2026-09","region":"กรุงเทพฯ","warehouse":"คลังปากเกร็ด","department":"คลังสินค้า","topic":"","category":"","category_points":"0","votes_yes":"0","voters":"8","result_points":"0","ranking":"5"},{"topic_id":"KZ-055","round":"2026-09","region":"กรุงเทพฯ","warehouse":"คลังหนองแขม","department":"คลังสินค้า","topic":"","category":"","category_points":"0","votes_yes":"0","voters":"8","result_points":"0","ranking":"5"}]};
+</script>
+<style>
+:root { --cds-radius: 0px; --cds-dur-slow: .3s; --font-anthropic-sans: "Noto Sans Thai"; }
+html, body { margin: 0; background: #eceef3; }
+body { font-family: "Noto Sans Thai", "Leelawadee UI", system-ui, sans-serif; }
+#dash-root { max-width: 1500px; margin: 0 auto; }
+.dash-skeleton { min-height: 6rem; background: linear-gradient(90deg, #e3e6ec, #f2f3f6, #e3e6ec); background-size: 200% 100%; border-radius: 8px; }
+.pcg-foot { text-align: center; font-size: .8rem; color: #5b6275; padding: 4px 16px 18px; }
+</style>
+<script>
+// Small stand-in for the dashboard runtime: data comes from data.js
+window.dash = (() => {
+  const D = window.KAIZEN_DATA || {};
+  const store = {}, subs = [];
+  const defaults = { year: 'all', month: 'latest' };
+  let params = { ...defaults };
+  const ok = (data) => ({ status: 'ok', data, columns: data[0] ? Object.keys(data[0]) : [], meta: [] });
+  for (const k of ['kaizen_topics']) store[k] = Array.isArray(D[k]) ? ok(D[k]) : { status: 'error', data: [] };
+  const run = () => subs.forEach((fn) => { try { fn(); } catch (e) { console.error(e); } });
+  let t; window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(run, 150); });
+  return {
+    calc(id, { inputs, fn }) {
+      try {
+        if (inputs.some((i) => !store[i] || store[i].status !== 'ok')) throw new Error('missing input');
+        store[id] = ok(fn(...inputs.map((i) => store[i].data)));
+      } catch (e) { console.error(id, e); store[id] = { status: 'error', data: [] }; }
+    },
+    data: (id) => store[id] || { status: 'missing', data: [] },
+    onData(fn) { subs.push(fn); try { fn(); } catch (e) { console.error(e); } },
+    params: () => ({ ...params }),
+    setParams(p) { params = { ...params, ...p }; run(); },
+    resetParams() { params = { ...defaults }; run(); },
+    setLink(id) { try { history.replaceState(null, '', '#' + id); } catch (e) {} },
+    refresh() {},
+    colors: ['#1d2f9a', '#1ed86c', '#e9703a', '#7b1497', '#f51b1b', '#17b516', '#13289b', '#5b6275']
+  };
+})();
+</script>
+</head>
+<body>
+<div id="dash-root">
+<style>
+.pcg { --navy: #0b1660; --ink: #1b1f2a; --muted: #5b6275; --paper: #ffffff; --ground: #eceef3; --line: #d9dce4; --bar: #1ed86c; --gold: #f2b51c; --silver: #aeb6c2; --bronze: #c98142; --good: #0f7a3a; --bad: #d4161c;
+  font-family: var(--font-anthropic-sans), "Noto Sans Thai", "Leelawadee UI", system-ui, sans-serif; background: var(--ground); color: var(--ink); color-scheme: light; border-radius: var(--cds-radius); overflow: hidden; }
+.pcg-head { background: var(--navy); color: #fff; display: flex; flex-wrap: wrap; align-items: center; gap: 16px 24px; padding: 14px max(16px, 2vw); }
+.pcg-logo { display: flex; flex-direction: column; align-items: center; gap: 2px; flex: none; }
+.pcg-logo-box { border: 2px solid #fff; border-radius: 10px; padding: 2px 14px; font-weight: 700; font-size: 1.6rem; letter-spacing: .04em; background: #16245f; }
+.pcg-logo-sub { font-weight: 700; font-size: .85rem; letter-spacing: .06em; }
+.pcg-titles { flex: 1 1 18rem; min-width: 0; }
+.pcg-title { margin: 0; font-size: clamp(1.4rem, 3vw, 2.2rem); font-weight: 700; line-height: 1.15; }
+.pcg-sub { margin: 2px 0 0; font-size: clamp(.95rem, 1.6vw, 1.25rem); font-weight: 500; }
+.pcg-filters { background: #fff; color: var(--ink); border-radius: 12px; padding: 8px 14px 10px; display: flex; gap: 16px; flex-wrap: wrap; }
+.pcg-filters label { display: flex; flex-direction: column; gap: 2px; font-weight: 700; color: #1d2f9a; font-size: 1rem; }
+.pcg-filters select { font: inherit; font-size: .95rem; font-weight: 400; color: var(--ink); background: #f4f5f8; border: 1px solid var(--line); border-radius: 4px; padding: 3px 6px; min-width: 9rem; }
+.pcg-filters select:focus-visible { outline: 2px solid #1d2f9a; outline-offset: 1px; }
+.pcg-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem); gap: 14px; padding: 14px max(12px, 1.2vw); }
+@media (max-width: 900px) { .pcg-body { grid-template-columns: minmax(0, 1fr); } }
+.pcg-main { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.pcg-h2 { margin: 0; text-align: center; font-size: clamp(1.1rem, 2vw, 1.5rem); font-weight: 700; color: #2a2e38; }
+.pcg-regions { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); gap: 14px; }
+.pcg-region { background: var(--paper); border-radius: 18px; box-shadow: 0 1px 4px rgba(20, 30, 60, .14); overflow: hidden; display: flex; flex-direction: column; min-width: 0; }
+.pcg-region-h { color: #fff; text-align: center; font-weight: 700; font-size: 1.15rem; padding: 8px 10px; }
+.pcg-region-b { padding: 12px 14px 14px; display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 10px 8px; align-content: space-evenly; flex: 1; min-height: 9.5rem; }
+.pcg-wh { font-size: .8rem; font-weight: 600; text-align: right; white-space: nowrap; align-self: center; }
+.pcg-barcell { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.pcg-bar { height: 18px; background: var(--bar); flex: none; }
+.pcg-v { font-size: .8rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.pcg-rank { background: var(--paper); border-radius: 18px; box-shadow: 0 1px 4px rgba(20, 30, 60, .14); padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.pcg-rank h3 { margin: 0; text-align: center; font-size: 1.15rem; font-weight: 600; line-height: 1.3; }
+.pcg-rank-list { display: grid; grid-template-columns: 18px max-content minmax(0, 1fr); gap: 5px 6px; align-items: center; }
+.pcg-rank-list .pcg-wh { font-size: .88rem; font-weight: 700; }
+.pcg-medal { width: 18px; height: 22px; display: block; }
+.pcg-strip { grid-column: 1 / -1; background: var(--paper); border-radius: 18px; box-shadow: 0 1px 4px rgba(20, 30, 60, .14); display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); gap: 12px 20px; padding: 16px 20px; }
+.pcg-kpi { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.pcg-kpi svg { width: 64px; height: 64px; flex: none; }
+.pcg-kpi-t { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.pcg-kpi-l { font-weight: 700; font-size: .95rem; }
+.pcg-kpi-n { font-size: 2.1rem; font-weight: 700; color: #1d2f9a; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.pcg-kpi-n small { font-size: .9rem; color: var(--ink); font-weight: 600; margin-left: 10px; }
+.pcg-kpi-name { font-size: 1.35rem; font-weight: 700; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pcg-good { color: var(--good); }
+.pcg-bad { color: var(--bad); }
+.pcg-note { font-size: .8rem; color: var(--muted); }
+.pcg-topics { grid-column: 1 / -1; background: var(--paper); border-radius: 18px; box-shadow: 0 1px 4px rgba(20, 30, 60, .14); padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.pcg-topics h3 { margin: 0; font-size: 1.1rem; font-weight: 700; }
+.pcg-tablebox { overflow: auto; max-height: 28rem; }
+.pcg-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+.pcg-table th { position: sticky; top: 0; background: var(--navy); color: #fff; text-align: left; font-weight: 600; padding: 7px 8px; white-space: nowrap; }
+.pcg-table td { padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.pcg-table .pcg-r { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pcg-pill { display: inline-block; border-radius: 999px; padding: 1px 9px; font-size: .78rem; font-weight: 600; white-space: nowrap; }
+.pcg-pill.ok { background: #d9f7e6; color: var(--good); }
+.pcg-pill.no { background: #eef0f4; color: var(--muted); }
+@media (max-width: 640px) { .pcg-hide-sm { display: none; } }
+.pcg-matrix th.pcg-r, .pcg-matrix td.pcg-r { text-align: center; }
+.pcg-matrix .pcg-sel { background: #e7f9ef; font-weight: 700; }
+.pcg-matrix th.pcg-sel { background: #1ed86c; color: var(--navy); }
+.pcg-matrix .pcg-reg td { background: #f4f5f8; font-weight: 700; color: #1d2f9a; }
+.pcg-matrix .pcg-tot { font-weight: 700; }
+.pcg-matrix .pcg-zero { color: var(--muted); }
+.pcg-fail { display: flex; align-items: center; justify-content: center; gap: 6px; color: var(--muted); font-size: .8rem; grid-column: 1 / -1; }
+.pcg-fail::before { content: ""; width: .375rem; height: .375rem; border-radius: 50%; background: var(--bad); }
+</style>
+
+<div class="pcg">
+  <header class="pcg-head" id="pcg-head">
+    <div class="pcg-logo" aria-hidden="true"><span class="pcg-logo-box">PCG</span><span class="pcg-logo-sub">LOGISTICS</span></div>
+    <div class="pcg-titles">
+      <h1 class="pcg-title">Kaizen Score Dashboard 2026</h1>
+      <p class="pcg-sub">คะแนนสะสม แต่ละคลัง (500 คะแนน)</p>
+    </div>
+    <div class="pcg-filters">
+      <label for="pcg-year">Year<select id="pcg-year"></select></label>
+      <label for="pcg-month">Month<select id="pcg-month"></select></label>
+    </div>
+  </header>
+
+  <div class="pcg-body">
+    <section class="pcg-main" id="pcg-regions-section">
+      <h2 class="pcg-h2" id="pcg-period-title">คะแนนสะสมแต่ละคลังสินค้า</h2>
+      <div class="pcg-regions" id="pcg-regions"></div>
+    </section>
+
+    <aside class="pcg-rank" id="pcg-ranking">
+      <h3>Ranking คะแนนสะสมรวม</h3>
+      <div class="pcg-rank-list" id="pcg-rank-list"></div>
+    </aside>
+
+    <section class="pcg-strip" id="pcg-summary">
+      <div class="pcg-kpi">
+        <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M20 8h24v14a12 12 0 0 1-24 0z" fill="#f2b51c" stroke="#1b1f2a" stroke-width="2"/><path d="M20 12h-8c0 8 4 12 9 12M44 12h8c0 8-4 12-9 12" fill="none" stroke="#1b1f2a" stroke-width="2"/><path d="M32 34v10M24 54h16l-2-10H26z" fill="#f2b51c" stroke="#1b1f2a" stroke-width="2"/><path d="M32 13l2.2 4.6 5 .6-3.7 3.4 1 5-4.5-2.5-4.5 2.5 1-5-3.7-3.4 5-.6z" fill="#e8463a"/></svg>
+        <div class="pcg-kpi-t"><span class="pcg-kpi-l">คะแนนสะสมทั้งหมด</span><span class="pcg-kpi-n"><span class="pcg-k" data-field="total">—</span><small>คะแนน</small></span></div>
+      </div>
+      <div class="pcg-kpi">
+        <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M8 56h48" stroke="#1b1f2a" stroke-width="2"/><rect x="12" y="38" width="8" height="18" fill="#f2b51c"/><rect x="24" y="28" width="8" height="28" fill="#1ed86c"/><rect x="36" y="34" width="8" height="22" fill="#e8463a"/><rect x="48" y="22" width="8" height="34" fill="#3b82f6"/><path d="M12 30l12-12 10 8 18-16" fill="none" stroke="#3b82f6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="pcg-kpi-t"><span class="pcg-kpi-l">คะแนนเฉลี่ยต่อคลัง</span><span class="pcg-kpi-n"><span class="pcg-k" data-field="avg">—</span><small>คะแนน</small></span></div>
+      </div>
+      <div class="pcg-kpi">
+        <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M8 44a24 24 0 0 1 48 0" fill="none" stroke="#e8463a" stroke-width="7"/><path d="M8 44a24 24 0 0 1 14-21.8" fill="none" stroke="#1ed86c" stroke-width="7"/><path d="M22 22.2a24 24 0 0 1 20 0" fill="none" stroke="#f2b51c" stroke-width="7"/><path d="M32 44l14-10" stroke="#1b1f2a" stroke-width="3" stroke-linecap="round"/><circle cx="32" cy="44" r="4" fill="#1d2f9a"/></svg>
+        <div class="pcg-kpi-t"><span class="pcg-kpi-l">คลังที่ได้คะแนนสูงสุด</span><span class="pcg-kpi-name pcg-good pcg-k" data-field="top_wh">—</span><span class="pcg-kpi-n pcg-good"><span class="pcg-k" data-field="top_score">—</span><small>คะแนน</small></span><span class="pcg-note" id="pcg-top-ties" hidden>และอีก <span class="pcg-k" data-field="top_ties">—</span> คลังที่คะแนนเท่ากัน</span></div>
+      </div>
+      <div class="pcg-kpi">
+        <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 8L58 54H6z" fill="#f2b51c" stroke="#1b1f2a" stroke-width="2" stroke-linejoin="round"/><path d="M32 24v16" stroke="#1b1f2a" stroke-width="5" stroke-linecap="round"/><circle cx="32" cy="47" r="3" fill="#1b1f2a"/></svg>
+        <div class="pcg-kpi-t"><span class="pcg-kpi-l">คลังที่ได้คะแนนต่ำสุด</span><span class="pcg-kpi-name pcg-bad pcg-k" data-field="low_wh">—</span><span class="pcg-kpi-n pcg-bad"><span class="pcg-k" data-field="low_score">—</span><small>คะแนน</small></span><span class="pcg-note" id="pcg-low-ties" hidden>และอีก <span class="pcg-k" data-field="low_ties">—</span> คลังที่คะแนนเท่ากัน</span></div>
+      </div>
+    </section>
+
+    <section class="pcg-topics" id="pcg-monthly">
+      <h3>คะแนนรายเดือนแต่ละคลัง</h3>
+      <span class="pcg-note">คะแนนตามชีตประเมินคะแนน แยกตามเดือน · คอลัมน์ที่ไฮไลต์คือเดือนที่เลือก</span>
+      <div class="pcg-tablebox">
+        <table class="pcg-table pcg-matrix" id="pcg-matrix"><thead><tr id="pcg-matrix-head"></tr></thead><tbody id="pcg-matrix-body"></tbody></table>
+      </div>
+    </section>
+
+    <section class="pcg-topics" id="pcg-topics">
+      <h3>หัวข้อ Kaizen ที่ประเมิน</h3>
+      <span class="pcg-note">หัวข้อผ่านเมื่อกรรมการเห็นชอบอย่างน้อย 5 จาก 8 เสียง แล้วได้คะแนนตามหมวดหมู่ · แสดงตามเดือนที่เลือก</span>
+      <div class="pcg-tablebox">
+        <table class="pcg-table" id="pcg-table">
+          <thead><tr>
+            <th>เดือน</th>
+            <th>คลัง</th>
+            <th>หัวข้อ</th>
+            <th class="pcg-hide-sm">หมวดหมู่</th>
+            <th class="pcg-r">เสียงเห็นชอบ</th>
+            <th class="pcg-r">คะแนน</th>
+          </tr></thead>
+          <tbody id="pcg-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+  <div class="pcg-foot" id="pcg-foot"></div>
+</div>
+
+<script>
+(() => {
+  dash.calc('wh_period', {
+    inputs: ['kaizen_topics'],
+    fn: (kaizen_topics) => {
+      const regionName = { 'คลังสมุทรปราการ': 'คลัง WHA', 'กรุงเทพฯ': 'กรุงเทพมหานคร' };
+      const roster = [], seen = new Set();
+      kaizen_topics.forEach((t) => {
+        if (!t.warehouse || seen.has(t.warehouse)) return;
+        seen.add(t.warehouse); roster.push({ region: regionName[t.region] || t.region, warehouse: t.warehouse });
+      });
+      const months = [...new Set(kaizen_topics.map((t) => t.round))].filter(Boolean).sort();
+      const years = [...new Set(months.map((m) => m.slice(0, 4)))];
+      const periods = ['all', ...years, ...months];
+      const inPeriod = (t, p) => p === 'all' || t.round === p || (p.length === 4 && t.round.slice(0, 4) === p);
+      const out = [];
+      for (const period of periods) {
+        roster.forEach((w, order) => {
+          const ts = kaizen_topics.filter((t) => t.warehouse === w.warehouse && inPeriod(t, period));
+          out.push({
+            period, order, region: w.region, warehouse: w.warehouse,
+            score: ts.reduce((a, t) => a + (Number(t.result_points) || 0), 0),
+            topics: ts.filter((t) => t.topic).length,
+            passed: ts.filter((t) => Number(t.result_points) > 0).length
+          });
+        });
+      }
+      return out;
+    }
+  });
+
+  dash.calc('kpi_period', {
+    inputs: ['wh_period'],
+    fn: (wh_period) => {
+      const by = new Map();
+      wh_period.forEach((r) => { if (!by.has(r.period)) by.set(r.period, []); by.get(r.period).push(r); });
+      return [...by.entries()].map(([period, rs]) => {
+        const total = rs.reduce((a, r) => a + r.score, 0);
+        const hi = Math.max(...rs.map((r) => r.score)), lo = Math.min(...rs.map((r) => r.score));
+        const top = rs.filter((r) => r.score === hi).sort((a, b) => a.order - b.order);
+        const low = rs.filter((r) => r.score === lo).sort((a, b) => a.order - b.order);
+        return {
+          period, total, warehouses: rs.length,
+          avg: Math.round((total / rs.length) * 10) / 10,
+          top_wh: top[0].warehouse, top_score: hi, top_ties: top.length - 1,
+          low_wh: low[0].warehouse, low_score: lo, low_ties: low.length - 1
+        };
+      });
+    }
+  });
+
+  const REGIONS = [
+    ['คลัง WHA', '#2b1cf2'], ['ภาคเหนือ', '#7b1497'], ['ภาคอีสาน', '#e9703a'],
+    ['ภาคใต้', '#f51b1b'], ['ภาคกลาง', '#17b516'], ['กรุงเทพมหานคร', '#13289b']
+  ];
+  const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const monthLabel = (m) => `${MON[Number(m.slice(5, 7)) - 1]}-${m.slice(2, 4)}`;
+  const fmt = d3.format(',');
+  const yearSel = document.getElementById('pcg-year');
+  const monthSel = document.getElementById('pcg-month');
+
+  const params = () => ({ year: dash.params().year ?? 'all', month: dash.params().month ?? 'latest' });
+  // "latest" = the newest month in the evaluation sheet
+  const resolve = (p, all) => {
+    if (p.month !== 'latest') return p;
+    const months = [...new Set(all.map((r) => r.period))].filter((x) => x.length === 7 && (p.year === 'all' || x.startsWith(p.year))).sort();
+    return { ...p, month: months.length ? months[months.length - 1] : 'all' };
+  };
+  const periodOf = (p) => (p.month !== 'all' && p.month !== 'latest' ? p.month : p.year !== 'all' ? p.year : 'all');
+
+  yearSel.addEventListener('change', () => dash.setParams({ year: yearSel.value, month: 'latest' }));
+  monthSel.addEventListener('change', () => dash.setParams({ month: monthSel.value }));
+
+  function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function failLine(box) { box.replaceChildren(el('div', 'pcg-fail', 'โหลดข้อมูลไม่สำเร็จ (ไม่พบ data.js)')); }
+
+  function drawFilters(rows, p) {
+    const periods = [...new Set(rows.map((r) => r.period))];
+    const years = periods.filter((x) => x.length === 4).sort();
+    const months = periods.filter((x) => x.length === 7).sort().filter((m) => p.year === 'all' || m.startsWith(p.year));
+    yearSel.replaceChildren(new Option('All', 'all'), ...years.map((y) => new Option(y, y)));
+    monthSel.replaceChildren(new Option('All (สะสม)', 'all'), ...months.map((m) => new Option(monthLabel(m), m)));
+    yearSel.value = p.year; monthSel.value = months.includes(p.month) ? p.month : 'all';
+  }
+
+  function medal(rank) {
+    const c = rank === 1 ? 'var(--gold)' : rank === 2 ? 'var(--silver)' : 'var(--bronze)';
+    const ns = 'http://www.w3.org/2000/svg';
+    const s = document.createElementNS(ns, 'svg'); s.setAttribute('viewBox', '0 0 18 22'); s.setAttribute('class', 'pcg-medal'); s.setAttribute('aria-label', `อันดับ ${rank}`);
+    const r1 = document.createElementNS(ns, 'path'); r1.setAttribute('d', 'M4 12l-2 9 3-2 2 3 2-8M14 12l2 9-3-2-2 3-2-8'); r1.setAttribute('fill', '#3557c9');
+    const c1 = document.createElementNS(ns, 'circle'); c1.setAttribute('cx', '9'); c1.setAttribute('cy', '8'); c1.setAttribute('r', '7'); c1.style.fill = c; c1.setAttribute('stroke', '#7a5b10'); c1.setAttribute('stroke-width', '.8');
+    const t = document.createElementNS(ns, 'text'); t.setAttribute('x', '9'); t.setAttribute('y', '11'); t.setAttribute('text-anchor', 'middle'); t.setAttribute('font-size', '8'); t.setAttribute('font-weight', '700'); t.setAttribute('fill', '#1b1f2a'); t.textContent = rank;
+    s.append(r1, c1, t); return s;
+  }
+
+  function barRow(b, r, scaleMax) {
+    const cell = el('div', 'pcg-barcell');
+    const bar = el('span', 'pcg-bar');
+    bar.style.width = r.score > 0 ? `calc((100% - 2.5rem) * ${(r.score / scaleMax).toFixed(4)})` : '0px';
+    cell.append(bar, el('span', 'pcg-v', fmt(r.score)));
+    b.append(el('span', 'pcg-wh', r.warehouse), cell);
+  }
+
+  function drawRegions(rows, scaleMax) {
+    const box = document.getElementById('pcg-regions');
+    box.replaceChildren();
+    const groups = REGIONS.map(([n, c]) => [n, c, rows.filter((r) => r.region === n)]);
+    const other = rows.filter((r) => !REGIONS.some(([n]) => n === r.region));
+    if (other.length) groups.push(['อื่น ๆ', '#5b6275', other]);
+    for (const [name, color, rs] of groups) {
+      if (!rs.length) continue;
+      const card = el('article', 'pcg-region');
+      const h = el('div', 'pcg-region-h', name); h.style.background = color;
+      const b = el('div', 'pcg-region-b');
+      rs.slice().sort((a, c) => a.order - c.order).forEach((r) => barRow(b, r, scaleMax));
+      card.append(h, b); box.appendChild(card);
+    }
+  }
+
+  function drawRanking(rows, scaleMax) {
+    const box = document.getElementById('pcg-rank-list');
+    box.replaceChildren();
+    const sorted = rows.slice().sort((a, b) => b.score - a.score || a.order - b.order);
+    const distinct = [...new Set(sorted.filter((r) => r.score > 0).map((r) => r.score))];
+    for (const r of sorted) {
+      const rank = r.score > 0 ? distinct.indexOf(r.score) + 1 : 0;
+      const m = el('span');
+      if (rank >= 1 && rank <= 3) m.appendChild(medal(rank));
+      const cell = el('div', 'pcg-barcell'); const bar = el('span', 'pcg-bar');
+      bar.style.width = r.score > 0 ? `calc((100% - 2rem) * ${(r.score / scaleMax).toFixed(4)})` : '0px';
+      bar.style.height = '12px';
+      cell.append(bar, el('span', 'pcg-v', fmt(r.score)));
+      box.append(m, el('span', 'pcg-wh', r.warehouse), cell);
+    }
+  }
+
+  function drawKpi(period) {
+    const k = dash.data('kpi_period');
+    const row = k.status === 'ok' ? (k.data || []).find((r) => r.period === period) : null;
+    document.querySelectorAll('#pcg-summary .pcg-k').forEach((m) => {
+      if (!row) { m.textContent = '—'; return; }
+      const v = row[m.dataset.field];
+      m.textContent = m.dataset.field === 'avg' ? d3.format('.1f')(v) : typeof v === 'number' ? fmt(v) : v;
+      if (m.dataset.field === 'top_wh' || m.dataset.field === 'low_wh') m.title = v;
+    });
+    document.getElementById('pcg-top-ties').hidden = !row || row.top_ties < 1;
+    document.getElementById('pcg-low-ties').hidden = !row || row.low_ties < 1;
+  }
+
+  function drawMatrix(all, period) {
+    const head = document.getElementById('pcg-matrix-head');
+    const body = document.getElementById('pcg-matrix-body');
+    const months = [...new Set(all.map((r) => r.period))].filter((x) => x.length === 7).sort();
+    head.replaceChildren(el('th', null, 'คลัง'), ...months.map((m) => el('th', 'pcg-r' + (m === period ? ' pcg-sel' : ''), monthLabel(m))), el('th', 'pcg-r' + (period === 'all' ? ' pcg-sel' : ''), 'รวม'));
+    body.replaceChildren();
+    const get = (p, w) => all.find((r) => r.period === p && r.warehouse === w);
+    const base = all.filter((r) => r.period === 'all');
+    const groups = REGIONS.map(([n]) => n).concat([...new Set(base.map((r) => r.region))].filter((n) => !REGIONS.some(([x]) => x === n)));
+    for (const g of groups) {
+      const rs = base.filter((r) => r.region === g).sort((a, b) => a.order - b.order);
+      if (!rs.length) continue;
+      const rh = el('tr', 'pcg-reg'); const c = el('td', null, g); c.colSpan = months.length + 2; rh.appendChild(c); body.appendChild(rh);
+      for (const r of rs) {
+        const tr = el('tr');
+        tr.appendChild(el('td', null, r.warehouse));
+        for (const p of [...months, 'all']) {
+          const v = get(p, r.warehouse);
+          const td = el('td', 'pcg-r' + (p === period ? ' pcg-sel' : '') + (p === 'all' ? ' pcg-tot' : ''));
+          td.appendChild(el('span', v && v.score ? null : 'pcg-zero', fmt(v ? v.score : 0)));
+          tr.appendChild(td);
+        }
+        body.appendChild(tr);
+      }
+    }
+  }
+
+  function drawTopics(period) {
+    const tb = document.getElementById('pcg-tbody');
+    const d = dash.data('kaizen_topics');
+    tb.replaceChildren();
+    if (d.status !== 'ok') { const tr = el('tr'); const td = el('td'); td.colSpan = 6; td.appendChild(el('div', 'pcg-fail', 'โหลดข้อมูลไม่สำเร็จ')); tr.appendChild(td); tb.appendChild(tr); return; }
+    const list = (d.data || [])
+      .filter((t) => t.topic)
+      .filter((t) => period === 'all' || t.round === period || (period.length === 4 && t.round.startsWith(period)))
+      .sort((a, b) => (Number(b.result_points) || 0) - (Number(a.result_points) || 0) || d3.ascending(a.topic_id, b.topic_id));
+    for (const t of list) {
+      const tr = el('tr');
+      const pts = Number(t.result_points) || 0;
+      const ptd = el('td', 'pcg-r'); ptd.appendChild(el('span', 'pcg-pill ' + (pts > 0 ? 'ok' : 'no'), pts > 0 ? `ผ่าน · ${pts}` : 'ไม่ผ่าน'));
+      tr.append(el('td', null, monthLabel(t.round)), el('td', null, t.warehouse), el('td', null, t.topic),
+        el('td', 'pcg-hide-sm', t.category), el('td', 'pcg-r', `${t.votes_yes}/${t.voters}`), ptd);
+      tb.appendChild(tr);
+    }
+    if (!list.length) { const tr = el('tr'); const td = el('td', 'pcg-note', 'ยังไม่มีหัวข้อที่ประเมินในช่วงนี้'); td.colSpan = 6; tr.appendChild(td); tb.appendChild(tr); }
+  }
+
+  dash.onData(() => {
+    const w = dash.data('wh_period');
+    const p = resolve(params(), w.status === 'ok' ? w.data || [] : []);
+    const period = periodOf(p);
+    const title = document.getElementById('pcg-period-title');
+    title.textContent = period === 'all' ? 'คะแนนสะสมแต่ละคลังสินค้า (สะสมทั้งหมด)'
+      : period.length === 4 ? `คะแนนสะสมแต่ละคลังสินค้า (ปี ${period})` : `คะแนนสะสมแต่ละคลังสินค้า (ประจำเดือน ${monthLabel(period)})`;
+    const gen = (window.KAIZEN_DATA || {}).generated;
+    document.getElementById('pcg-foot').textContent = gen ? `ข้อมูลจาก Kaizen Score Data.xlsx · อัปเดตเมื่อ ${gen}` : '';
+    if (w.status !== 'ok') {
+      failLine(document.getElementById('pcg-regions')); failLine(document.getElementById('pcg-rank-list'));
+      drawKpi(period); drawTopics(period); return;
+    }
+    const all = w.data || [];
+    drawFilters(all, p);
+    const rows = all.filter((r) => r.period === period);
+    const scaleMax = Math.max(5, d3.max(rows, (r) => r.score) || 0);
+    drawRegions(rows, scaleMax);
+    drawRanking(rows, scaleMax);
+    drawKpi(period);
+    drawMatrix(all, period);
+    drawTopics(period);
+  });
+})();
+</script>
+</div>
+</body>
+</html>
