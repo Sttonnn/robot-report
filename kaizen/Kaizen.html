@@ -109,6 +109,27 @@ window.dash = (() => {
 .pcg-matrix .pcg-reg td { background: #f4f5f8; font-weight: 700; color: #1d2f9a; }
 .pcg-matrix .pcg-tot { font-weight: 700; }
 .pcg-matrix .pcg-zero { color: var(--muted); }
+.pcg-click { cursor: pointer; border-radius: 6px; transition: background .15s; }
+.pcg-click:hover, .pcg-click.pcg-hover { background: #eaf0ff; }
+.pcg-click:focus-visible { outline: 2px solid #1d2f9a; outline-offset: 1px; }
+.pcg-hint { font-size: .78rem; color: var(--muted); text-align: center; margin: -4px 0 0; }
+.pcg-modal-bg { position: fixed; inset: 0; background: rgba(11, 22, 96, .45); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 50; }
+.pcg-modal-bg[hidden] { display: none; }
+.pcg-modal { background: #fff; color: var(--ink); border-radius: 16px; width: min(680px, 100%); max-height: 86vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 12px 40px rgba(0, 0, 0, .3); font-family: "Noto Sans Thai", "Leelawadee UI", system-ui, sans-serif; }
+.pcg-modal-h { background: var(--navy, #0b1660); color: #fff; padding: 14px 18px; display: flex; align-items: flex-start; gap: 12px; }
+.pcg-modal-h h3 { margin: 0; font-size: 1.25rem; }
+.pcg-modal-h p { margin: 2px 0 0; font-size: .85rem; opacity: .85; }
+.pcg-modal-x { margin-left: auto; background: rgba(255, 255, 255, .15); color: #fff; border: 0; border-radius: 8px; width: 34px; height: 34px; font-size: 1.2rem; cursor: pointer; flex: none; }
+.pcg-modal-x:focus-visible { outline: 2px solid #fff; }
+.pcg-modal-sum { display: flex; flex-wrap: wrap; gap: 8px 20px; padding: 12px 18px; border-bottom: 1px solid #d9dce4; font-size: .9rem; }
+.pcg-modal-sum b { font-size: 1.3rem; color: #1d2f9a; font-variant-numeric: tabular-nums; }
+.pcg-modal-list { padding: 12px 18px 18px; overflow: auto; display: flex; flex-direction: column; gap: 10px; }
+.pcg-item { border: 1px solid #d9dce4; border-radius: 12px; padding: 10px 12px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; }
+.pcg-item.ok { border-left: 5px solid #1ed86c; }
+.pcg-item.no { border-left: 5px solid #c4c9d4; }
+.pcg-item-t { font-weight: 700; font-size: .98rem; }
+.pcg-item-m { font-size: .8rem; color: #5b6275; grid-column: 1; }
+.pcg-item .pcg-pill { grid-row: 1 / span 2; grid-column: 2; align-self: center; font-size: .85rem; }
 .pcg-fail { display: flex; align-items: center; justify-content: center; gap: 6px; color: var(--muted); font-size: .8rem; grid-column: 1 / -1; }
 .pcg-fail::before { content: ""; width: .375rem; height: .375rem; border-radius: 50%; background: var(--bad); }
 </style>
@@ -129,6 +150,7 @@ window.dash = (() => {
   <div class="pcg-body">
     <section class="pcg-main" id="pcg-regions-section">
       <h2 class="pcg-h2" id="pcg-period-title">คะแนนสะสมแต่ละคลังสินค้า</h2>
+      <p class="pcg-hint">กดที่ชื่อคลังเพื่อดูหัวข้อ Kaizen ที่ได้คะแนน</p>
       <div class="pcg-regions" id="pcg-regions"></div>
     </section>
 
@@ -183,6 +205,16 @@ window.dash = (() => {
     </section>
   </div>
   <div class="pcg-foot" id="pcg-foot"></div>
+  <div class="pcg-modal-bg" id="pcg-modal-bg" hidden>
+    <div class="pcg-modal" role="dialog" aria-modal="true" aria-labelledby="pcg-modal-title">
+      <div class="pcg-modal-h">
+        <div><h3 id="pcg-modal-title"></h3><p id="pcg-modal-sub"></p></div>
+        <button class="pcg-modal-x" id="pcg-modal-x" type="button" aria-label="ปิด">✕</button>
+      </div>
+      <div class="pcg-modal-sum" id="pcg-modal-sum"></div>
+      <div class="pcg-modal-list" id="pcg-modal-list"></div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -280,12 +312,70 @@ window.dash = (() => {
     s.append(r1, c1, t); return s;
   }
 
+  // ----- Warehouse detail popup -----
+  let currentPeriod = 'all';
+  const modalBg = document.getElementById('pcg-modal-bg');
+  let lastFocus = null;
+  function closeDetail() { modalBg.hidden = true; if (lastFocus) lastFocus.focus(); }
+  document.getElementById('pcg-modal-x').addEventListener('click', closeDetail);
+  modalBg.addEventListener('click', (e) => { if (e.target === modalBg) closeDetail(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modalBg.hidden) closeDetail(); });
+
+  function openDetail(r) {
+    lastFocus = document.activeElement;
+    const period = currentPeriod;
+    const d = dash.data('kaizen_topics');
+    const list = (d.data || [])
+      .filter((t) => t.warehouse === r.warehouse && t.topic)
+      .filter((t) => period === 'all' || t.round === period || (period.length === 4 && t.round.startsWith(period)))
+      .sort((a, b) => d3.ascending(a.round, b.round) || (Number(b.result_points) || 0) - (Number(a.result_points) || 0));
+    const passed = list.filter((t) => Number(t.result_points) > 0);
+    const periodText = period === 'all' ? 'สะสมทั้งหมด' : period.length === 4 ? `ปี ${period}` : `เดือน ${monthLabel(period)}`;
+    document.getElementById('pcg-modal-title').textContent = r.warehouse;
+    document.getElementById('pcg-modal-sub').textContent = `${r.region} · ${periodText}`;
+    const sum = document.getElementById('pcg-modal-sum');
+    const stat = (label, value) => { const s = el('span'); s.append(el('b', null, value), document.createTextNode(' ' + label)); return s; };
+    sum.replaceChildren(stat('คะแนน', fmt(r.score)), stat('หัวข้อที่ส่ง', fmt(list.length)), stat('หัวข้อที่ผ่าน', fmt(passed.length)));
+    const box = document.getElementById('pcg-modal-list');
+    box.replaceChildren();
+    for (const t of list) {
+      const pts = Number(t.result_points) || 0;
+      const item = el('div', 'pcg-item ' + (pts > 0 ? 'ok' : 'no'));
+      item.append(
+        el('div', 'pcg-item-t', t.topic),
+        el('span', 'pcg-pill ' + (pts > 0 ? 'ok' : 'no'), pts > 0 ? `+${pts} คะแนน` : 'ไม่ผ่าน'),
+        el('div', 'pcg-item-m', `${monthLabel(t.round)} · ${t.category || '-'} · ${t.department || '-'} · เห็นชอบ ${t.votes_yes}/${t.voters} เสียง`)
+      );
+      box.appendChild(item);
+    }
+    if (!list.length) box.appendChild(el('div', 'pcg-note', 'ไม่มีหัวข้อ Kaizen ที่ส่งในช่วงนี้'));
+    modalBg.hidden = false;
+    document.getElementById('pcg-modal-x').focus();
+  }
+
+  // Make the cells of one warehouse row act as one button
+  function clickable(cells, r) {
+    const on = () => cells.forEach((c) => c.classList.add('pcg-hover'));
+    const off = () => cells.forEach((c) => c.classList.remove('pcg-hover'));
+    cells.forEach((c, i) => {
+      c.classList.add('pcg-click');
+      c.addEventListener('click', () => openDetail(r));
+      c.addEventListener('mouseenter', on); c.addEventListener('mouseleave', off);
+      if (i === 0) {
+        c.tabIndex = 0; c.setAttribute('role', 'button'); c.setAttribute('aria-label', `ดูหัวข้อ Kaizen ของ ${r.warehouse}`);
+        c.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDetail(r); } });
+      }
+    });
+  }
+
   function barRow(b, r, scaleMax) {
     const cell = el('div', 'pcg-barcell');
     const bar = el('span', 'pcg-bar');
     bar.style.width = r.score > 0 ? `calc((100% - 2.5rem) * ${(r.score / scaleMax).toFixed(4)})` : '0px';
     cell.append(bar, el('span', 'pcg-v', fmt(r.score)));
-    b.append(el('span', 'pcg-wh', r.warehouse), cell);
+    const name = el('span', 'pcg-wh', r.warehouse);
+    b.append(name, cell);
+    clickable([name, cell], r);
   }
 
   function drawRegions(rows, scaleMax) {
@@ -317,7 +407,9 @@ window.dash = (() => {
       bar.style.width = r.score > 0 ? `calc((100% - 2rem) * ${(r.score / scaleMax).toFixed(4)})` : '0px';
       bar.style.height = '12px';
       cell.append(bar, el('span', 'pcg-v', fmt(r.score)));
-      box.append(m, el('span', 'pcg-wh', r.warehouse), cell);
+      const name = el('span', 'pcg-wh', r.warehouse);
+      box.append(m, name, cell);
+      clickable([name, cell, m], r);
     }
   }
 
@@ -395,6 +487,7 @@ window.dash = (() => {
       drawKpi(period); drawTopics(period); return;
     }
     const all = w.data || [];
+    currentPeriod = period;
     drawFilters(all, p);
     const rows = all.filter((r) => r.period === period);
     const scaleMax = Math.max(5, d3.max(rows, (r) => r.score) || 0);
