@@ -68,7 +68,9 @@ window.dash = (() => {
 @media (max-width: 900px) { .pcg-body { grid-template-columns: minmax(0, 1fr); } }
 .pcg-main { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 .pcg-h2 { margin: 0; text-align: center; font-size: clamp(1.1rem, 2vw, 1.5rem); font-weight: 700; color: #2a2e38; }
-.pcg-regions { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); gap: 14px; }
+.pcg-regions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 760px) { .pcg-regions { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 480px) { .pcg-regions { grid-template-columns: minmax(0, 1fr); } }
 .pcg-region { background: var(--paper); border-radius: 18px; box-shadow: 0 1px 4px rgba(20, 30, 60, .14); overflow: hidden; display: flex; flex-direction: column; min-width: 0; }
 .pcg-region-h { color: #fff; text-align: center; font-weight: 700; font-size: 1.15rem; padding: 8px 10px; }
 .pcg-region-b { padding: 12px 14px 14px; display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 10px 8px; align-content: space-evenly; flex: 1; min-height: 9.5rem; }
@@ -109,6 +111,13 @@ window.dash = (() => {
 .pcg-matrix .pcg-reg td { background: #f4f5f8; font-weight: 700; color: #1d2f9a; }
 .pcg-matrix .pcg-tot { font-weight: 700; }
 .pcg-matrix .pcg-zero { color: var(--muted); }
+.pcg-pages { grid-column: 1 / -1; display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 6px; }
+.pcg-page-tab { font: inherit; font-size: .95rem; font-weight: 700; border: 1px solid var(--line); background: #fff; color: #1d2f9a; border-radius: 999px; padding: 6px 18px; cursor: pointer; box-shadow: 0 1px 3px rgba(20, 30, 60, .1); }
+.pcg-page-tab:hover { background: #eef2ff; }
+.pcg-page-tab[aria-selected="true"] { background: var(--navy); color: #fff; border-color: var(--navy); }
+.pcg-page-tab:focus-visible { outline: 2px solid #1d2f9a; outline-offset: 2px; }
+.pcg-body > [hidden] { display: none !important; }
+.pcg-body > #pcg-monthly .pcg-tablebox, .pcg-body > #pcg-topics .pcg-tablebox { max-height: none; }
 .pcg-tabs { display: flex; gap: 4px; background: #eef0f6; border-radius: 10px; padding: 4px; }
 .pcg-tab { flex: 1; font: inherit; font-size: .85rem; font-weight: 600; border: 0; background: transparent; color: var(--muted); border-radius: 8px; padding: 6px 4px; cursor: pointer; white-space: nowrap; }
 .pcg-tab[aria-selected="true"] { background: var(--navy); color: #fff; }
@@ -193,13 +202,19 @@ window.dash = (() => {
   </header>
 
   <div class="pcg-body">
-    <section class="pcg-main" id="pcg-regions-section">
+    <nav class="pcg-pages" role="tablist" aria-label="หัวข้อของ Dashboard">
+      <button class="pcg-page-tab" role="tab" type="button" data-go="overview" aria-selected="true">ภาพรวม</button>
+      <button class="pcg-page-tab" role="tab" type="button" data-go="monthly" aria-selected="false" tabindex="-1">คะแนนรายเดือน</button>
+      <button class="pcg-page-tab" role="tab" type="button" data-go="topics" aria-selected="false" tabindex="-1">หัวข้อ Kaizen</button>
+    </nav>
+
+    <section class="pcg-main" id="pcg-regions-section" data-page="overview">
       <h2 class="pcg-h2" id="pcg-period-title">คะแนนสะสมแต่ละคลังสินค้า</h2>
       <p class="pcg-hint">กดที่ชื่อคลังเพื่อดูหัวข้อ Kaizen ที่ได้คะแนน</p>
       <div class="pcg-regions" id="pcg-regions"></div>
     </section>
 
-    <aside class="pcg-rank" id="pcg-ranking">
+    <aside class="pcg-rank" id="pcg-ranking" data-page="overview">
       <div class="pcg-tabs" role="tablist" aria-label="แผงด้านขวา">
         <button class="pcg-tab" role="tab" id="pcg-tab-rank" aria-controls="pcg-panel-rank" aria-selected="true" type="button">คะแนนรวม</button>
         <button class="pcg-tab" role="tab" id="pcg-tab-win" aria-controls="pcg-panel-win" aria-selected="false" tabindex="-1" type="button">ผู้ชนะรายเดือน</button>
@@ -235,7 +250,7 @@ window.dash = (() => {
       </div>
     </aside>
 
-    <section class="pcg-strip" id="pcg-summary">
+    <section class="pcg-strip" id="pcg-summary" data-page="overview">
       <div class="pcg-kpi">
         <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M20 8h24v14a12 12 0 0 1-24 0z" fill="#f2b51c" stroke="#1b1f2a" stroke-width="2"/><path d="M20 12h-8c0 8 4 12 9 12M44 12h8c0 8-4 12-9 12" fill="none" stroke="#1b1f2a" stroke-width="2"/><path d="M32 34v10M24 54h16l-2-10H26z" fill="#f2b51c" stroke="#1b1f2a" stroke-width="2"/><path d="M32 13l2.2 4.6 5 .6-3.7 3.4 1 5-4.5-2.5-4.5 2.5 1-5-3.7-3.4 5-.6z" fill="#e8463a"/></svg>
         <div class="pcg-kpi-t"><span class="pcg-kpi-l">คะแนนสะสมทั้งหมด</span><span class="pcg-kpi-n"><span class="pcg-k" data-field="total">—</span><small>คะแนน</small></span></div>
@@ -254,7 +269,7 @@ window.dash = (() => {
       </div>
     </section>
 
-    <section class="pcg-topics" id="pcg-monthly">
+    <section class="pcg-topics" id="pcg-monthly" data-page="monthly" hidden>
       <h3>คะแนนรายเดือนแต่ละคลัง</h3>
       <span class="pcg-note">คะแนนตามชีตประเมินคะแนน แยกตามเดือน · คอลัมน์ที่ไฮไลต์คือเดือนที่เลือก</span>
       <div class="pcg-tablebox">
@@ -262,7 +277,7 @@ window.dash = (() => {
       </div>
     </section>
 
-    <section class="pcg-topics" id="pcg-topics">
+    <section class="pcg-topics" id="pcg-topics" data-page="topics" hidden>
       <h3>หัวข้อ Kaizen ที่ประเมิน</h3>
       <span class="pcg-note">หัวข้อผ่านเมื่อกรรมการเห็นชอบอย่างน้อย 5 จาก 8 เสียง แล้วได้คะแนนตามหมวดหมู่ · แสดงตามเดือนที่เลือก</span>
       <div class="pcg-tablebox">
@@ -498,6 +513,30 @@ window.dash = (() => {
       }
     });
   }
+
+  // ----- Page tabs (overview / monthly / topics) -----
+  const PAGES = ['overview', 'monthly', 'topics'];
+  const pageTabs = [...document.querySelectorAll('.pcg-page-tab')];
+  function showPage(name, focus) {
+    if (!PAGES.includes(name)) name = 'overview';
+    pageTabs.forEach((b) => {
+      const on = b.dataset.go === name;
+      b.setAttribute('aria-selected', String(on)); b.tabIndex = on ? 0 : -1;
+      if (on && focus) b.focus();
+    });
+    document.querySelectorAll('.pcg-body > [data-page]').forEach((s) => { s.hidden = s.dataset.page !== name; });
+    dash.setLink(name);
+  }
+  pageTabs.forEach((b, i) => {
+    b.addEventListener('click', () => showPage(b.dataset.go));
+    b.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        const n = (i + (e.key === 'ArrowRight' ? 1 : -1) + PAGES.length) % PAGES.length;
+        showPage(PAGES[n], true);
+      }
+    });
+  });
+  if (PAGES.includes(location.hash.slice(1))) showPage(location.hash.slice(1));
 
   // ----- Right-side tabs -----
   const TABS = ['rank', 'win', 'prize'];
