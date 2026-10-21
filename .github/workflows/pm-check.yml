@@ -27,7 +27,7 @@ jobs:
           print('last updated',sorted((x['updated_at'] or '')[:16] for x in a)[-5:])
           print('owners',collections.Counter(r.get('owner') for r in T).most_common(8))
           PY
-          echo "== robot.csv ล่าสุด"
+          echo "== robot.csv ล่าสุด (เช็ก)"
           curl -sL -D rh.txt "https://dl.dropboxusercontent.com/scl/fi/tackqddg35xdt41rs4r5x/robot.csv?rlkey=ikqlvz6gfujzyo5ik07ni680b" -o r.csv
           grep -iE "^(HTTP|last-modified|content-length|etag)" rh.txt | tr -d '\r'
           python3 - <<'PY'
